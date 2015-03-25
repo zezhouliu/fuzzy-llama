@@ -32,10 +32,11 @@ socket_t* socket_startup(unsigned short port)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
-		if(s == NULL){
-			//First failure, we cannot allocate our structure due to lack of memory
-			return NULL;
-		}
+    if(s == NULL){
+        //  First failure, we cannot allocate our structure due to lack of memory
+        return NULL;
+    }
+
     s->port = port;
     s->status = SOCKET_CLOSED;
     s->name.sin_family = AF_INET;
@@ -129,7 +130,11 @@ socket_t* socket_accept(socket_t* s)
     assert(s->status == SOCKET_OPEN);
 
     // Create new socket wrapper for the connecting socket
-    socket_t* new_socket = (socket_t *)malloc(sizeof(socket_t));
+    socket_t * new_socket = (socket_t *) calloc(1, sizeof(socket_t));
+    if(new_socket == NULL){
+        //  First failure, we cannot allocate our structure due to lack of memory
+        return NULL;
+    }
 
     unsigned client_name_len = sizeof(new_socket->name);
     new_socket->fd = accept(socket_get_fd(s),
