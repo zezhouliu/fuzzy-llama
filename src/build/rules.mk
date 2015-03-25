@@ -1,5 +1,7 @@
 PREFER_GCC = 0
 
+INCLUDE = ../include
+
 GCC ?= $(shell if gcc-4.9 --version | grep gcc >/dev/null; then echo gcc-4.9; \
 	elif gcc-4.7 --version | grep gcc >/dev/null; then echo gcc-4.7; \
 	else echo gcc; fi 2>/dev/null)
@@ -7,16 +9,19 @@ GCC ?= $(shell if gcc-4.9 --version | grep gcc >/dev/null; then echo gcc-4.9; \
 ifeq ($(PREFER_GCC),1)
 CC = $(shell if $(GCC) --version | grep gcc >/dev/null; then echo $(GCC); \
 	else echo clang; fi 2>/dev/null)
+override CFLAGS += $(shell if $(GCC) --version | grep gcc >/dev/null; then echo -std=gnu99 -g -ggdb -Wall -Wextra -Werror -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
+	else echo -std=c99 -g -ggdb -Weverything -Werror -Wno-cast-align -Wno-documentation -Wno-padded -pedantic -I$(INCLUDE); fi 2>/dev/null)
+
 else
 CC = $(shell if clang --version | grep LLVM >/dev/null; then echo clang; \
 	else echo $(GCC); fi 2>/dev/null)
+override CFLAGS += $(shell if clang --version | grep LLVM >/dev/null; then echo -std=c99 -g -ggdb -Weverything -mt -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
+	else echo -std=gnu99 -g -ggdb -Wall -Wextra -Werror -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); fi 2>/dev/null)
+
 endif
 
 CLANG := $(shell if $(CC) --version | grep LLVM >/dev/null; then echo 1; else echo 0; fi)
 
-INCLUDE = ../include
-
-override CFLAGS += -std=c99 -g -ggdb -Weverything -mt -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE)
 MATHFLAGS = -lrt -lm
 DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 

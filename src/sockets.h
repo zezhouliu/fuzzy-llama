@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 #include "utils.h"
 
@@ -28,12 +29,12 @@ typedef struct socket_ {
     int fd;
     sstatus_t status;
     struct sockaddr_in name;
-    u_short port;
+    unsigned short port;
 } socket_t;
 
 
 // Public interface
-socket_t* socket_startup(u_short port);
+socket_t* socket_startup(unsigned short port);
 void socket_close(socket_t* s);
 socket_t* socket_accept(socket_t* s);
 int socket_read_line(socket_t* s, char* buf, int size);

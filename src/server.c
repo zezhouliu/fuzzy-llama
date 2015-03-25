@@ -10,10 +10,10 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "utils.h"
 #include "sockets.h"
@@ -37,7 +37,6 @@ void execute_cgi(socket_t*, const char *, const char *, const char *);
 void headers(socket_t*, const char *);
 void not_found(socket_t*);
 void serve_file(socket_t*, const char *);
-int startup(u_short *);
 void unimplemented(socket_t*);
 
 /**********************************************************************/
@@ -405,7 +404,7 @@ void unimplemented(socket_t* client)
 int main(void)
 {
     // Get a server socket
-    u_short port = 0;
+    unsigned short port = 0;
     socket_t* server_sock = socket_startup(port);
     socket_t* client_sock;
 

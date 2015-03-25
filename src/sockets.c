@@ -7,7 +7,7 @@
  * socket_startup()
  *
  * @Brief: Starts up a socket at a [opt] port
- * @param[in]: port, u_short containing port to connect to
+ * @param[in]: port, unsigned short containing port to connect to
  * @pre: port is not already occupied by another socket
  * @post: port will be occupied by this socket
  * @return: socket_t* wrapper containing socket info
@@ -28,7 +28,7 @@
  * disjoint behaviors null, success;
  *
  */
-socket_t* socket_startup(uint16_t port)
+socket_t* socket_startup(unsigned short port)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
