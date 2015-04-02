@@ -32,7 +32,7 @@ typedef struct socket_ {
 
 
 // Public interface
-socket_t socket_startup(u_short port);
-socket_t socket_close(socket_t s);
+socket_t* socket_startup(u_short port);
+void socket_close(socket_t* s);
 
 #endif /* __SOCKETS_H__ */
