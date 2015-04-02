@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
+#include "utils.h"
+
 // sstatus_t = socket status type
 typedef enum {
     SOCKET_OPEN, 
@@ -24,8 +26,8 @@ typedef struct socket_ {
     int fd;
     sstatus_t status;
     struct sockaddr_in name;
-
-    // Add error message type??
+    u_short port;
+    // Add error message type?? 
 } socket_t;
 
 #endif /* __SOCKETS_H__ */
