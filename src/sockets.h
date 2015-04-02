@@ -30,4 +30,9 @@ typedef struct socket_ {
     // Add error message type?? 
 } socket_t;
 
+
+// Public interface
+socket_t socket_startup(u_short port);
+socket_t socket_close(socket_t s);
+
 #endif /* __SOCKETS_H__ */

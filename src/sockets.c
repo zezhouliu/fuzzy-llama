@@ -65,3 +65,25 @@ socket_t socket_startup(u_short port)
 
     return s;
 }
+
+/**
+* socket_startup()
+*
+* @Brief: Closes the socket associated with s
+* @param[in]: s, socket_t to be closed
+* @post: s.status = SOCKET_CLOSED
+* @post: s is invalidated
+* @return: void
+**/
+socket_t socket_close(socket_t s)
+{
+    // If open, then close
+    if (s.status == SOCKET_OPEN)
+    {
+        close(s.fd);
+    }
+
+    s.status = SOCKET_CLOSED;
+
+    return s;
+}
