@@ -24,6 +24,9 @@
 //Boolean variables
 #include <stdbool.h>
 
-void log_error(FILE* out, const char *format, ...);
+
+void logg(FILE* out, const char *format, ...);
+void log_out(const char *format, ...);
+void log_error(const char *format, ...);
 
 #endif /* __UTILS_H__ */
