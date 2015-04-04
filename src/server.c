@@ -3,8 +3,6 @@
  * Adapted from tinyhttpd
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <strings.h>
@@ -16,6 +14,9 @@
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+
+#include "utils.h"
+#include "sockets.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -451,9 +452,8 @@ int main(void)
     // Get a server socket
     u_short port = 0;
     socket_t* server_sock = socket_startup(port);
-    socket_t* client_sock = NULL;
+    socket_t* client_sock;
 
-    server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
 
     while (1)
