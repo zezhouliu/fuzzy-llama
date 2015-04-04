@@ -1,7 +1,7 @@
 #include "sockets.h"
 
 /** Private methods **/
-int socket_get_fd(socket_t* s);
+
 
 /**
  * socket_startup()
@@ -151,4 +151,76 @@ int socket_get_fd(socket_t* s)
     assert(s->status == SOCKET_OPEN);
 
     return s->fd;
+}
+
+/**
+ * socket_read_line(s, buf, size)
+ *
+ * @Brief: Read a line from a socket one character at a time.
+ *  Terminates the string read with a null character.  
+ *  If any line terminators is read, the last character of the
+ *  string will be a linefeed and the string will be terminated with a
+ *  null character.
+ *  
+ * @param[in]: s, socket_t* to read from
+ * @param[in]: buf, char* to write into
+ * @param[in]: size of buf
+ * @return size read
+ */
+int socket_read_line(socket_t* s, char* buf, int size)
+{
+    // Track the counter
+    char c = '\0';
+    int i;
+    // Read until it's the end of the buffer or endline
+    for (i = 0; i < size - 1 && c != '\n'; ++i)
+    {
+        int n = recv(socket_get_fd(s), &c, 1, 0);
+        if (n > 0)
+        {
+            if (c == '\r')
+            {
+                n = recv(socket_get_fd(s), &c, 1, MSG_PEEK);
+
+                if ((n > 0) && (c == '\n'))
+                {
+                    recv(socket_get_fd(s), &c, 1, 0);
+                }
+                else 
+                {
+                    c = '\n';
+                }
+            }
+            buf[i] = c;
+        }
+        else
+        {
+            c = '\n';
+        }
+    }
+
+    // Mark the end of the string
+    buf[i] = '\0';
+
+    return i;
+}
+
+/**
+ * socket_send(s, buf, size, flags)
+ *
+ * @Brief: Wrapper for send()
+ * 
+ * @param[in]: s, socket_t* to send through
+ * @param[in]: buf, char* to send across socket
+ * @param[in]: size, int of buffer
+ * @param[in]: flags, int of flags to send
+ * @return n success, these calls return the number of characters sent. 
+ *  On error, -1 is returned, and errno is set appropriately.
+ */
+ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
+{
+    assert(s);
+    assert(s->status == SOCKET_OPEN);
+
+    return send(socket_get_fd(s), buf, size, flags);
 }
