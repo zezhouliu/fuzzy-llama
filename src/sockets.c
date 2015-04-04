@@ -1,5 +1,7 @@
 #include "sockets.h"
 
+/** Private methods **/
+int socket_get_fd(socket_t* s);
 
 /**
  * socket_startup()
@@ -36,14 +38,14 @@ socket_t* socket_startup(uint16_t port)
     s->fd = socket(PF_INET, SOCK_STREAM, 0);
     if (s->fd == -1)
     {
-        log_error(stderr, "%s:L %d: could not create socket", __func__, __LINE__);
+        log_error("%s:L %d: could not create socket", __func__, __LINE__);
         assert(0);
     }
 
     // Try to bind the socket
     if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
     {
-        log_error(stderr, "%s:L %d: could not bind socket", __func__, __LINE__);
+        log_error("%s:L %d: could not bind socket", __func__, __LINE__);
         assert(0);
     }
 
@@ -53,7 +55,7 @@ socket_t* socket_startup(uint16_t port)
         unsigned namelen = sizeof(s->name);
         if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
         {
-            log_error(stderr, "%s:L %d: could not get socket name", __func__, __LINE__);
+            log_error("%s:L %d: could not get socket name", __func__, __LINE__);
             assert(0);
         }
 
@@ -65,7 +67,7 @@ socket_t* socket_startup(uint16_t port)
     // NOTE: If s.fd is valid socket, this call CANNOT fail
     if (listen(s->fd, 5) < 0)
     {
-        log_error(stderr, "%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
+        log_error("%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
         assert(0);
     }
 
@@ -116,7 +118,7 @@ void socket_close(socket_t* s)
 socket_t* socket_accept(socket_t* s)
 {
     // Check preconditions
-    assert(s.status == SOCKET_OPEN);
+    assert(s->status == SOCKET_OPEN);
 
     // Create new socket wrapper for the connecting socket
     socket_t* new_socket = (socket_t *)malloc(sizeof(socket_t));
@@ -146,7 +148,7 @@ socket_t* socket_accept(socket_t* s)
 int socket_get_fd(socket_t* s)
 {
     assert(s);
-    assert(s.status == SOCKET_OPEN);
+    assert(s->status == SOCKET_OPEN);
 
     return s->fd;
 }
