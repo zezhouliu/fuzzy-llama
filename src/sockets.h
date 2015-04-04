@@ -1,6 +1,6 @@
 /**
  * sockets.h
- * 
+ *
  * @Brief: Sockets wrapper
  */
 
@@ -15,11 +15,11 @@
 
 // sstatus_t = socket status type
 typedef enum {
-    SOCKET_OPEN, 
-    SOCKET_CLOSED, 
-    SOCKET_UNKNOWN, 
-    SOCKET_INVALID 
-} sstatus_t; 
+    SOCKET_OPEN,
+    SOCKET_CLOSED,
+    SOCKET_UNKNOWN,
+    SOCKET_INVALID
+} sstatus_t;
 
 // socket_t = our socket wrapper
 typedef struct socket_ {
@@ -27,7 +27,6 @@ typedef struct socket_ {
     sstatus_t status;
     struct sockaddr_in name;
     u_short port;
-    // Add error message type?? 
 } socket_t;
 
 

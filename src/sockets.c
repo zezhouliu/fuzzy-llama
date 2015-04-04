@@ -8,19 +8,27 @@
  * @param[in]: port, u_short containing port to connect to
  * @pre: port is not already occupied by another socket
  * @post: port will be occupied by this socket
- * @return: socket_t* wrapper containing socket info 
+ * @return: socket_t* wrapper containing socket info
  **/
-socket_t* socket_startup(u_short port)
+
+/*@
+ * ensures
+ *
+ *
+ *
+ */
+socket_t* socket_startup(uint16_t port)
 {
     // Basic initialization routine
-    socket_t* s = (socket_t *) malloc(sizeof(socket_t));
+    socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
+		if(s == NULL){
+			//First failure, we cannot allocate our structure due to lack of memory
+			assert(false);
+		}
     s->port = port;
     s->status = SOCKET_CLOSED;
-
-    // prepare sockaddr_in
-    memset(&(s->name), 0, sizeof(s->name));
     s->name.sin_family = AF_INET;
-    s->name.sin_port = htons(s.port);
+    s->name.sin_port = htons(s->port);
     s->name.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Assign a file descriptor and validate
@@ -28,7 +36,7 @@ socket_t* socket_startup(u_short port)
     if (s->fd == -1)
     {
         log_error(stderr, "%s:L %d: could not create socket", __func__, __LINE__);
-        assert(0); 
+        assert(0);
     }
 
     // Try to bind the socket

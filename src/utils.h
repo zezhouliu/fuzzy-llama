@@ -9,9 +9,12 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-
-#include "constants.h"
-
+#include <stdlib.h>
+#include <errno.h>
+#include <stdint.h>
+#include <string.h>
+#include <assert.h>
+#include <stdbool.h>
 void log_error(FILE* out, const char *format, ...);
 
 #endif /* __UTILS_H__ */
