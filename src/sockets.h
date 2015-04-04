@@ -38,6 +38,7 @@ void socket_close(socket_t* s);
 socket_t* socket_accept(socket_t* s);
 int socket_read_line(socket_t* s, char* buf, int size);
 ssize_t socket_send(socket_t* s, char* buf, int size, int flags);
+ssize_t socket_recv(socket_t* s, char* buf, int size, int flags);
 
 // Accessors
 int socket_get_fd(socket_t* s);

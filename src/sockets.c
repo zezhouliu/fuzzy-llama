@@ -224,3 +224,23 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
 
     return send(socket_get_fd(s), buf, size, flags);
 }
+
+/**
+ * socket_recv(s, buf, size, flags)
+ *
+ * @Brief: Wrapper for recv()
+ * 
+ * @param[in]: s, socket_t* to recv from
+ * @param[in]: buf, char* to receive from socket
+ * @param[in]: size, int of buffer
+ * @param[in]: flags, int of flags to send
+ * @return n success, these calls return the number of characters received. 
+ *  On error, -1 is returned, and errno is set appropriately.
+ */
+ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
+{
+    assert(s);
+    assert(s->status == SOCKET_OPEN);
+
+    return recv(socket_get_fd(s), buf, size, flags);
+}
