@@ -157,12 +157,18 @@ void cat(int client, FILE *resource)
 {
     char buf[BUF_SIZE];
 
-    fgets(buf, sizeof(buf), resource);
-    while (!feof(resource))
+    if (fgets(buf, sizeof(buf), resource) != NULL)
     {
-        send(client, buf, strlen(buf), 0);
-        fgets(buf, sizeof(buf), resource);
+        while (!feof(resource))
+        {
+            send(client, buf, strlen(buf), 0);
+            if (fgets(buf, sizeof(buf), resource) == NULL)
+            {
+                // Error
+            }
+        }
     }
+    
 }
 
 /**********************************************************************/
@@ -278,7 +284,9 @@ void execute_cgi(int client, const char *path,
         if (strcasecmp(method, "POST") == 0)
             for (i = 0; i < content_length; i++) {
                 recv(client, &c, 1, 0);
-                write(cgi_input[1], &c, 1);
+                int r = write(cgi_input[1], &c, 1);
+                // Fix compiler warning, but should later check for return value
+                (void) r;
             }
         while (read(cgi_output[0], &c, 1) > 0)
             send(client, &c, 1, 0);
@@ -435,7 +443,7 @@ int startup(u_short *port)
 
     if (*port == 0)  /* if dynamically allocating a port */
     {
-        int namelen = sizeof(name);
+        unsigned namelen = sizeof(name);
         if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
             error_die("getsockname");
         *port = ntohs(name.sin_port);
@@ -481,7 +489,7 @@ int main(void)
     u_short port = 0;
     int client_sock = -1;
     struct sockaddr_in client_name;
-    int client_name_len = sizeof(client_name);
+    unsigned client_name_len = sizeof(client_name);
 
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
