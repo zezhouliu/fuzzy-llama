@@ -49,7 +49,7 @@ socket_t* socket_startup(uint16_t port)
     // Check if dynamically allocating the port
     if (!port)
     {
-        int namelen = sizeof(name);
+        int namelen = sizeof(s->name);
         if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
         {
             log_error(stderr, "%s:L %d: could not get socket name", __func__, __LINE__);
