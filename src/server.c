@@ -418,43 +418,6 @@ void serve_file(int client, const char *filename)
 }
 
 /**********************************************************************/
-/* This function starts the process of listening for web connections
- * on a specified port.  If the port is 0, then dynamically allocate a
- * port and modify the original port variable to reflect the actual
- * port.
- * Parameters: pointer to variable containing the port to connect on
- * Returns: the socket */
-/**********************************************************************/
-int startup(u_short *port)
-{
-    int httpd = 0;
-    struct sockaddr_in name;
-    memset(&name, 0, sizeof(name));
-    name.sin_family = AF_INET;
-    name.sin_port = htons(*port);
-    name.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    httpd = socket(PF_INET, SOCK_STREAM, 0);
-    if (httpd == -1)
-        error_die("socket");
-    
-    if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)
-        error_die("bind");
-
-    if (*port == 0)  /* if dynamically allocating a port */
-    {
-        unsigned namelen = sizeof(name);
-        if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
-            error_die("getsockname");
-        *port = ntohs(name.sin_port);
-    }
-
-    if (listen(httpd, 5) < 0)
-        error_die("listen");
-    return(httpd);
-}
-
-/**********************************************************************/
 /* Inform the client that the requested web method has not been
  * implemented.
  * Parameter: the client socket */
@@ -485,28 +448,23 @@ void unimplemented(int client)
 
 int main(void)
 {
-    int server_sock = -1;
+    // Get a server socket
     u_short port = 0;
-    int client_sock = -1;
-    struct sockaddr_in client_name;
-    unsigned client_name_len = sizeof(client_name);
+    socket_t* server_sock = socket_startup(port);
+    socket_t* client_sock = NULL;
 
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
 
     while (1)
     {
-        client_sock = accept(server_sock, (struct sockaddr *)&client_name,
-            &client_name_len);
-
-        if (client_sock == -1)
-            error_die("accept");
+        client_sock = socket_accept(server_sock);
 
         /* Single threaded for now... */
-        accept_request(client_sock);
+        // accept_request(client_sock);
     }
 
-    close(server_sock);
+    socket_close(server_sock);
 
     return(0);
 }
