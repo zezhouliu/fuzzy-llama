@@ -21,10 +21,11 @@ socket_t* socket_startup(uint16_t port)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
-		if(s == NULL){
-			//First failure, we cannot allocate our structure due to lack of memory
-			assert(false);
-		}
+	if(s == NULL){
+		//First failure, we cannot allocate our structure due to lack of memory
+		assert(false);
+	}
+
     s->port = port;
     s->status = SOCKET_CLOSED;
     s->name.sin_family = AF_INET;
@@ -75,10 +76,10 @@ socket_t* socket_startup(uint16_t port)
 }
 
 /**
-* socket_startup()
+* socket_close()
 *
 * @Brief: Closes the socket associated with s
-* @param[in]: s, socket_t to be closed
+* @param[in]: s, socket_t* to be closed
 * @post: s.status = SOCKET_CLOSED
 * @post: s is invalidated
 * @return: void
@@ -93,5 +94,59 @@ void socket_close(socket_t* s)
 
     s->status = SOCKET_CLOSED;
 
+    // Should possibly free socket?
+    // free(s);
+
     return;
+}
+
+/**
+* socket_accept(s)
+*
+* @Brief: Accepts the first connection on the queue of pending connections from s
+*   creates a new socket with the same socket type and protocol and address family 
+*   as the specified socket.
+*   Allocates a new file descriptor for that socket.
+* @param[in]: s, socket_t* to accept a connection from
+* @pre: s.status = SOCKET_OPEN
+* @post: new_socket.status = SOCKET_OPEN
+* @post: new_socket.fd != s.fd
+* @return: void
+**/
+socket_t* socket_accept(socket_t* s)
+{
+    // Check preconditions
+    assert(s.status == SOCKET_OPEN);
+
+    // Create new socket wrapper for the connecting socket
+    socket_t* new_socket = (socket_t *)malloc(sizeof(socket_t));
+    
+    unsigned client_name_len = sizeof(new_socket->name);
+    new_socket->fd = accept(socket_get_fd(s), 
+        (struct sockaddr *)&(new_socket->name), &(client_name_len));
+
+    // Error?
+    if (new_socket->fd == -1)
+    {
+        log_error("%s, %d: Could not create socket\n", __func__, __LINE__);
+    }
+
+    return new_socket;
+}
+
+/**
+* socket_get_fd(s)
+* 
+* @Brief returns the file descriptor associated with s
+* @param[in]: s, socket_t* 
+* @pre: s is a valid socket_t* 
+* @pre: s.status = SOCKET_OPEN
+* return: int fd
+**/
+int socket_get_fd(socket_t* s)
+{
+    assert(s);
+    assert(s.status == SOCKET_OPEN);
+
+    return s->fd;
 }
