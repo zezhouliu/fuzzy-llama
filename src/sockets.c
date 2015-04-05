@@ -1,5 +1,7 @@
 #include "sockets.h"
 
+/** Private methods **/
+
 
 /**
  * socket_startup()
@@ -35,24 +37,24 @@ socket_t* socket_startup(uint16_t port)
     s->fd = socket(PF_INET, SOCK_STREAM, 0);
     if (s->fd == -1)
     {
-        log_error(stderr, "%s:L %d: could not create socket", __func__, __LINE__);
+        log_error("%s:L %d: could not create socket", __func__, __LINE__);
         assert(0);
     }
 
     // Try to bind the socket
     if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
     {
-        log_error(stderr, "%s:L %d: could not bind socket", __func__, __LINE__);
+        log_error("%s:L %d: could not bind socket", __func__, __LINE__);
         assert(0);
     }
 
     // Check if dynamically allocating the port
     if (!port)
     {
-        int namelen = sizeof(s->name);
+        unsigned namelen = sizeof(s->name);
         if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
         {
-            log_error(stderr, "%s:L %d: could not get socket name", __func__, __LINE__);
+            log_error("%s:L %d: could not get socket name", __func__, __LINE__);
             assert(0);
         }
 
@@ -64,7 +66,7 @@ socket_t* socket_startup(uint16_t port)
     // NOTE: If s.fd is valid socket, this call CANNOT fail
     if (listen(s->fd, 5) < 0)
     {
-        log_error(stderr, "%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
+        log_error("%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
         assert(0);
     }
 
@@ -75,10 +77,10 @@ socket_t* socket_startup(uint16_t port)
 }
 
 /**
-* socket_startup()
+* socket_close()
 *
 * @Brief: Closes the socket associated with s
-* @param[in]: s, socket_t to be closed
+* @param[in]: s, socket_t* to be closed
 * @post: s.status = SOCKET_CLOSED
 * @post: s is invalidated
 * @return: void
@@ -93,5 +95,151 @@ void socket_close(socket_t* s)
 
     s->status = SOCKET_CLOSED;
 
+    // Should possibly free socket?
+    // free(s);
+
     return;
+}
+
+/**
+* socket_accept(s)
+*
+* @Brief: Accepts the first connection on the queue of pending connections from s
+*   creates a new socket with the same socket type and protocol and address family
+*   as the specified socket.
+*   Allocates a new file descriptor for that socket.
+* @param[in]: s, socket_t* to accept a connection from
+* @pre: s.status = SOCKET_OPEN
+* @post: new_socket.status = SOCKET_OPEN
+* @post: new_socket.fd != s.fd
+* @return: void
+**/
+socket_t* socket_accept(socket_t* s)
+{
+    // Check preconditions
+    assert(s->status == SOCKET_OPEN);
+
+    // Create new socket wrapper for the connecting socket
+    socket_t* new_socket = (socket_t *)malloc(sizeof(socket_t));
+
+    unsigned client_name_len = sizeof(new_socket->name);
+    new_socket->fd = accept(socket_get_fd(s),
+        (struct sockaddr *)&(new_socket->name), &(client_name_len));
+
+    // Error?
+    if (new_socket->fd == -1)
+    {
+        log_error("%s, %d: Could not create socket\n", __func__, __LINE__);
+    }
+
+    return new_socket;
+}
+
+/**
+* socket_get_fd(s)
+*
+* @Brief returns the file descriptor associated with s
+* @param[in]: s, socket_t*
+* @pre: s is a valid socket_t*
+* @pre: s.status = SOCKET_OPEN
+* return: int fd
+**/
+int socket_get_fd(socket_t* s)
+{
+    assert(s);
+    assert(s->status == SOCKET_OPEN);
+
+    return s->fd;
+}
+
+/**
+ * socket_read_line(s, buf, size)
+ *
+ * @Brief: Read a line from a socket one character at a time.
+ *  Terminates the string read with a null character.
+ *  If any line terminators is read, the last character of the
+ *  string will be a linefeed and the string will be terminated with a
+ *  null character.
+ *
+ * @param[in]: s, socket_t* to read from
+ * @param[in]: buf, char* to write into
+ * @param[in]: size of buf
+ * @return size read
+ */
+int socket_read_line(socket_t* s, char* buf, int size)
+{
+    // Track the counter
+    char c = '\0';
+    int i;
+    // Read until it's the end of the buffer or endline
+    for (i = 0; i < size - 1 && c != '\n'; ++i)
+    {
+        int n = recv(socket_get_fd(s), &c, 1, 0);
+        if (n > 0)
+        {
+            if (c == '\r')
+            {
+                n = recv(socket_get_fd(s), &c, 1, MSG_PEEK);
+
+                if ((n > 0) && (c == '\n'))
+                {
+                    recv(socket_get_fd(s), &c, 1, 0);
+                }
+                else
+                {
+                    c = '\n';
+                }
+            }
+            buf[i] = c;
+        }
+        else
+        {
+            c = '\n';
+        }
+    }
+
+    // Mark the end of the string
+    buf[i] = '\0';
+
+    return i;
+}
+
+/**
+ * socket_send(s, buf, size, flags)
+ *
+ * @Brief: Wrapper for send()
+ *
+ * @param[in]: s, socket_t* to send through
+ * @param[in]: buf, char* to send across socket
+ * @param[in]: size, int of buffer
+ * @param[in]: flags, int of flags to send
+ * @return n success, these calls return the number of characters sent.
+ *  On error, -1 is returned, and errno is set appropriately.
+ */
+ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
+{
+    assert(s);
+    assert(s->status == SOCKET_OPEN);
+
+    return send(socket_get_fd(s), buf, size, flags);
+}
+
+/**
+ * socket_recv(s, buf, size, flags)
+ *
+ * @Brief: Wrapper for recv()
+ *
+ * @param[in]: s, socket_t* to recv from
+ * @param[in]: buf, char* to receive from socket
+ * @param[in]: size, int of buffer
+ * @param[in]: flags, int of flags to send
+ * @return n success, these calls return the number of characters received.
+ *  On error, -1 is returned, and errno is set appropriately.
+ */
+ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
+{
+    assert(s);
+    assert(s->status == SOCKET_OPEN);
+
+    return recv(socket_get_fd(s), buf, size, flags);
 }
