@@ -23,7 +23,7 @@ socket_t* socket_startup(uint16_t port)
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
 		if(s == NULL){
 			//First failure, we cannot allocate our structure due to lack of memory
-			assert(false);
+			return NULL;
 		}
     s->port = port;
     s->status = SOCKET_CLOSED;
