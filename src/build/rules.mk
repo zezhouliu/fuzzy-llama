@@ -2,7 +2,7 @@ CC = clang
 
 INCLUDE = ../include
 
-override CFLAGS += -std=c99 -g -ggdb -Weverything -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE)
+override CFLAGS += -std=c99 -g -ggdb -Weverything -mt -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE)
 MATHFLAGS = -lrt -lm
 DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
