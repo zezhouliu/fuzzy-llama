@@ -8,6 +8,7 @@
  *
  * @Brief: Starts up a socket at a [opt] port
  * @param[in]: port, unsigned short containing port to connect to
+ * @param[in]: addr, char* representing address to bind to
  * @pre: port is not already occupied by another socket
  * @post: port will be occupied by this socket
  * @return: socket_t* wrapper containing socket info
@@ -28,7 +29,7 @@
  * disjoint behaviors null, success;
  *
  */
-socket_t* socket_startup(unsigned short port)
+socket_t* socket_startup(unsigned short port, char* addr)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
@@ -41,7 +42,16 @@ socket_t* socket_startup(unsigned short port)
     s->status = SOCKET_CLOSED;
     s->name.sin_family = AF_INET;
     s->name.sin_port = htons(s->port);
-    s->name.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    // Optional param of addr
+    if (addr)
+    {
+        s->name.sin_addr.s_addr = inet_addr(addr);
+    }
+    else
+    {
+        s->name.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
 
     // Assign a file descriptor and validate
     s->fd = socket(PF_INET, SOCK_STREAM, 0);

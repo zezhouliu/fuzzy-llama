@@ -405,7 +405,7 @@ int main(void)
 {
     // Get a server socket
     unsigned short port = 0;
-    socket_t* server_sock = socket_startup(port);
+    socket_t* server_sock = socket_startup(port, NULL);
     socket_t* client_sock;
 
     printf("httpd running on port %d\n", port);
