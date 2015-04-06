@@ -59,21 +59,6 @@ socket_t* socket_startup(unsigned short port)
         assert(0);
     }
 
-    // Check if dynamically allocating the port
-    if (!port)
-    {
-        printf("Dynamically allocating port\n");
-        unsigned namelen = sizeof(s->name);
-        if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
-        {
-            log_error("%s:L %d: could not get socket name", __func__, __LINE__);
-            assert(0);
-        }
-
-        s->port = ntohs(s->name.sin_port);
-
-    }
-
     // Try to listen, with backlog of 5
     // NOTE: If s.fd is valid socket, this call CANNOT fail
     if (listen(s->fd, 5) < 0)
@@ -84,6 +69,8 @@ socket_t* socket_startup(unsigned short port)
 
     // If all succeeds, assign server status as OPEN
     s->status = SOCKET_OPEN;
+
+    log_out("Server started at port: %d\n", s->port);
 
     return s;
 }
@@ -142,6 +129,7 @@ socket_t* socket_accept(socket_t* s)
     unsigned client_name_len = sizeof(new_socket->name);
     new_socket->fd = accept(socket_get_fd(s),
         (struct sockaddr *)&(new_socket->name), &(client_name_len));
+
     // Error?
     if (new_socket->fd == -1)
     {
@@ -282,7 +270,7 @@ socket_t* socket_connect(unsigned short port, char* addr)
     s->status = SOCKET_CLOSED;
 
     // 9734 default port
-    s->port = port ? port : 9734;
+    s->port = port ? port : SERVER_PORT;
     s->name.sin_port = htons(s->port);
 
     s->name.sin_family = AF_INET;
