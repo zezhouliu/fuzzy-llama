@@ -32,7 +32,8 @@ socket_t* socket_startup(unsigned short port)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
-    if(s == NULL){
+    if(!s)
+    {
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
@@ -61,6 +62,7 @@ socket_t* socket_startup(unsigned short port)
     // Check if dynamically allocating the port
     if (!port)
     {
+        printf("Dynamically allocating port\n");
         unsigned namelen = sizeof(s->name);
         if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
         {
@@ -131,7 +133,8 @@ socket_t* socket_accept(socket_t* s)
 
     // Create new socket wrapper for the connecting socket
     socket_t * new_socket = (socket_t *) calloc(1, sizeof(socket_t));
-    if(new_socket == NULL){
+    if(!new_socket)
+    {
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
@@ -139,7 +142,6 @@ socket_t* socket_accept(socket_t* s)
     unsigned client_name_len = sizeof(new_socket->name);
     new_socket->fd = accept(socket_get_fd(s),
         (struct sockaddr *)&(new_socket->name), &(client_name_len));
-
     // Error?
     if (new_socket->fd == -1)
     {
@@ -272,37 +274,33 @@ socket_t* socket_connect(unsigned short port, char* addr)
 {
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
-    if(s == NULL){
+    if(s == NULL)
+    {
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
-
-    s->port = port;
     s->status = SOCKET_CLOSED;
-    s->name.sin_family = AF_INET;
-    s->name.sin_port = htons(s->port);
-    if (addr)
-    {
 
-        s->name.sin_addr.s_addr = inet_addr(addr);
-    }
-    else
-    {
-        s->name.sin_addr.s_addr = htonl(INADDR_ANY);
-    }
+    // 9734 default port
+    s->port = port ? port : 9734;
+    s->name.sin_port = htons(s->port);
+
+    s->name.sin_family = AF_INET;
+    s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
 
     // Assign a file descriptor and validate
     s->fd = socket(AF_INET, SOCK_STREAM, 0);
     if (s->fd == -1)
     {
-        log_error("%s:L %d: could not create socket", __func__, __LINE__);
+        log_error("%s:L %d: could not create socket\n", __func__, __LINE__);
         assert(0);
     }
 
+    int result = connect(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name));
     // Try to bind the socket
-    if (connect(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
+    if (result < 0)
     {
-        log_error("%s:L %d: could not connect client", __func__, __LINE__);
+        log_error("%s:L %d: could not connect client, %d\n", __func__, __LINE__, result);
         assert(0);
     }
 
