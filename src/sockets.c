@@ -14,19 +14,18 @@
  **/
 
 /*@
- * requires errno == 0;
- * behavior null:
- *     ensures \result == \null && errno != 0;
- * behavior success:
- *     assumes errno == 0;
- *     allocates \result;
- *     ensures \fresh{Old, Here}(\result, sizeof(socket_t));
- *     ensures \result->port == port && \result->status == SOCKET_OPEN;
- *
- *
- * complete behaviors null, success;
- * disjoint behaviors null, success;
- *
+   requires errno == 0;
+   behavior null:
+       ensures \result == \null && errno != 0;
+   behavior success:
+       assumes errno == 0;
+       allocates \result;
+       ensures \fresh{Old, Here}(\result, sizeof(socket_t));
+       ensures \result->port == port && \result->status == SOCKET_OPEN;
+  
+   complete behaviors null, success;
+   disjoint behaviors null, success;
+  
  */
 socket_t* socket_startup(unsigned short port)
 {
