@@ -15,25 +15,25 @@ socket_t* s;
 
 int main(int argc, char *argv[])
 {
-	// Silence compiler warnings (in case later on we want to use them)
-	(void) argc; 
-	(void) argv;
+    // Silence compiler warnings (in case later on we want to use them)
+    (void) argc; 
+    (void) argv;
 
-	// Local addr for now
-	unsigned short port = SERVER_PORT;
-	char* addr = "127.0.0.1";
+    // Local addr for now
+    unsigned short port = SERVER_PORT;
+    char* addr = "127.0.0.1";
 
-	s = socket_connect(port, addr);
+    s = socket_connect(port, addr);
 
-	signal(SIGINT, sigint_handler);
+    signal(SIGINT, sigint_handler);
 
-	printf("Connected at %p\n", (void*) s);
-	while(1)
-	{
-		// Just hang for now
-	}
+    printf("Connected at %p\n", (void*) s);
+    while(1)
+    {
+        // Just hang for now
+    }
 
-	return 0;
+    return 0;
 }
 
 void sigint_handler(int signum)
