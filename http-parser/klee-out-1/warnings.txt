@@ -1,0 +1,9 @@
+KLEE: WARNING: undefined reference to function: fflush
+KLEE: WARNING: undefined reference to function: fprintf
+KLEE: WARNING: undefined reference to function: memchr
+KLEE: WARNING: undefined reference to variable: stdout
+KLEE: WARNING: undefined reference to function: strtoul
+KLEE: WARNING ONCE: calling external: gettimeofday(51568112, 0)
+KLEE: WARNING ONCE: calling external: memchr(51782714, 13, 478)
+KLEE: WARNING ONCE: calling external: fprintf(139643799700480, 51785376)
+KLEE: WARNING ONCE: calling external: fflush(139643799700480)

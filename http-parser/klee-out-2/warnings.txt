@@ -1,0 +1,4 @@
+KLEE: WARNING: undefined reference to function: memchr
+KLEE: WARNING: undefined reference to function: strtoul
+KLEE: WARNING ONCE: calling external: gettimeofday(43185520, 0)
+KLEE: WARNING ONCE: calling external: memchr(43330234, 13, 478)

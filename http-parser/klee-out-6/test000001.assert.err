@@ -1,0 +1,6 @@
+Error: ASSERTION FAIL: parsed == data_len
+File: /home/userfog/klee-auto/klee/examples/http-parser/http_parser_main.c
+Line: 2476
+assembly.ll line: 9828
+Stack: 
+	#000009828 in main (argc=1, argv=36552432) at /home/userfog/klee-auto/klee/examples/http-parser/http_parser_main.c:2476
