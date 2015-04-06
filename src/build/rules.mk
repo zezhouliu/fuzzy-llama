@@ -1,3 +1,4 @@
+PREFER_GCC = 0
 
 GCC ?= $(shell if gcc-4.9 --version | grep gcc >/dev/null; then echo gcc-4.9; \
 	elif gcc-mp-4.7 --version | grep gcc >/dev/null; then echo gcc-mp-4.7; \
