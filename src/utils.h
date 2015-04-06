@@ -4,9 +4,10 @@
 * @Brief: Utilites file including helper functions, i.e., debugging tools
 */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#pragma once
 
+
+#define DEBUG_MODE 0
 //Headers for variable arguments
 #include <stdarg.h>
 //Standard IO Operations
@@ -29,4 +30,3 @@ void logg(FILE* out, const char *format, ...);
 void log_out(const char *format, ...);
 void log_error(const char *format, ...);
 
-#endif /* __UTILS_H__ */
