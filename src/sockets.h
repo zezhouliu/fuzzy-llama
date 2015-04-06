@@ -35,7 +35,8 @@ typedef struct socket_ {
 
 
 // Public interface
-socket_t* socket_startup(unsigned short port, char* addr);
+socket_t* socket_startup(unsigned short port);
+socket_t* socket_connect(unsigned short port, char* addr);
 void socket_close(socket_t* s);
 socket_t* socket_accept(socket_t* s);
 int socket_read_line(socket_t* s, char* buf, int size);
