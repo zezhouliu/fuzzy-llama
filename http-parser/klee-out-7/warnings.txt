@@ -1,5 +1,0 @@
-KLEE: WARNING: undefined reference to function: memchr
-KLEE: WARNING: undefined reference to function: strtoul
-KLEE: WARNING ONCE: calling external: gettimeofday(34794960, 0)
-KLEE: WARNING ONCE: skipping fork (memory cap exceeded)
-KLEE: WARNING ONCE: calling external: memchr(34938342, 13, 418)
