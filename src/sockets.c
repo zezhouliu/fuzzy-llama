@@ -25,8 +25,8 @@
   
    complete behaviors null, success;
    disjoint behaviors null, success;
-  
- */
+*/  
+ 
 socket_t* socket_startup(unsigned short port)
 {
     // Basic initialization routine
@@ -169,8 +169,19 @@ int socket_get_fd(socket_t* s)
  * @param[in]: size of buf
  * @return size read
  */
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+    assigns \nothing;
+    ensures \result > 0 && \result <= size;
+*/
 int socket_read_line(socket_t* s, char* buf, int size)
 {
+    assert(s);
+    assert(buf);
+    assert(size > 0);
+
     // Track the counter
     char c = '\0';
     int i;
@@ -219,6 +230,13 @@ int socket_read_line(socket_t* s, char* buf, int size)
  * @return n success, these calls return the number of characters sent.
  *  On error, -1 is returned, and errno is set appropriately.
  */
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+    assigns \nothing;
+    ensures \result > 0 && \result == size;
+*/
 ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
 {
     assert(s);
@@ -239,6 +257,13 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
  * @return n success, these calls return the number of characters received.
  *  On error, -1 is returned, and errno is set appropriately.
  */
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+    assigns buf[0..size-1];
+    ensures \result > 0 && \result == size;
+*/
 ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
 {
     assert(s);
@@ -257,6 +282,16 @@ ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
  * @post: port will be occupied by this socket
  * @return: socket_t* wrapper containing socket info
  **/
+
+ /*@
+    behavior null_addr:
+        requires !\valid(addr);
+    behavior addr:
+        requires \valid(addr);
+
+    complete behaviors null_addr, addr;
+    disjoint behaviors null_addr, addr;
+*/
 socket_t* socket_connect(unsigned short port, char* addr)
 {
     // Basic initialization routine
