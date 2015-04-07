@@ -2349,6 +2349,7 @@ http_parser_parse_url(const char *buf, size_t buflen, int is_connect,
         break;
 
       default:
+        klee_assert(0);
         assert(!"Unexpected state");
         return 1;
     }
@@ -2458,27 +2459,177 @@ static http_parser_settings settings = {
 };
 
 int main(int argc, char** argv) {
-  struct http_parser parser;
-  int i;
-  int err;
-  struct timeval start;
-  struct timeval end;
-  float rps;
+  // struct http_parser parser;
+  // int i;
+  // int err;
+  // struct timeval start;
+  // struct timeval end;
+  // float rps;
 
-  err = gettimeofday(&start, NULL);
-  assert(err == 0);
+  // err = gettimeofday(&start, NULL);
+  // assert(err == 0);
 
-  size_t parsed;
-  http_parser_init(&parser, HTTP_REQUEST);
+  // size_t parsed;
+  // http_parser_init(&parser, HTTP_REQUEST);
    
-  klee_make_symbolic(data, sizeof data, "data");
-  parsed = http_parser_execute(&parser, &settings, data, data_len);
-  assert(parsed == data_len);
+  // klee_make_symbolic(data, sizeof data, "data");
+  // parsed = http_parser_execute(&parser, &settings, data, data_len);
+  // assert(parsed == data_len);
 
-  err = gettimeofday(&end, NULL);
-  assert(err == 0);
+  // err = gettimeofday(&end, NULL);
+  // assert(err == 0);
+
+  size_t buflen; 
+  klee_assume(buflen < 2048);
+  klee_make_symbolic(&buflen, sizeof(buflen), "buflen"); 
+
+  char buf[buflen]; 
+  klee_make_symbolic(buf, buflen, "buf"); 
+  const char * const_buf = buf; 
+
+  int is_connect; 
+  klee_assume(is_connect == 0 || is_connect == 1)
+  klee_make_symbolic(&is_connect, sizeof(is_connect), "is_connect")
+
+  struct http_parser_url u; 
+  klee_make_symbolic(&u, sizeof(u), "u");
+  klee_assume(((u.field_set  - 1) & u.field_set) == 0) /* u.field_set should be a power of 2 */
+  klee_assume(u.port <= 0xffff); 
+
+  int parse = http_parser_parse_url(buf, buflen, is_connect, &http_parser_url); 
 
   return 0;
-
 }
+
+//  /************ Message code ************/
+//   struct message {
+//   const char *name; // for debugging purposes
+//   const char *raw;
+//   enum http_parser_type type;
+//   enum http_method method;
+//   int status_code;
+//   char response_status[MAX_ELEMENT_SIZE];
+//   char request_path[MAX_ELEMENT_SIZE];
+//   char request_url[MAX_ELEMENT_SIZE];
+//   char fragment[MAX_ELEMENT_SIZE];
+//   char query_string[MAX_ELEMENT_SIZE];
+//   char body[MAX_ELEMENT_SIZE];
+//   size_t body_size;
+//   const char *host;
+//   const char *userinfo;
+//   uint16_t port;
+//   int num_headers;
+//   enum { NONE=0, FIELD, VALUE } last_header_element;
+//   char headers [MAX_HEADERS][2][MAX_ELEMENT_SIZE];
+//   int should_keep_alive;
+
+//   const char *upgrade; // upgraded body
+
+//   unsigned short http_major;
+//   unsigned short http_minor;
+
+//   int message_begin_cb_called;
+//   int headers_complete_cb_called;
+//   int message_complete_cb_called;
+//   int message_complete_on_eof;
+//   int body_is_final;
+// };
+
+//   const char *name; // for debugging purposes
+//   const char *raw;
+//   enum http_parser_type type;
+//   enum http_method method;
+//   int status_code;
+//   char response_status[MAX_ELEMENT_SIZE];
+//   char request_path[MAX_ELEMENT_SIZE];
+//   char request_url[MAX_ELEMENT_SIZE];
+//   char fragment[MAX_ELEMENT_SIZE];
+//   char query_string[MAX_ELEMENT_SIZE];
+//   char body[MAX_ELEMENT_SIZE];
+//   size_t body_size;
+//   const char *host;
+//   const char *userinfo;
+//   uint16_t port;
+//   int num_headers;
+//   enum { NONE=0, FIELD, VALUE } last_header_element;
+//   char headers [MAX_HEADERS][2][MAX_ELEMENT_SIZE];
+//   int should_keep_alive;
+
+//   const char *upgrade; // upgraded body
+
+//   unsigned short http_major;
+//   unsigned short http_minor;
+
+//   int message_begin_cb_called;
+//   int headers_complete_cb_called;
+//   int message_complete_cb_called;
+//   int message_complete_on_eof;
+//   int body_is_final;
+
+
+//   // name 
+//   // raw
+//   // http_parser_type
+//   // http_method 
+//   klee_make_symbolic(&status_code, sizeof(status_code), "status_code"); 
+//   klee_make_symbolic(response_status, MAX_ELEMENT_SIZE, "request_path"); 
+//   klee_make_symbolic(response_path, MAX_ELEMENT_SIZE, "response_path")
+//   klee_make_symbolic(request_url, MAX_ELEMENT_SIZE, "request_url"); 
+//   klee_make_symbolic(fragment, MAX_ELEMENT_SIZE, "fragment"); 
+//   klee_make_symbolic(query_string, MAX_ELEMENT_SIZE, "query_string"); 
+//   klee_make_symbolic(body, MAX_ELEMENT_SIZE, "body"); 
+//   klee_make_symbolic(&body_size, sizeof(body_size), "body_size"); 
+//   // host
+//   // userinfo 
+//   klee_make_symbolic(&port, sizeof(port), "port"); 
+//   klee_make_symbolic(&num_headers, sizeof(num_headers), "num_headers"); 
+//   // last_header_element
+//   // headers
+//   // should_keep_alive
+//   // upgrade
+//   // http_major
+//   // http_minor 
+//   // message_begin_cb_called;
+//   // headers_complete_cb_called;
+//   // message_complete_cb_called;
+//   // message_complete_on_eof;
+//   // body_is_final;
+
+// message example = 
+// {.name= "curl get"
+//   ,.type= HTTP_REQUEST
+//   ,.raw= "GET /test HTTP/1.1\r\n"
+//          "User-Agent: curl/7.18.0 (i486-pc-linux-gnu) libcurl/7.18.0 OpenSSL/0.9.8g zlib/1.2.3.3 libidn/1.1\r\n"
+//          "Host: 0.0.0.0=5000\r\n"
+//          "Accept: */*\r\n"
+//          "\r\n"
+//   ,.should_keep_alive= TRUE
+//   ,.message_complete_on_eof= FALSE
+//   ,.http_major= 1
+//   ,.http_minor= 1
+//   ,.method= HTTP_GET
+//   ,.query_string= query_string
+//   ,.fragment= fragment
+//   ,.request_path= request_path
+//   ,.request_url= request_url
+//   ,.num_headers= num_headers
+//   ,.headers=
+//     { { "User-Agent", "curl/7.18.0 (i486-pc-linux-gnu) libcurl/7.18.0 OpenSSL/0.9.8g zlib/1.2.3.3 libidn/1.1" }
+//     , { "Host", "0.0.0.0=5000" }
+//     , { "Accept", "*/*" }
+//     }
+//   ,.body= ""
+// }
+
+//   //klee_make_symbolic(data, sizeof data, "data");
+//   parsed = http_parser_execute(&parser, &settings, example, sizeof(message));
+//   assert(parsed == data_len);
+
+//   err = gettimeofday(&end, NULL);
+//   assert(err == 0);
+
+//   return 0;
+// }
+
+
 
