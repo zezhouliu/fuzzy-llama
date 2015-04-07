@@ -1,2 +1,0 @@
-KLEE: ERROR: /home/userfog/klee-auto/klee/examples/http-parser/http_parser_main.c:2474: wrong size given to klee_make_symbolic[_name]
-KLEE: NOTE: now ignoring this error at this location
