@@ -14,26 +14,30 @@
  **/
 
 /*@
- * requires errno == 0;
- * behavior null:
- *	ensures \result == \null && errno != 0;
- * behavior success:
- *	assumes errno == 0;
- *	allocates \result;
- *	ensures \fresh{Old, Here}(\result, sizeof(socket_t));
- *	ensures \result->port == port && \result->status == SOCKET_OPEN;
- *
- *
- * complete behaviors null, success;
- * disjoint behaviors null, success;
- *
+  behavior null:
+		assumes !is_allocable((unsigned int)sizeof(socket_t));
+		ensures \result == \null && errno != 0;
+  behavior success:
+		assumes is_allocable((unsigned int)sizeof(socket_t));
+		allocates \result;
+		ensures \fresh{Old, Here}(\result, sizeof(socket_t));
+		ensures (\result->port == port || port == 0) && \result->status == SOCKET_OPEN;
+		ensures errno == 0;
+		ensures (\result->fd >= 0);
+
+	complete behaviors;
+	disjoint behaviors;
+
  */
 socket_t* socket_startup(unsigned short port)
 {
+		errno = 0;
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
     if(s == NULL){
-        //  First failure, we cannot allocate our structure due to lack of memory
+        // First failure, we cannot allocate our structure due to lack of memory
+				// we should set errno to set failure
+				errno = ENOMEM;
         return NULL;
     }
 
@@ -45,27 +49,23 @@ socket_t* socket_startup(unsigned short port)
 
     // Assign a file descriptor and validate
     s->fd = socket(PF_INET, SOCK_STREAM, 0);
-    if (s->fd == -1)
-    {
+    if (s->fd == -1){
         log_error("%s:L %d: could not create socket", __func__, __LINE__);
-        assert(0);
-    }
+				goto failure;
+		}
 
     // Try to bind the socket
-    if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
-    {
+    if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0){
         log_error("%s:L %d: could not bind socket", __func__, __LINE__);
-        assert(0);
-    }
+				goto failure;
+		}
 
     // Check if dynamically allocating the port
-    if (!port)
-    {
+    if (port == 0){
         unsigned namelen = sizeof(s->name);
-        if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
-        {
+        if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1){
             log_error("%s:L %d: could not get socket name", __func__, __LINE__);
-            assert(0);
+						goto failure;
         }
 
         s->port = ntohs(s->name.sin_port);
@@ -74,16 +74,23 @@ socket_t* socket_startup(unsigned short port)
 
     // Try to listen, with backlog of 5
     // NOTE: If s.fd is valid socket, this call CANNOT fail
-    if (listen(s->fd, 5) < 0)
-    {
+    if (listen(s->fd, 5) < 0){
         log_error("%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
-        assert(0);
+				goto failure;
     }
 
     // If all succeeds, assign server status as OPEN
     s->status = SOCKET_OPEN;
 
     return s;
+
+		failure:
+		//Here we handle all error cases
+		if (s->fd >= 0){
+			close(s->fd);
+		}
+		free(s);
+		return NULL;
 }
 
 /**
