@@ -13,7 +13,8 @@ parsertrace_g
 *.Makefile
 *.so.*
 *.a
-
+*.swp
+klee-out*
 
 # Visual Studio uglies
 *.suo
