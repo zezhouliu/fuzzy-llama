@@ -1,7 +1,7 @@
 # Default optimization level
 O ?= 3
 
-all: utils sockets server
+all: utils sockets client server
 
 LIBS = -lm
 
@@ -16,12 +16,15 @@ utils: utils.o
 sockets: sockets.o
 	$(call,$(CC) $(CFLAGS) $(DEPCFLAGS) -o sockets.o -c sockets.c
 
+client: client.o
+	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
+
 server: server.o
 	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
 
 clean: clean-main
 clean-main:
-	$(call run,rm -f server *.o *~ *.bak core *.core,CLEAN)
+	$(call run,rm -f client server *.o *~ *.bak core *.core,CLEAN)
 	$(call run,rm -rf $(DEPSDIR))
 
 distclean: clean

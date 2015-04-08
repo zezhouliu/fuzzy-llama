@@ -7,7 +7,7 @@
 #pragma once
 
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 //Headers for variable arguments
 #include <stdarg.h>
 //Standard IO Operations
@@ -25,6 +25,7 @@
 //Boolean variables
 #include <stdbool.h>
 
+#define SERVER_PORT 8080
 
 void logg(FILE* out, const char *format, ...);
 void log_out(const char *format, ...);

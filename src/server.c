@@ -39,6 +39,10 @@ void not_found(socket_t*);
 void serve_file(socket_t*, const char *);
 void unimplemented(socket_t*);
 
+// Global to handle closing sockets
+socket_t* server_sock;
+socket_t* client_sock;
+
 /**********************************************************************/
 /* A request has caused a call to accept() on the server port to
  * return.  Process the request appropriately.
@@ -404,21 +408,27 @@ void unimplemented(socket_t* client)
 int main(void)
 {
     // Get a server socket
-    unsigned short port = 0;
-    socket_t* server_sock = socket_startup(port);
-    socket_t* client_sock;
-
-    printf("httpd running on port %d\n", port);
+    unsigned short port = SERVER_PORT;
+    server_sock = socket_startup(port);
 
     while (1)
     {
         client_sock = socket_accept(server_sock);
-
+        (void) client_sock;
+        printf("Accepted client at: %d\n", socket_get_fd(client_sock));
         /* Single threaded for now... */
-        accept_request(client_sock);
+        // accept_request(client_sock);
     }
 
     socket_close(server_sock);
 
     return(0);
+}
+
+void sigint_handler(int signum)
+{
+    // do cleanups here and free all existing variables and stuff
+    log_out("Closing server on:...\n", socket_get_fd(server_sock));
+    socket_close(server_sock);
+    exit(signum);
 }

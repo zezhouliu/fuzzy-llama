@@ -22,7 +22,7 @@
 #include <strings.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <pthread.h>
+// #include <pthread.h>
 #include <sys/wait.h>
 #include <stdlib.h>
 
@@ -433,7 +433,7 @@ int startup(u_short *port)
   error_die("bind");
  if (*port == 0)  /* if dynamically allocating a port */
  {
-  int namelen = sizeof(name);
+  unsigned int namelen = sizeof(name);
   if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
    error_die("getsockname");
   *port = ntohs(name.sin_port);
@@ -478,8 +478,8 @@ int main(void)
  u_short port = 0;
  int client_sock = -1;
  struct sockaddr_in client_name;
- int client_name_len = sizeof(client_name);
- pthread_t newthread;
+ unsigned int client_name_len = sizeof(client_name);
+ // pthread_t newthread;
 
  server_sock = startup(&port);
  printf("httpd running on port %d\n", port);
@@ -491,12 +491,12 @@ int main(void)
                        &client_name_len);
   if (client_sock == -1)
    error_die("accept");
- /* accept_request(client_sock); */
- if (pthread_create(&newthread , NULL, accept_request, client_sock) != 0)
-   perror("pthread_create");
+  accept_request(client_sock); 
+ // if (pthread_create(&newthread , NULL, accept_request, client_sock) != 0)
+ //   perror("pthread_create");
+ // }
  }
-
  close(server_sock);
 
- return(0);
+ return 0;
 }

@@ -4,7 +4,7 @@
 
 
 /**
- * socket_startup()
+ * socket_startup(port)
  *
  * @Brief: Starts up a socket at a [opt] port
  * @param[in]: port, unsigned short containing port to connect to
@@ -27,10 +27,9 @@
 
 	complete behaviors;
 	disjoint behaviors;
+*/
 
- */
-socket_t* socket_startup(unsigned short port)
-{
+socket_t * socket_startup(unsigned short port){
 		errno = 0;
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
@@ -82,6 +81,8 @@ socket_t* socket_startup(unsigned short port)
     // If all succeeds, assign server status as OPEN
     s->status = SOCKET_OPEN;
 
+    log_out("Server started at port: %d\n", s->port);
+
     return s;
 
 		failure:
@@ -102,20 +103,38 @@ socket_t* socket_startup(unsigned short port)
 * @post: s is invalidated
 * @return: void
 **/
-void socket_close(socket_t* s)
-{
-    // If open, then close
-    if (s->status == SOCKET_OPEN)
-    {
-        close(s->fd);
-    }
 
-    s->status = SOCKET_CLOSED;
 
-    // Should possibly free socket?
-    // free(s);
+/*@
+	behavior open:
+		assumes \valid(s) && s->status == SOCKET_OPEN;
+		ensures s->status == SOCKET_CLOSED;
+	behavior null:
+		assumes s == \null;
+		ensures errno == 0;
+	behavior other:
+		assumes \valid(s);
+		assigns \nothing;
+		ensures errno == 0;
 
-    return;
+	complete behaviors;
+	disjoint behaviors;
+*/
+void socket_close(socket_t* s){
+	if(s == NULL){
+		return;
+	}
+	// If open, then close
+	if (s->status == SOCKET_OPEN && s->fd >= 0)	{
+			close(s->fd);
+			s->status = SOCKET_CLOSED;
+	}
+
+
+	// Should possibly free socket?
+	// free(s);
+	errno = 0;
+	return;
 }
 
 /**
@@ -138,7 +157,8 @@ socket_t* socket_accept(socket_t* s)
 
     // Create new socket wrapper for the connecting socket
     socket_t * new_socket = (socket_t *) calloc(1, sizeof(socket_t));
-    if(new_socket == NULL){
+    if(!new_socket)
+    {
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
@@ -187,34 +207,33 @@ int socket_get_fd(socket_t* s)
  * @param[in]: size of buf
  * @return size read
  */
-int socket_read_line(socket_t* s, char* buf, int size)
-{
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+		requires s->status == SOCKET_OPEN && s->fd >= 0;
+    assigns \nothing;
+    ensures \result > 0 && \result <= size;
+*/
+int socket_read_line(socket_t* s, char* buf, int size){
     // Track the counter
     char c = '\0';
     int i;
     // Read until it's the end of the buffer or endline
-    for (i = 0; i < size - 1 && c != '\n'; ++i)
-    {
+    for (i = 0; i < size - 1 && c != '\n'; ++i){
         int n = recv(socket_get_fd(s), &c, 1, 0);
-        if (n > 0)
-        {
-            if (c == '\r')
-            {
+        if (n > 0){
+            if (c == '\r'){
                 n = recv(socket_get_fd(s), &c, 1, MSG_PEEK);
 
-                if ((n > 0) && (c == '\n'))
-                {
+                if ((n > 0) && (c == '\n')){
                     recv(socket_get_fd(s), &c, 1, 0);
-                }
-                else
-                {
+                } else {
                     c = '\n';
                 }
             }
             buf[i] = c;
-        }
-        else
-        {
+        } else {
             c = '\n';
         }
     }
@@ -237,6 +256,14 @@ int socket_read_line(socket_t* s, char* buf, int size)
  * @return n success, these calls return the number of characters sent.
  *  On error, -1 is returned, and errno is set appropriately.
  */
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+		requires s->status == SOCKET_OPEN;
+    assigns \nothing;
+    ensures \result > 0 && \result == size;
+*/
 ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
 {
     assert(s);
@@ -257,10 +284,77 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
  * @return n success, these calls return the number of characters received.
  *  On error, -1 is returned, and errno is set appropriately.
  */
+
+/*@
+    requires \valid(s) && \valid(buf) && size > 0;
+    requires \valid(buf + (0..size - 1));
+    assigns buf[0..size-1];
+    ensures \result > 0 && \result == size;
+*/
 ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
 {
     assert(s);
     assert(s->status == SOCKET_OPEN);
 
     return recv(socket_get_fd(s), buf, size, flags);
+}
+
+/**
+ * socket_connect(port, addr)
+ *
+ * @Brief: Starts up a socket at a [opt] port
+ * @param[in]: port, unsigned short containing port to connect to
+ * @param[in]: addr, char* representing address to bind to
+ * @pre: port is not already occupied by another socket
+ * @post: port will be occupied by this socket
+ * @return: socket_t* wrapper containing socket info
+ **/
+
+ /*@
+    behavior null_addr:
+        requires !\valid(addr);
+    behavior addr:
+        requires \valid(addr);
+
+    complete behaviors null_addr, addr;
+    disjoint behaviors null_addr, addr;
+*/
+socket_t* socket_connect(unsigned short port, char* addr)
+{
+    // Basic initialization routine
+    socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
+    if(s == NULL)
+    {
+        //  First failure, we cannot allocate our structure due to lack of memory
+        return NULL;
+    }
+    s->status = SOCKET_CLOSED;
+
+    // 9734 default port
+    s->port = port ? port : SERVER_PORT;
+    s->name.sin_port = htons(s->port);
+
+    s->name.sin_family = AF_INET;
+    s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
+
+    // Assign a file descriptor and validate
+    s->fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (s->fd == -1)
+    {
+        log_error("%s:L %d: could not create socket\n", __func__, __LINE__);
+        assert(0);
+    }
+
+    int result = connect(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name));
+    // Try to bind the socket
+    if (result < 0)
+    {
+        log_error("%s:L %d: could not connect client, %d\n", __func__, __LINE__, result);
+        assert(0);
+    }
+
+    // If all succeeds, assign server status as OPEN
+    s->status = SOCKET_OPEN;
+
+    return s;
 }

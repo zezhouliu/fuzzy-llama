@@ -1,4 +1,4 @@
-PREFER_GCC = 0
+PREFER_GCC = 1
 
 INCLUDE = ../include
 
@@ -15,14 +15,14 @@ override CFLAGS += $(shell if $(GCC) --version | grep gcc >/dev/null; then echo 
 else
 CC = $(shell if clang --version | grep LLVM >/dev/null; then echo clang; \
 	else echo $(GCC); fi 2>/dev/null)
-override CFLAGS += $(shell if clang --version | grep LLVM >/dev/null; then echo -std=c99 -g -ggdb -Weverything -mt -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
+override CFLAGS += $(shell if clang --version | grep LLVM >/dev/null; then echo -std=c99 -g -ggdb -Weverything  -Werror -Wno-documentation -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
 	else echo -std=gnu99 -g -ggdb -Wall -Wextra -Werror -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); fi 2>/dev/null)
 
 endif
 
 CLANG := $(shell if $(CC) --version | grep LLVM >/dev/null; then echo 1; else echo 0; fi)
 
-MATHFLAGS = -lrt -lm
+MATHFLAGS =  -lm
 DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
 DEPSDIR := .deps
