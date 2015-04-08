@@ -1,7 +1,7 @@
 # Default optimization level
 O ?= 3
 
-all: utils sockets client server
+all: utils socket-base socket-systems sockets client server
 
 LIBS = -lm
 
@@ -13,14 +13,20 @@ LIBS = -lm
 utils: utils.o
 	$(call,$(CC) $(CFLAGS) $(DEPCFLAGS) -o utils.o -c utils.c
 
+socket-base: socket-base.o
+	$(call,$(CC) $(CFLAGS) $(DEPCFLAGS) -o socket-base.o -c socket-base.c
+
+socket-systems: socket-systems.o
+	$(call,$(CC) $(CFLAGS) $(DEPCFLAGS) -o socket-systems.o -c socket-systems.c
+
 sockets: sockets.o
 	$(call,$(CC) $(CFLAGS) $(DEPCFLAGS) -o sockets.o -c sockets.c
 
 client: client.o
-	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
+	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o socket-base.o socket-systems.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
 
 server: server.o
-	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
+	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o socket-base.o socket-systems.o  sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
 
 clean: clean-main
 clean-main:

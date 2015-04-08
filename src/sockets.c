@@ -176,22 +176,6 @@ socket_t* socket_accept(socket_t* s)
     return new_socket;
 }
 
-/**
-* socket_get_fd(s)
-*
-* @Brief returns the file descriptor associated with s
-* @param[in]: s, socket_t*
-* @pre: s is a valid socket_t*
-* @pre: s.status = SOCKET_OPEN
-* return: int fd
-**/
-int socket_get_fd(socket_t* s)
-{
-    assert(s);
-    assert(s->status == SOCKET_OPEN);
-
-    return s->fd;
-}
 
 /**
  * socket_read_line(s, buf, size)
@@ -212,7 +196,6 @@ int socket_get_fd(socket_t* s)
     requires \valid(s) && \valid(buf) && size > 0;
     requires \valid(buf + (0..size - 1));
 		requires s->status == SOCKET_OPEN && s->fd >= 0;
-    assigns \nothing;
     ensures \result > 0 && \result <= size;
 */
 int socket_read_line(socket_t* s, char* buf, int size){
@@ -221,13 +204,13 @@ int socket_read_line(socket_t* s, char* buf, int size){
     int i;
     // Read until it's the end of the buffer or endline
     for (i = 0; i < size - 1 && c != '\n'; ++i){
-        int n = recv(socket_get_fd(s), &c, 1, 0);
+        int n = io_recv(s, &c, 1, 0);
         if (n > 0){
             if (c == '\r'){
-                n = recv(socket_get_fd(s), &c, 1, MSG_PEEK);
+                n = io_recv(s, &c, 1, MSG_PEEK);
 
                 if ((n > 0) && (c == '\n')){
-                    recv(socket_get_fd(s), &c, 1, 0);
+                    io_recv(s, &c, 1, 0);
                 } else {
                     c = '\n';
                 }
@@ -269,7 +252,7 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
     assert(s);
     assert(s->status == SOCKET_OPEN);
 
-    return send(socket_get_fd(s), buf, size, flags);
+    return io_send(s, buf, size, flags);
 }
 
 /**
@@ -296,7 +279,7 @@ ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
     assert(s);
     assert(s->status == SOCKET_OPEN);
 
-    return recv(socket_get_fd(s), buf, size, flags);
+    return io_recv(s, buf, size, flags);
 }
 
 /**
