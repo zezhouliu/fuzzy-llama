@@ -8,11 +8,25 @@
 * @pre: s is a valid socket_t*
 * return: sstatus_t representing status of s
 **/
+/*@
+	behavior null:
+		assumes !\valid(s);
+		ensures \result == -1;
+	behavior valid:
+		assumes \valid(s);
+		ensures \result > 0;
 
+	complete behaviors null, valid;
+	disjoint behaviors null, valid;
+*/
 sstatus_t socket_get_status(socket_t* s)
 {
-    assert(s);
-    return socket_get_status(s);
+    if(s)
+    {
+    	return socket_get_status(s);
+    }
+
+    return -1;
 }
 
 /**
@@ -24,10 +38,20 @@ sstatus_t socket_get_status(socket_t* s)
 * @pre: s.status = SOCKET_OPEN
 * return: int fd if valid, else -1
 **/
+/*@
+	behavior null:
+		assumes !\valid(s);
+		ensures \result == -1;
+	behavior valid:
+		assumes \valid(s) && s->status == SOCKET_OPEN;
+		ensures \result > 0;
+
+	complete behaviors null, valid;
+	disjoint behaviors null, valid;
+*/
 int socket_get_fd(socket_t* s)
 {
-    assert(s);
-    if(socket_get_status(s) == SOCKET_OPEN)
+    if(s && socket_get_status(s) == SOCKET_OPEN)
     {
         return s->fd;
     }
