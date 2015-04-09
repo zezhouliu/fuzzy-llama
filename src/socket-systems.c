@@ -1,23 +1,39 @@
 #include "socket-systems.h"
 
-/*@
-    behavior null:
-        assumes !\valid(socket) || length <= 0 || !\valid((char*)buffer + (0..length-1));
+/*@ 
+    requires length > 0;
+
+    behavior invalid:
+        assumes socket <= 0 || !\valid((char*)buffer + (0..length-1));
         assigns \nothing;
-        ensures \result == 0;
-    behavior valid_open:
-        assumes \valid(socket) && length > 0 && \valid((char*) buffer + (0..length-1));
-        assumes socket->status == SOCKET_OPEN;
+        ensures \result == -1;
+    behavior valid_error
+    behavior valid:
+        assumes socket > 0 && \valid((char*)buffer + (0..length-1));
         assigns ((char*) buffer)[0..length-1];
         ensures \result == length;
-    behavior valid_closed:
-        assumes \valid(socket) && length > 0 && \valid((char*) buffer + (0..length-1));
-        assumes socket->status != SOCKET_OPEN;
-        assigns ((char*) buffer)[0..length-1];
-        ensures \result == 0;
 
-    complete behaviors null, valid_open, valid_closed;
-    disjoint behaviors null, valid_open, valid_closed;
+    complete behaviors invalid, valid;
+    disjoint behaviors invalid, valid;
+*/
+ssize_t
+recv(int socket, void *buffer, size_t length, int flags);
+
+/*@
+    requires \valid(socket);
+    requires length > 0;
+    requires \valid((char*)buffer + (0..length-1));
+
+    behavior invalid:
+        assumes socket->status != SOCKET_OPEN;
+        assigns \nothing;
+        ensures \result == 0;
+    behavior valid_error:
+        assumes socket->status == SOCKET_OPEN;
+        ensures \result >= 0 || \result == -1;
+
+    complete behaviors invalid, valid;
+    disjoint behaviors invalid, valid;
 */
 ssize_t io_recv(socket_t* socket, void* buffer, size_t length, int flags)
 {
@@ -31,23 +47,21 @@ ssize_t io_recv(socket_t* socket, void* buffer, size_t length, int flags)
 }
 
 /*@
-    behavior null:
-        assumes !\valid(socket) || length <= 0 || !\valid((char*)buffer + (0..length-1));
-        assigns \nothing;
-        ensures \result == 0;
-    behavior valid_open:
-        assumes \valid(socket) && length > 0 && \valid((char*) buffer + (0..length-1));
-        assumes socket->status == SOCKET_OPEN;
-        assigns \nothing;
-        ensures \result == length;
-    behavior valid_closed:
-        assumes \valid(socket) && length > 0 && \valid((char*) buffer + (0..length-1));
-        assumes socket->status != SOCKET_OPEN;
-        assigns \nothing;
-        ensures \result == 0;
+    requires \valid(socket);
+    requires length > 0;
+    requires \valid((char*)buffer + (0..length-1));
+    assigns \nothing;
 
-    complete behaviors null, valid_open, valid_closed;
-    disjoint behaviors null, valid_open, valid_closed;
+    behavior invalid:
+        assumes socket->status != SOCKET_OPEN;
+        ensures \result == 0;
+    behavior valid:
+        assumes socket->status == SOCKET_OPEN;
+        ensures \result == length;
+
+    complete behaviors invalid, valid;
+    disjoint behaviors invalid, valid;
+
 */
 ssize_t io_send(socket_t* socket, const void* buffer, size_t length, int flags)
 {
