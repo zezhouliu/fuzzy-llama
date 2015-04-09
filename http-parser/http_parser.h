@@ -205,7 +205,11 @@ struct http_parser {
   /** PRIVATE **/
   unsigned int type : 2;         /* enum http_parser_type */
   unsigned int flags : 7;        /* F_* values from 'flags' enum; semi-public */
-  unsigned int state : 7;        /* enum state from http_parser.c */
+#if KLEE 
+  unsigned int state;        /* enum state from http_parser.c */ 
+#else
+  unsigned int state : 7;        /* enum state from http_parser.c */ 
+#endif
   unsigned int header_state : 8; /* enum header_state from http_parser.c */
   unsigned int index : 8;        /* index into current matcher */
 
@@ -286,7 +290,10 @@ struct http_parser_url {
 unsigned long http_parser_version(void);
 
 void http_parser_init(http_parser *parser, enum http_parser_type type);
-
+/* Klee version */
+#if KLEE
+void http_parser_init_symbolic(http_parser *parser, enum http_parser_type type);
+#endif
 
 /* Initialize http_parser_settings members to 0
  */

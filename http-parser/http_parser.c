@@ -2125,6 +2125,25 @@ http_method_str (enum http_method m)
   return ELEM_AT(method_strings, m, "<unknown>");
 }
 
+#if KLEE
+// https://keeda.stanford.edu/pipermail/klee-dev/2011-July/000685.html
+void klee_make_symbolic_range(void* addr, size_t offset, size_t nbytes, const char* name) {
+	assert(addr != NULL && "Must pass a valid addr");
+	assert(name != NULL && "Must pass a valid name");
+
+	if(nbytes == 0)
+		return;
+
+	// this function can be made a primitive but it will require changes to the ktest file format
+	void* start = addr + offset;
+	klee_check_memory_access(start, nbytes);
+
+	void* symbolic_data = malloc(nbytes);
+	klee_make_symbolic(symbolic_data, nbytes, name);
+	memcpy(start, symbolic_data, nbytes);
+	free(symbolic_data);
+}
+#endif // KLEE
 
 void
 http_parser_init (http_parser *parser, enum http_parser_type t)
@@ -2133,9 +2152,26 @@ http_parser_init (http_parser *parser, enum http_parser_type t)
   memset(parser, 0, sizeof(*parser));
   parser->data = data;
   parser->type = t;
+#if KLEE
+  klee_make_symbolic_range(&parser->state, 0, sizeof(unsigned int), "state");
+#else
   parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
+#endif
   parser->http_errno = HPE_OK;
 }
+
+#if KLEE
+void
+http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)
+{
+  void *data = parser->data; /* preserve application data */
+  memset(parser, 0, sizeof(*parser));
+  klee_make_symbolic(parser, sizeof(*parser), "parser");
+  parser->data = data; 
+  parser->type = t;
+}
+#endif
+
 
 void
 http_parser_settings_init(http_parser_settings *settings)
