@@ -18,6 +18,7 @@
 
 #include "utils.h"
 #include "sockets.h"
+#include "events.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -412,8 +413,28 @@ int main(void)
     unsigned short port = SERVER_PORT;
     server_sock = socket_startup(port);
 
+    // 1 Acceptor, 4 Clients
+    vector* sockets = vector_create_with_size(5);
+    vector_set(sockets, 0, server_sock);
+
+    pollsocket_t* ps = pollsocket_create(sockets);
+
     while (1)
     {
+        int result = poll_sockets(ps, 10000);
+        if (result < 0)
+        {
+            log_error("%s, %d: polling error!\n", __func__, __LINE__);
+        }
+        else if (result == 0)
+        {
+            log_out("%s, %d: No response from poll!\n", __func__, __LINE__);
+        }
+        else
+        {
+            // Check for events on the different sockets
+            
+        }
         client_sock = socket_accept(server_sock);
         (void) client_sock;
         printf("Accepted client at: %d\n", socket_get_fd(client_sock));
