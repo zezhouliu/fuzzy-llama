@@ -28,15 +28,16 @@
 	complete behaviors;
 	disjoint behaviors;
 */
-
 socket_t * socket_startup(unsigned short port){
-		errno = 0;
+	
+    errno = 0;
     // Basic initialization routine
     socket_t * s = (socket_t *) calloc(1, sizeof(socket_t));
-    if(s == NULL){
+    if(s == NULL)
+    {
         // First failure, we cannot allocate our structure due to lack of memory
-				// we should set errno to set failure
-				errno = ENOMEM;
+		// we should set errno to set failure
+		errno = ENOMEM;
         return NULL;
     }
 
@@ -48,23 +49,27 @@ socket_t * socket_startup(unsigned short port){
 
     // Assign a file descriptor and validate
     s->fd = socket(PF_INET, SOCK_STREAM, 0);
-    if (s->fd == -1){
+    if (s->fd == -1)
+    {
         log_error("%s:L %d: could not create socket", __func__, __LINE__);
-				goto failure;
-		}
+		goto failure;
+	}
 
     // Try to bind the socket
-    if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0){
+    if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
+    {
         log_error("%s:L %d: could not bind socket", __func__, __LINE__);
-				goto failure;
-		}
+		goto failure;
+	}
 
     // Check if dynamically allocating the port
-    if (port == 0){
+    if (port == 0)
+    {
         unsigned namelen = sizeof(s->name);
-        if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1){
+        if (getsockname(s->fd, (struct sockaddr *)&(s->name), &namelen) == -1)
+        {
             log_error("%s:L %d: could not get socket name", __func__, __LINE__);
-						goto failure;
+			goto failure;
         }
 
         s->port = ntohs(s->name.sin_port);
@@ -73,9 +78,10 @@ socket_t * socket_startup(unsigned short port){
 
     // Try to listen, with backlog of 5
     // NOTE: If s.fd is valid socket, this call CANNOT fail
-    if (listen(s->fd, 5) < 0){
+    if (listen(s->fd, 5) < 0)
+    {
         log_error("%s:L %d: could not listen to invalid socket: %d", __func__, __LINE__, s->fd);
-				goto failure;
+		goto failure;
     }
 
     // If all succeeds, assign server status as OPEN
@@ -85,13 +91,16 @@ socket_t * socket_startup(unsigned short port){
 
     return s;
 
-		failure:
-		//Here we handle all error cases
-		if (s->fd >= 0){
-			close(s->fd);
-		}
-		free(s);
-		return NULL;
+
+    // Here we handle all error cases
+	failure:
+    	if (s->fd >= 0)
+        {
+    		close(s->fd);
+    	}
+    	free(s);
+
+    	return NULL;
 }
 
 /**
@@ -121,19 +130,24 @@ socket_t * socket_startup(unsigned short port){
 	disjoint behaviors;
 */
 void socket_close(socket_t* s){
-	if(s == NULL){
+
+	if(!s)
+    {
+        errno = 1;
 		return;
 	}
-	// If open, then close
-	if (s->status == SOCKET_OPEN && s->fd >= 0)	{
-			close(s->fd);
-			s->status = SOCKET_CLOSED;
-	}
 
+	// If open, then close
+	if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)	
+    {
+		close(s->fd);
+		s->status = SOCKET_CLOSED;
+	}
 
 	// Should possibly free socket?
 	// free(s);
 	errno = 0;
+    free(s);
 	return;
 }
 
