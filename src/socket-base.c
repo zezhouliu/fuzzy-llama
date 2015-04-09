@@ -36,11 +36,11 @@ sstatus_t socket_get_status(socket_t* s)
 	requires \valid(s);
 
 	behavior valid_closed:
-		assumes \valid(s) && s->status != SOCKET_OPEN;
+		assumes s->status != SOCKET_OPEN;
 		assigns \nothing;
 		ensures \result == -1;
 	behavior valid_open:
-		assumes \valid(s) && s->status == SOCKET_OPEN;
+		assumes s->status == SOCKET_OPEN;
 		assigns \nothing;
 
 	complete behaviors valid_closed, valid_open;
