@@ -9,24 +9,17 @@
 * return: sstatus_t representing status of s
 **/
 /*@
-	behavior null:
-		assumes !\valid(s);
-		ensures \result == -1;
-	behavior valid:
-		assumes \valid(s);
-		ensures \result > 0;
-
-	complete behaviors null, valid;
-	disjoint behaviors null, valid;
+	requires \valid(s);
+	assigns \nothing;
 */
 sstatus_t socket_get_status(socket_t* s)
 {
-    if(s)
+    if(!s)
     {
-    	return socket_get_status(s);
+    	return SOCKET_INVALID;
     }
 
-    return -1;
+    return s->status;
 }
 
 /**
@@ -38,20 +31,24 @@ sstatus_t socket_get_status(socket_t* s)
 * @pre: s.status = SOCKET_OPEN
 * return: int fd if valid, else -1
 **/
-/*@
-	behavior null:
-		assumes !\valid(s);
-		ensures \result == -1;
-	behavior valid:
-		assumes \valid(s) && s->status == SOCKET_OPEN;
-		ensures \result > 0;
 
-	complete behaviors null, valid;
-	disjoint behaviors null, valid;
+/*@
+	requires \valid(s);
+
+	behavior valid_closed:
+		assumes \valid(s) && s->status != SOCKET_OPEN;
+		assigns \nothing;
+		ensures \result == -1;
+	behavior valid_open:
+		assumes \valid(s) && s->status == SOCKET_OPEN;
+		assigns \nothing;
+
+	complete behaviors valid_closed, valid_open;
+	disjoint behaviors valid_closed, valid_open;
 */
 int socket_get_fd(socket_t* s)
 {
-    if(s && socket_get_status(s) == SOCKET_OPEN)
+    if(s && s->status == SOCKET_OPEN)
     {
         return s->fd;
     }

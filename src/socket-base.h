@@ -18,10 +18,9 @@
 
 // sstatus_t = socket status type
 typedef enum {
-    SOCKET_OPEN,
-    SOCKET_CLOSED,
-    SOCKET_UNKNOWN,
-    SOCKET_INVALID
+    SOCKET_OPEN = 1,
+    SOCKET_CLOSED = 2,
+    SOCKET_INVALID = 3
 } sstatus_t;
 
 // socket_t = our socket wrapper
