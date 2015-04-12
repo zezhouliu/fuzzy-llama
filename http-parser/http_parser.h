@@ -286,6 +286,8 @@ struct http_parser_url {
 unsigned long http_parser_version(void);
 
 void http_parser_init(http_parser *parser, enum http_parser_type type);
+/* Klee version */
+void http_parser_init_symbolic(http_parser *parser, enum http_parser_type type);
 
 
 /* Initialize http_parser_settings members to 0
