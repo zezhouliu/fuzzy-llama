@@ -1626,20 +1626,6 @@ const struct message responses[] =
 , {.name= NULL } /* sentinel */
 };
 
-/* Klee Friendly Functions */
-void
-http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)
-{
-  void *data = parser->data; /* preserve application data */
-  memset(parser, 0, sizeof(*parser));
-  parser->data = data;
-  parser->type = t;
-  klee_make_symbolic(parser->state, sizeof(int), "state"); 
-  klee_assume(parser->state = s_start_req);
-  //parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
-  parser->http_errno = HPE_OK;
-}
-
 /* strnlen() is a POSIX.2008 addition. Can't rely on it being available so
  * define it ourselves.
  */
