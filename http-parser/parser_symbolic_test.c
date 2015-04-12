@@ -1635,7 +1635,7 @@ http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)
   parser->data = data;
   parser->type = t;
   klee_make_symbolic(parser->state, sizeof(int), "state"); 
-  klee_assume(parser->state = s_start_req)
+  klee_assume(parser->state = s_start_req);
   //parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
   parser->http_errno = HPE_OK;
 }
