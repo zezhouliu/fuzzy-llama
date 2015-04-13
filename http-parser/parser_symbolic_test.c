@@ -3403,6 +3403,22 @@ test:
   parser_free();
 }
 
+size_t http_parser_execute_incrementally(http_parser *parser, 
+                                         const http_parser_settings *settings, 
+                                         const char *data, 
+                                         size_t len) { 
+char * p = data; 
+int err; 
+
+for (int i = 0; i < len; i++) { 
+  err = http_parser_execute(parser, settings, p, 1)
+  if (!err)
+    return err;
+  p++; 
+}
+return 0;
+}
+
 int
 main (void)
 {
