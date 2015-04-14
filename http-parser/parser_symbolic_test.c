@@ -3005,8 +3005,6 @@ test_simple (const char *buf, enum http_errno err_expected)
 
   parser_free();
 
-  klee_assert(err_expected == err); 
-
   /* In strict mode, allow us to pass with an unexpected HPE_STRICT as
    * long as the caller isn't expecting success.
    */
@@ -3014,6 +3012,8 @@ test_simple (const char *buf, enum http_errno err_expected)
   if (err_expected != err && err_expected != HPE_OK && err != HPE_STRICT) {
 #else
   if (err_expected != err) {
+
+    klee_assert(0); 
 #endif
     fprintf(stderr, "\n*** test_simple expected %s, but saw %s ***\n\n%s\n",
         http_errno_name(err_expected), http_errno_name(err), buf);
@@ -3407,16 +3407,14 @@ size_t http_parser_execute_incrementally(http_parser *parser,
                                          const http_parser_settings *settings, 
                                          const char *data, 
                                          size_t len) { 
-char * p = data; 
-int err; 
-
-for (int i = 0; i < len; i++) { 
-  err = http_parser_execute(parser, settings, p, 1)
-  if (!err)
-    return err;
-  p++; 
-}
-return 0;
+	int err; 
+	int i;
+	for (i = 0; i < len; i++) { 
+	  err = http_parser_execute(parser, settings, &data[i], 1);
+	  if (!err)
+	    return err;
+	}
+	return 0;
 }
 
 int
