@@ -2041,11 +2041,10 @@ parser_init (enum http_parser_type type)
 
   parser = malloc(sizeof(http_parser));
 
-  //http_parser_init(parser, type);
-  http_parser_init_symbolic(parser, type);
+  http_parser_init(parser, type);
+  //http_parser_init_symbolic(parser, type);
 
   memset(&messages, 0, sizeof messages);
-
 }
 
 void
@@ -2061,6 +2060,30 @@ size_t parse (const char *buf, size_t len)
   size_t nparsed;
   currently_parsing_eof = (len == 0);
   nparsed = http_parser_execute(parser, &settings, buf, len);
+  return nparsed;
+}
+
+// VeriServe
+size_t http_parser_execute_incrementally(http_parser *parser, 
+                                         const http_parser_settings *settings, 
+                                         const char *data, 
+                                         size_t len) { 
+	int err; 
+	int i;
+	for (i = 0; i < len; i++) { 
+	  err = http_parser_execute(parser, settings, &data[i], 1);
+	  if (!err)
+	    return err;
+	}
+	return 0;
+}
+
+// VeriServe
+size_t parse_incrementally (const char *buf, size_t len)
+{
+  size_t nparsed;
+  currently_parsing_eof = (len == 0);
+  nparsed = http_parser_execute_incrementally(parser, &settings, buf, len);
   return nparsed;
 }
 
@@ -3022,6 +3045,26 @@ test_simple (const char *buf, enum http_errno err_expected)
 }
 
 void
+test_simple_incrementally (const char *buf, enum http_errno err_expected)
+{
+
+  parser_init(HTTP_BOTH);
+
+  enum http_errno err;
+
+  parse_incrementally(buf, strlen(buf));
+  err = HTTP_PARSER_ERRNO(parser);
+  parse(NULL, 0);
+
+  parser_free();
+
+  if(err == HPE_UNKNOWN){
+	klee_assert(0);
+  }
+
+}
+
+void
 test_header_overflow_error (int req)
 {
   http_parser parser;
@@ -3403,22 +3446,10 @@ test:
   parser_free();
 }
 
-size_t http_parser_execute_incrementally(http_parser *parser, 
-                                         const http_parser_settings *settings, 
-                                         const char *data, 
-                                         size_t len) { 
-	int err; 
-	int i;
-	for (i = 0; i < len; i++) { 
-	  err = http_parser_execute(parser, settings, &data[i], 1);
-	  if (!err)
-	    return err;
-	}
-	return 0;
-}
+
 
 int
-main (void)
+main (int argc, char **argv)
 {
   parser = NULL;
   int i, j, k;
@@ -3439,6 +3470,8 @@ main (void)
 
   for (request_count = 0; requests[request_count].name; request_count++);
   for (response_count = 0; responses[response_count].name; response_count++);
+
+  test_simple_incrementally(argv[1], HPE_UNKNOWN);
 
   //// API
   // test_preserve_data();
@@ -3530,9 +3563,6 @@ main (void)
 
 
   /// REQUESTS
-
-
-  test_simple("GET / HTP/1.1\r\n\r\n", HPE_INVALID_VERSION);
 
 //   // Well-formed but incomplete
 //   test_simple("GET / HTTP/1.1\r\n"
