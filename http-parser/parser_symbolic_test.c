@@ -3044,6 +3044,7 @@ test_simple (const char *buf, enum http_errno err_expected)
   }
 }
 
+// VeriServe
 void
 test_simple_incrementally (const char *buf, enum http_errno err_expected)
 {
@@ -3052,7 +3053,9 @@ test_simple_incrementally (const char *buf, enum http_errno err_expected)
 
   enum http_errno err;
 
+  printf("%d", strlen(buf));
   parse_incrementally(buf, strlen(buf));
+
   err = HTTP_PARSER_ERRNO(parser);
   parse(NULL, 0);
 
@@ -3492,6 +3495,7 @@ main (int argc, char **argv)
   const char *buf;
   char p[5] = {'\0'};
   char flag;
+  
   if(argc > 1 && argv[1][0] == '-'){
     flag = argv[1][1]; 
   } else{
@@ -3501,11 +3505,17 @@ main (int argc, char **argv)
 
   switch(flag){
 	case 'p':
-	    //memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
+
+	    memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
+
+#if KLEE
             klee_make_symbolic(p, sizeof p, "p");
             klee_assume(p[4] == '\0');
+#endif // KLEE
+
             buf = sym_port(p);
             test_simple_incrementally(buf, HPE_UNKNOWN);			
+	    free((void *)buf);
 	    break;
 	case 'g':
   	  test_simple_incrementally(argv[2], HPE_UNKNOWN);

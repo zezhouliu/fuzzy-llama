@@ -2137,6 +2137,7 @@ http_parser_init (http_parser *parser, enum http_parser_type t)
   parser->http_errno = HPE_OK;
 }
 
+#if KLEE
 // https://keeda.stanford.edu/pipermail/klee-dev/2011-July/000685.html
 void klee_make_symbolic_range(void* addr, size_t offset, size_t nbytes, const char* name) {
 	assert(addr != NULL && "Must pass a valid addr");
@@ -2154,6 +2155,7 @@ void klee_make_symbolic_range(void* addr, size_t offset, size_t nbytes, const ch
 	memcpy(start, symbolic_data, nbytes);
 	free(symbolic_data);
 }
+#endif // KLEE
 
 /* Klee version of http_parser_init*/
 void
@@ -2163,9 +2165,9 @@ http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)
   memset(parser, 0, sizeof(*parser));
   parser->data = data;
   parser->type = t;
-  klee_make_symbolic_range(&parser->state, 0, sizeof(unsigned int), "state"); 
-  klee_assume(parser->state = s_start_req);
-  //parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
+  //klee_make_symbolic_range(&parser->state, 0, sizeof(unsigned int), "state"); 
+  //klee_assume(parser->state = s_start_req);
+  parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
   parser->http_errno = HPE_OK;
 }
 
