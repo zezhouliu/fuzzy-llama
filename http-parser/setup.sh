@@ -34,28 +34,21 @@ setup_options(){
 
 # MAIN: Control Flow Begins Here
 
-
-
-
-#
-## Check if the last argument is a file
-#if [ ! -f $last ]; then 
-#	echo "File Not found"
-#	exit 1
-#fi
-
-# $last will contain the flag to be passed to parser_symbolic_test
-# if -a or -k are specified 
-for last; do true; done
-
 ulimit -s unlimited 
+for last; do true; done
 
 # Are we emitting llvm byte code or running klee
 case "$1" in 
 	"-p"|"--prepare")
 		setup_prep;;
 	"-k"|"--klee")
-		setup_klee $last;;
+		if (( $# == 2 )); then
+		  setup_klee $@[$(( $# ))]
+                fi
+		if (( $# == 3 )); then
+		  setup_klee $$(( $# - 1 )) $@[$(( $# ))] 
+                fi
+		;;
 	"-b"|"--bin")
 		setup_bin;;
 	"-a"|"--all")
