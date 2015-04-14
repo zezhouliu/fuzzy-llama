@@ -3446,6 +3446,36 @@ test:
   parser_free();
 }
 
+const char *
+sym_port(char *port)
+{
+  char str [] = "GET /favicon.ico HTTP/1.1\r\n"
+         "Host: 0.0.0.0=%s\r\n"
+         "User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008061015 Firefox/3.0\r\n"
+         "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+         "Accept-Language: en-us,en;q=0.5\r\n"
+         "Accept-Encoding: gzip,deflate\r\n"
+         "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+         "Keep-Alive: 300\r\n"
+         "Connection: keep-alive\r\n"
+         "\r\n\0";
+  // Need to subtract two to prevent double counting
+  unsigned length = strlen(str)-2 + strlen(port);
+  char *buf = malloc(length);
+  int n;
+
+  n = sprintf(buf,str,port);
+
+  if(n != length){
+    printf("%s", buf);
+    printf("%s", port);
+    free(buf);
+    printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
+  }
+
+  printf("%s", buf);
+  return (const char *)buf;  
+}
 
 
 int
@@ -3459,19 +3489,27 @@ main (int argc, char **argv)
   unsigned major;
   unsigned minor;
   unsigned patch;
+  const char *buf;
+  char p[5] = {'\0'};
+  char flag;
+  if(argc > 1 && argv[1][0] == '-'){
+    flag = argv[1][1]; 
+  } else{
+    printf("Please specify a flag\r\n");
+    return 0;
+  } 
 
-  version = http_parser_version();
-  major = (version >> 16) & 255;
-  minor = (version >> 8) & 255;
-  patch = version & 255;
-  printf("http_parser v%u.%u.%u (0x%06lx)\n", major, minor, patch, version);
-
-  printf("sizeof(http_parser) = %u\n", (unsigned int)sizeof(http_parser));
-
-  for (request_count = 0; requests[request_count].name; request_count++);
-  for (response_count = 0; responses[response_count].name; response_count++);
-
-  test_simple_incrementally(argv[1], HPE_UNKNOWN);
+  switch(flag){
+	case 'p':
+	    //memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
+            klee_make_symbolic(p, sizeof p, "p");
+            klee_assume(p[4] == '\0');
+            buf = sym_port(p);
+            test_simple_incrementally(buf, HPE_UNKNOWN);			
+	    break;
+	case 'g':
+  	  test_simple_incrementally(argv[2], HPE_UNKNOWN);
+  }
 
   return 0;
 }
