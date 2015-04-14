@@ -16,13 +16,20 @@ setup_bin(){
 	if [ -f out ]; then 
 		eval make -f my_make.mk clean_bin
 	fi
-
 	eval make -f my_make.mk out
 }
 
 setup_all(){
 	setup_prep
 	setup_klee
+}
+
+setup_options(){
+	echo "-p\t--prepare\tMerges all byte code files into out.o"
+	echo "-k\t--klee\t\tRuns klee with correct options on out.o"
+	echo "-b\t--bin\t\tCompiles to executable out"
+	echo "-a\t--all\t\tRuns -p and -k back to back"
+	echo "-h\t--help\t\tPrints help menu"
 }
 
 # MAIN: Control Flow Begins Here
@@ -48,6 +55,8 @@ case "$1" in
 		setup_bin;;
 	"-a"|"--all")
 		setup_all;;	
+	"-h"|"--help")
+		setup_options;;	
 	*)
-		echo "${1} Invalid";; 
+		echo "Please include valid flag. Run ./setup.sh --help to see all options";; 
 esac
