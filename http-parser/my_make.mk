@@ -13,3 +13,6 @@ out:
 
 clean:
 	rm http_parser.o parser_symbolic_test.o out.o
+
+clean_bin:
+	rm out

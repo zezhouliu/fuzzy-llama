@@ -13,6 +13,10 @@ setup_klee(){
 }
 
 setup_bin(){
+	if [ -f out ]; then 
+		eval make -f my_make.mk clean_bin
+	fi
+
 	eval make -f my_make.mk out
 }
 
