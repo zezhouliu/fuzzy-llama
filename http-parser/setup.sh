@@ -6,7 +6,7 @@ setup_prep(){
 }
 
 setup_klee(){
-	$(klee --emit-all-errors --optimize out.o)
+	exec klee out.o
 }
 
 setup_all(){
