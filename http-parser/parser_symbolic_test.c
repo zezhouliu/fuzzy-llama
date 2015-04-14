@@ -2072,8 +2072,14 @@ size_t http_parser_execute_incrementally(http_parser *parser,
 	int i;
 	for (i = 0; i < len; i++) { 
 	  err = http_parser_execute(parser, settings, &data[i], 1);
-	  if (!err)
+	  if (!err){
+#if KLEE
+            klee_assert(0);
+#else
+	    printf("Error Code: %d", err);
+#endif // KLEE 
 	    return err;
+	  }
 	}
 	return 0;
 }
@@ -3053,7 +3059,6 @@ test_simple_incrementally (const char *buf, enum http_errno err_expected)
 
   enum http_errno err;
 
-  printf("%d", strlen(buf));
   parse_incrementally(buf, strlen(buf));
 
   err = HTTP_PARSER_ERRNO(parser);
