@@ -3499,6 +3499,7 @@ main (int argc, char **argv)
   unsigned patch;
   const char *buf;
   char p[5] = {'\0'};
+  char g_buf[2];
   char flag;
   
   if(argc > 1 && argv[1][0] == '-'){
@@ -3523,7 +3524,14 @@ main (int argc, char **argv)
 	    free((void *)buf);
 	    break;
 	case 'g':
+#if KLEE
+	  klee_make_symbolic(g_buf, sizeof g_buf, "g_buf");
+  	  test_simple_incrementally(g_buf, HPE_UNKNOWN);
+#else
+	
   	  test_simple_incrementally(argv[2], HPE_UNKNOWN);
+#endif
+
   }
 
   return 0;
