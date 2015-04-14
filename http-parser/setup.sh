@@ -9,7 +9,7 @@ setup_prep(){
 }
 
 setup_klee(){
-	exec klee --optimize --emit-all-errors ./out.o -g --sym-arg 1
+	exec klee --optimize --emit-all-errors ./out.o $1
 }
 
 setup_bin(){
@@ -21,7 +21,7 @@ setup_bin(){
 
 setup_all(){
 	setup_prep
-	setup_klee
+	setup_klee $1
 }
 
 setup_options(){
@@ -33,15 +33,20 @@ setup_options(){
 }
 
 # MAIN: Control Flow Begins Here
- 
-## $last contains last cmd line argument
-#for last; do true; done
+
+
+
+
 #
 ## Check if the last argument is a file
 #if [ ! -f $last ]; then 
 #	echo "File Not found"
 #	exit 1
 #fi
+
+# $last will contain the flag to be passed to parser_symbolic_test
+# if -a or -k are specified 
+for last; do true; done
 
 ulimit -s unlimited 
 
@@ -50,11 +55,11 @@ case "$1" in
 	"-p"|"--prepare")
 		setup_prep;;
 	"-k"|"--klee")
-		setup_klee;;
+		setup_klee $last;;
 	"-b"|"--bin")
 		setup_bin;;
 	"-a"|"--all")
-		setup_all;;	
+		setup_all $last;;	
 	"-h"|"--help")
 		setup_options;;	
 	*)
