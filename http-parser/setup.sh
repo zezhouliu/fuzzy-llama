@@ -42,13 +42,7 @@ case "$1" in
 	"-p"|"--prepare")
 		setup_prep;;
 	"-k"|"--klee")
-		if (( $# == 2 )); then
-		  setup_klee $@[$(( $# ))]
-                fi
-		if (( $# == 3 )); then
-		  setup_klee $$(( $# - 1 )) $@[$(( $# ))] 
-                fi
-		;;
+		setup_klee $last;;
 	"-b"|"--bin")
 		setup_bin;;
 	"-a"|"--all")
