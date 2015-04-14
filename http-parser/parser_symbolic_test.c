@@ -41,6 +41,10 @@
 #define MAX_HEADERS 13
 #define MAX_ELEMENT_SIZE 2048
 
+#ifndef SYM_BUF_SZ
+#define SYM_BUF_SZ 2
+#endif
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 static http_parser *parser;
@@ -3498,8 +3502,6 @@ main (int argc, char **argv)
   unsigned minor;
   unsigned patch;
   const char *buf;
-  char p[5] = {'\0'};
-  char g_buf[100];
   char flag;
   
   if(argc > 1 && argv[1][0] == '-'){
@@ -3511,8 +3513,9 @@ main (int argc, char **argv)
 
   switch(flag){
 	case 'p':
+        {
 
-
+            char p[5] = {'\0'};
 #if KLEE
             klee_make_symbolic(p, sizeof p, "p");
             klee_assume(p[4] == '\0');
@@ -3524,14 +3527,21 @@ main (int argc, char **argv)
             test_simple_incrementally(buf, HPE_UNKNOWN);			
 	    free((void *)buf);
 	    break;
+        }
 	case 'g':
+        {
+          char d[SYM_BUF_SZ] = {'\0'};
+	  if(argv[2]){
+             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+          }
+          buf = (const char *)d;
 #if KLEE
-	  klee_make_symbolic(g_buf, sizeof g_buf, "g_buf");
-  	  test_simple_incrementally(g_buf, HPE_UNKNOWN);
+	  klee_make_symbolic(buf, sizeof d, "buf");
+  	  test_simple_incrementally(buf, HPE_UNKNOWN);
 #else
-  	  test_simple_incrementally(argv[2], HPE_UNKNOWN);
+  	  test_simple_incrementally(buf, HPE_UNKNOWN);
 #endif // KLEE
-
+       }
   }
 
   return 0;
