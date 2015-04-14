@@ -3499,7 +3499,7 @@ main (int argc, char **argv)
   unsigned patch;
   const char *buf;
   char p[5] = {'\0'};
-  char g_buf[2];
+  char g_buf[100];
   char flag;
   
   if(argc > 1 && argv[1][0] == '-'){
@@ -3512,11 +3512,12 @@ main (int argc, char **argv)
   switch(flag){
 	case 'p':
 
-	    memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
 
 #if KLEE
             klee_make_symbolic(p, sizeof p, "p");
             klee_assume(p[4] == '\0');
+#else
+            memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
 #endif // KLEE
 
             buf = sym_port(p);
@@ -3528,9 +3529,8 @@ main (int argc, char **argv)
 	  klee_make_symbolic(g_buf, sizeof g_buf, "g_buf");
   	  test_simple_incrementally(g_buf, HPE_UNKNOWN);
 #else
-	
   	  test_simple_incrementally(argv[2], HPE_UNKNOWN);
-#endif
+#endif // KLEE
 
   }
 
