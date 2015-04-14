@@ -1,8 +1,11 @@
 #!/bin/sh
 
 setup_prep(){
-	$(make -f my_make.mk clean)
-	$(make -f my_make.mk)
+
+	if [ -f out.o ] || [ -f http_parser.o ] || [ -f http_parser.o ]; then 
+		eval make -f my_make.mk clean
+	fi
+	eval make -f my_make.mk
 }
 
 setup_klee(){
