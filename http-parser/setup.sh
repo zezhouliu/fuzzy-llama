@@ -9,7 +9,7 @@ setup_prep(){
 }
 
 setup_klee(){
-	exec klee --optimize --emit-all-errors ./out.o -p --sym-arg 4
+	exec klee --optimize --emit-all-errors ./out.o -g --sym-arg 1
 }
 
 setup_bin(){
@@ -35,6 +35,8 @@ setup_all(){
 #	echo "File Not found"
 #	exit 1
 #fi
+
+ulimit -s unlimited 
 
 # Are we emitting llvm byte code or running klee
 case "$1" in 
