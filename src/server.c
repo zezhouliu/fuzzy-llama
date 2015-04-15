@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <poll.h>
 
 #include "utils.h"
 #include "sockets.h"
