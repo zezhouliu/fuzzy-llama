@@ -9,7 +9,8 @@ setup_prep(){
 }
 
 setup_klee(){
-	exec klee --optimize --emit-all-errors ./out.o $1 --sym-arg 2
+	#exec klee --optimize --emit-all-errors --libc=uclibc --posix-runtime ./out.o $1
+	exec klee --optimize --emit-all-errors ./out.o $1
 }
 
 setup_bin(){

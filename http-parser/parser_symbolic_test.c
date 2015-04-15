@@ -3501,11 +3501,43 @@ sym_port(char *port)
   char *buf = malloc(length);
   int n;
 
-  n = sprintf(buf,str,port);
+  if(port)
+  	n = sprintf(buf,str,port);
 
   if(n != length){
     printf("%s", buf);
     printf("%s", port);
+    free(buf);
+    printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
+  }
+
+  printf("%s", buf);
+  return (const char *)buf;  
+}
+
+const char *
+sym_keep_alive(char *keep)
+{
+  char str [] = "GET /favicon.ico HTTP/1.1\r\n"
+         "Host: 0.0.0.0=8000\r\n"
+         "User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008061015 Firefox/3.0\r\n"
+         "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+         "Accept-Language: en-us,en;q=0.5\r\n"
+         "Accept-Encoding: gzip,deflate\r\n"
+         "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+         "Keep-Alive: %s\r\n"
+         "Connection: keep-alive\r\n"
+         "\r\n\0";
+  // Need to subtract two to prevent double counting
+  unsigned length = strlen(str)-2 + strlen(keep);
+  char *buf = malloc(length);
+  int n;
+
+  n = sprintf(buf,str,keep);
+
+  if(n != length){
+    printf("%s", buf);
+    printf("%s", keep);
     free(buf);
     printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
   }
@@ -3540,15 +3572,32 @@ main (int argc, char **argv)
 	case 'p':
         {
 
-            char p[5] = {'\0'};
+           char p[SYM_BUF_SZ];
 #if KLEE
             klee_make_symbolic(p, sizeof p, "p");
-            klee_assume(p[4] == '\0');
+            klee_assume(p[SYM_BUF_SZ-1] == '\0');
 #else
-            memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
+            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
 #endif // KLEE
 
+
             buf = sym_port(p);
+            test_simple_incrementally(buf, HPE_UNKNOWN);			
+	    free((void *)buf);
+	    break;
+        }
+	case 'u':
+        {
+
+            char p[SYM_BUF_SZ];
+#if KLEE
+            klee_make_symbolic(p, sizeof p, "p");
+            klee_assume(p[SYM_BUF_SZ-1] == '\0');
+#else
+            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+            printf("I am here");
+#endif // KLEE
+            buf = sym_keep_alive(argv[2]);
             test_simple_incrementally(buf, HPE_UNKNOWN);			
 	    free((void *)buf);
 	    break;

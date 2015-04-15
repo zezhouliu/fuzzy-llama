@@ -1,6 +1,32 @@
-ktest file : 'klee-last/test000001.ktest'
-args       : ['http_parser_main.o']
-num objects: 1
-object    0: name: 'data'
-object    0: size: 521
-object    0: data: '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2040: ASSERTION FAIL: 0 && "unhandled state"
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2040: ASSERTION FAIL: 0 && "unhandled state"
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1878: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1923: ASSERTION FAIL: parser->nread == 1
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1878: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: WARNING ONCE: calling external: memchr(46941536, 0, 1)
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2006: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2007: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2033: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2025: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2007: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:2026: ASSERTION FAIL: parser->content_length == 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1987: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1924: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1976: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1941: ASSERTION FAIL: parser->flags & F_CHUNKED
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/parser_symbolic_test.c:2084: ASSERTION FAIL: 0
+KLEE: ERROR: /home/zfogelson/Developer/fuzzy-llama/http-parser/http_parser.c:1570: ASSERTION FAIL: 0 && "Shouldn't get here."
