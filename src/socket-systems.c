@@ -1,20 +1,23 @@
 #include "socket-systems.h"
 
-/*@ 
+/*@
     requires length > 0;
 
     behavior invalid:
         assumes socket <= 0 || !\valid((char*)buffer + (0..length-1));
         assigns \nothing;
         ensures \result == -1;
-    behavior valid_error
+    behavior valid_error:
+			assumes socket > 0 && \valid((char*)buffer + (0..length-1));
+			assigns errno;
+			ensures errno != 0;
     behavior valid:
         assumes socket > 0 && \valid((char*)buffer + (0..length-1));
         assigns ((char*) buffer)[0..length-1];
-        ensures \result == length;
+        ensures \result <= length;
 
-    complete behaviors invalid, valid;
-    disjoint behaviors invalid, valid;
+    complete behaviors;
+		disjoint behaviors;
 */
 ssize_t
 recv(int socket, void *buffer, size_t length, int flags);
