@@ -2160,8 +2160,17 @@ http_parser_init (http_parser *parser, enum http_parser_type t)
   parser->http_errno = HPE_OK;
 }
 
-
-
+#if KLEE
+void
+http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)
+{
+  void *data = parser->data; /* preserve application data */
+  memset(parser, 0, sizeof(*parser));
+  klee_make_symbolic(parser, sizeof(*parser), "parser");
+  parser->data = data; 
+  parser->type = t;
+}
+#endif
 
 
 void

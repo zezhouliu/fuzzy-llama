@@ -2045,8 +2045,11 @@ parser_init (enum http_parser_type type)
 
   parser = malloc(sizeof(http_parser));
 
+#if KLEE
+  http_parser_init_symbolic(parser, type);
+#else
   http_parser_init(parser, type);
-  //http_parser_init_symbolic(parser, type);
+#endif
 
   memset(&messages, 0, sizeof messages);
 }
@@ -3076,6 +3079,28 @@ test_simple_incrementally (const char *buf, enum http_errno err_expected)
 
 }
 
+// VeriServe
+void
+test_symbolic_parser (const char *buf, enum http_errno err_expected)
+{
+
+  parser_init(HTTP_BOTH);
+
+  enum http_errno err;
+
+  parse_incrementally(buf, strlen(buf));
+
+  err = HTTP_PARSER_ERRNO(parser);
+  parse(NULL, 0);
+
+  parser_free();
+
+  if(err == HPE_UNKNOWN){
+	klee_assert(0);
+  }
+
+}
+
 void
 test_header_overflow_error (int req)
 {
@@ -3541,7 +3566,8 @@ main (int argc, char **argv)
 #else
   	  test_simple_incrementally(buf, HPE_UNKNOWN);
 #endif // KLEE
-       }
+	  break;
+       }	
   }
 
   return 0;
