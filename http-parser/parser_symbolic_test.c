@@ -3514,6 +3514,37 @@ sym_port(char *port)
   return (const char *)buf;  
 }
 
+const char *
+sym_method(char *method)
+{
+  char str [] = "%s /favicon.ico HTTP/1.1\r\n"
+         "Host: 0.0.0.0=5000\r\n"
+         "User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008061015 Firefox/3.0\r\n"
+         "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+         "Accept-Language: en-us,en;q=0.5\r\n"
+         "Accept-Encoding: gzip,deflate\r\n"
+         "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+         "Keep-Alive: 300\r\n"
+         "Connection: keep-alive\r\n"
+         "\r\n\0";
+  // Need to subtract two to prevent double counting
+  unsigned length = strlen(str)-2 + strlen(port);
+  char *buf = malloc(length);
+  int n;
+
+  n = sprintf(buf,str,method);
+
+  if(n != length){
+    printf("%s", buf);
+    printf("%s", method);
+    free(buf);
+    printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
+  }
+
+  printf("%s", buf);
+  return (const char *)buf;  
+}
+
 
 int
 main (int argc, char **argv)
@@ -3552,6 +3583,22 @@ main (int argc, char **argv)
             test_simple_incrementally(buf, HPE_UNKNOWN);			
 	    free((void *)buf);
 	    break;
+        }
+  case 'm':
+        {
+
+            char method[8] = {'\0'};
+#if KLEE
+            klee_make_symbolic(method, sizeof method, "method");
+            klee_assume(p[7] == '\0');
+#else
+            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+#endif // KLEE
+
+            buf = sym_method(p);
+            test_simple_incrementally(buf, HPE_UNKNOWN);      
+      free((void *)buf);
+      break;
         }
 	case 'g':
         {
