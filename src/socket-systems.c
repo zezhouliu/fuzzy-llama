@@ -10,11 +10,9 @@
     behavior valid_error:
 			assumes socket > 0 && \valid((char*)buffer + (0..length-1));
 			assigns errno;
+			assigns ((char *) buffer)[0 .. length-1];
+			ensures (0 < \result <= length) || (\result == -1);
 			ensures errno != 0;
-    behavior valid:
-        assumes socket > 0 && \valid((char*)buffer + (0..length-1));
-        assigns ((char*) buffer)[0..length-1];
-        ensures \result <= length;
 
     complete behaviors;
 		disjoint behaviors;
@@ -35,8 +33,8 @@ recv(int socket, void *buffer, size_t length, int flags);
         assumes socket->status == SOCKET_OPEN;
         ensures \result >= 0 || \result == -1;
 
-    complete behaviors invalid, valid;
-    disjoint behaviors invalid, valid;
+    complete behaviors;
+    disjoint behaviors;
 */
 ssize_t io_recv(socket_t* socket, void* buffer, size_t length, int flags)
 {
