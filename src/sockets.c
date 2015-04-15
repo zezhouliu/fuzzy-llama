@@ -185,7 +185,12 @@ socket_t* socket_accept(socket_t* s)
     if (new_socket->fd == -1)
     {
         log_error("%s, %d: Could not create socket\n", __func__, __LINE__);
+        free(new_socket);
+        return NULL;
     }
+
+    // If everything is fine, mark socket as valid and open
+    new_socket->status = SOCKET_OPEN;
 
     return new_socket;
 }
