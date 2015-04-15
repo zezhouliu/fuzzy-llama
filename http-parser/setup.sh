@@ -9,7 +9,7 @@ setup_prep(){
 }
 
 setup_klee(){
-	exec klee --optimize --emit-all-errors ./out.o $1
+	exec klee --optimize --emit-all-errors ./out.o $1 --sym-arg 2
 }
 
 setup_bin(){
