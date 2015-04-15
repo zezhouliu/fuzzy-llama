@@ -3545,6 +3545,37 @@ sym_method(char *method)
   return (const char *)buf;  
 }
 
+const char *
+sym_version(char *version)
+{
+  char str [] = "GET /favicon.ico %s\r\n"
+         "Host: 0.0.0.0=5000\r\n"
+         "User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008061015 Firefox/3.0\r\n"
+         "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+         "Accept-Language: en-us,en;q=0.5\r\n"
+         "Accept-Encoding: gzip,deflate\r\n"
+         "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+         "Keep-Alive: 300\r\n"
+         "Connection: keep-alive\r\n"
+         "\r\n\0";
+  // Need to subtract two to prevent double counting
+  unsigned length = strlen(str)-2 + strlen(version);
+  char *buf = malloc(length);
+  int n;
+
+  n = sprintf(buf,str,version);
+
+  if(n != length){
+    printf("%s", buf);
+    printf("%s", version);
+    free(buf);
+    printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
+  }
+
+  printf("%s", buf);
+  return (const char *)buf;  
+}
+
 
 int
 main (int argc, char **argv)
@@ -3596,6 +3627,22 @@ main (int argc, char **argv)
 #endif // KLEE
 
             buf = sym_method(method);
+            test_simple_incrementally(buf, HPE_UNKNOWN);      
+      free((void *)buf);
+      break;
+        }
+  case 'v':
+        {
+
+            char version[11] = {'\0'};
+#if KLEE
+            klee_make_symbolic(version, sizeof version, "version");
+            klee_assume(version[10] == '\0');
+#else
+            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+#endif // KLEE
+
+            buf = sym_version(version);
             test_simple_incrementally(buf, HPE_UNKNOWN);      
       free((void *)buf);
       break;
