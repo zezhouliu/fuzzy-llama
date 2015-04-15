@@ -3590,12 +3590,12 @@ main (int argc, char **argv)
             char method[8] = {'\0'};
 #if KLEE
             klee_make_symbolic(method, sizeof method, "method");
-            klee_assume(p[7] == '\0');
+            klee_assume(method[7] == '\0');
 #else
             memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
 #endif // KLEE
 
-            buf = sym_method(p);
+            buf = sym_method(method);
             test_simple_incrementally(buf, HPE_UNKNOWN);      
       free((void *)buf);
       break;
