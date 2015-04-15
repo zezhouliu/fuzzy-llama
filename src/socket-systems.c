@@ -1,23 +1,44 @@
 #include "socket-systems.h"
 
-/*@ 
+/*@
     requires length > 0;
 
     behavior invalid:
-        assumes socket <= 0 || !\valid((char*)buffer + (0..length-1));
-        assigns \nothing;
-        ensures \result == -1;
-    behavior valid_error
-    behavior valid:
-        assumes socket > 0 && \valid((char*)buffer + (0..length-1));
-        assigns ((char*) buffer)[0..length-1];
-        ensures \result == length;
+      assumes socket <= 0 || !\valid((char*)buffer + (0..length-1));
+      assigns \nothing;
+      ensures \result == -1;
 
-    complete behaviors invalid, valid;
-    disjoint behaviors invalid, valid;
+    behavior valid_error:
+			assumes socket > 0 && \valid((char*)buffer + (0..length-1));
+			assigns errno;
+			assigns ((char *) buffer)[0 .. length-1];
+			ensures (0 < \result <= length) || (\result == -1 && errno != 0);
+
+    complete behaviors;
+		disjoint behaviors;
 */
 ssize_t
 recv(int socket, void *buffer, size_t length, int flags);
+
+
+/*@
+ 	requires length >= 0;
+ 	assigns errno;
+
+ 	behavior valid_error:
+ 		assumes sockfd > 0 && \valid((char *)buffer + (0..length-1));
+		ensures (0 < \result <= length) || (\result == -1 && errno != 0);
+
+ 	behavior invalid:
+ 		assumes sockfd <= 0 || !\valid((char *) buffer + (0 .. length - 1));
+ 		ensures \result == -1;
+
+
+  complete behaviors;
+  disjoint behaviors;
+*/
+ssize_t send(int sockfd, const void * buffer, size_t length, int flags);
+
 
 /*@
     requires \valid(socket);
@@ -32,8 +53,8 @@ recv(int socket, void *buffer, size_t length, int flags);
         assumes socket->status == SOCKET_OPEN;
         ensures \result >= 0 || \result == -1;
 
-    complete behaviors invalid, valid;
-    disjoint behaviors invalid, valid;
+    complete behaviors;
+    disjoint behaviors;
 */
 ssize_t io_recv(socket_t* socket, void* buffer, size_t length, int flags)
 {
