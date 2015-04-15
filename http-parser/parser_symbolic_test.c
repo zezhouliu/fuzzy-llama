@@ -3528,7 +3528,7 @@ sym_method(char *method)
          "Connection: keep-alive\r\n"
          "\r\n\0";
   // Need to subtract two to prevent double counting
-  unsigned length = strlen(str)-2 + strlen(port);
+  unsigned length = strlen(str)-2 + strlen(method);
   char *buf = malloc(length);
   int n;
 
