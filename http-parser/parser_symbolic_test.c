@@ -3603,102 +3603,141 @@ sym_version(char *version)
 }
 
 
+int parser_chunked_states(){
+	enum state p_state = (enum state) parser->state;
+	return (p_state == s_chunk_size_start 
+		|| p_state == s_chunk_size
+		|| p_state == s_chunk_parameters
+		|| p_state == s_chunk_size_almost_done
+		|| p_state == s_chunk_data
+		|| p_state == s_chunk_data_almost_done
+		|| p_state == s_chunk_data_done);
+}
+
+int
+valid(){
+	
+	if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
+		return 1;
+	}	
+	return 0;
+}
+
+int
+transition(char *buf, int len){
+	int n;
+	n = http_parser_execute(parser, &settings, buf, len);
+	return valid();
+}
+
 int
 main (int argc, char **argv)
 {
   parser = NULL;
-  const char *buf;
-  char flag;
-  
-  if(argc > 1 && argv[1][0] == '-'){
-    flag = argv[1][1]; 
-  } else{
-    printf("Please specify a flag\r\n");
-    return 0;
-  } 
+  char buf[2];
+  klee_make_symbolic(&buf, sizeof buf, "eddie's buf");
+  klee_assume(buf[1] == '\0');
 
-  switch(flag){
-	case 'p':
-        {
-
-           char p[SYM_BUF_SZ];
-#if KLEE
-            klee_make_symbolic(p, sizeof p, "p");
-            klee_assume(p[SYM_BUF_SZ-1] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-#endif // KLEE
-
-
-            buf = sym_port(p);
-            test_simple_incrementally(buf, HPE_UNKNOWN);			
-	    free((void *)buf);
-	    break;
-        }
-	case 'u':
-        {
-
-            char p[SYM_BUF_SZ];
-#if KLEE
-            klee_make_symbolic(p, sizeof p, "p");
-            klee_assume(p[SYM_BUF_SZ-1] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-            printf("I am here");
-#endif // KLEE
-            buf = sym_keep_alive(argv[2]);
-            test_simple_incrementally(buf, HPE_UNKNOWN);			
-	    free((void *)buf);
-	    break;
-	}
-  case 'm':
-        {
-
-            char method[8] = {'\0'};
-#if KLEE
-            klee_make_symbolic(method, sizeof method, "method");
-            klee_assume(method[7] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-#endif // KLEE
-
-            buf = sym_method(method);
-            test_simple_incrementally(buf, HPE_UNKNOWN);      
-      free((void *)buf);
-      break;
-        }
-  case 'v':
-        {
-
-            char version[11] = {'\0'};
-#if KLEE
-            klee_make_symbolic(version, sizeof version, "version");
-            klee_assume(version[10] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-#endif // KLEE
-
-            buf = sym_version(version);
-            test_simple_incrementally(buf, HPE_UNKNOWN);      
-      free((void *)buf);
-      break;
-        }
-	case 'g':
-        {
-          char d[SYM_BUF_SZ] = {'\0'};
-	  if(argv[2]){
-             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-          }
-          buf = (const char *)d;
-#if KLEE
-	  klee_make_symbolic(buf, sizeof d, "buf");
-  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-#else
-  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-#endif // KLEE
-	  break;
-       }	
+  parser_init(HTTP_BOTH);
+  if(valid()){
+	if(!transition(buf, 1)){
+		klee_assert(0);	
+	} 
   }
+
+ 
+//  const char *buf;
+//  char flag;
+//  
+//  if(argc > 1 && argv[1][0] == '-'){
+//    flag = argv[1][1]; 
+//  } else{
+//    printf("Please specify a flag\r\n");
+//    return 0;
+//  } 
+//
+//  switch(flag){
+//	case 'p':
+//        {
+//
+//           char p[SYM_BUF_SZ];
+//#if KLEE
+//            klee_make_symbolic(p, sizeof p, "p");
+//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//#endif // KLEE
+//
+//
+//            buf = sym_port(p);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);			
+//	    free((void *)buf);
+//	    break;
+//        }
+//	case 'u':
+//        {
+//
+//            char p[SYM_BUF_SZ];
+//#if KLEE
+//            klee_make_symbolic(p, sizeof p, "p");
+//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//            printf("I am here");
+//#endif // KLEE
+//            buf = sym_keep_alive(argv[2]);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);			
+//	    free((void *)buf);
+//	    break;
+//	}
+//  case 'm':
+//        {
+//
+//            char method[8] = {'\0'};
+//#if KLEE
+//            klee_make_symbolic(method, sizeof method, "method");
+//            klee_assume(method[7] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+//#endif // KLEE
+//
+//            buf = sym_method(method);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);      
+//      free((void *)buf);
+//      break;
+//        }
+//  case 'v':
+//        {
+//
+//            char version[11] = {'\0'};
+//#if KLEE
+//            klee_make_symbolic(version, sizeof version, "version");
+//            klee_assume(version[10] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+//#endif // KLEE
+//
+//            buf = sym_version(version);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);      
+//      free((void *)buf);
+//      break;
+//        }
+//	case 'g':
+//        {
+//          char d[SYM_BUF_SZ] = {'\0'};
+//	  if(argv[2]){
+//             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//          }
+//          buf = (const char *)d;
+//#if KLEE
+//	  klee_make_symbolic(buf, sizeof d, "buf");
+//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
+//#else
+//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
+//#endif // KLEE
+//	  break;
+//       }	
+//  }
 
   return 0;
 }
