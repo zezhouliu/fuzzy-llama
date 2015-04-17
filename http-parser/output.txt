@@ -1,7 +1,3 @@
-KLEE: output directory is "/home/jharvard/cs260/project/fuzzy-llama/http-parser/./klee-out-20"
-KLEE: WARNING: undefined reference to function: fwrite
-KLEE: WARNING: undefined reference to function: memchr
-KLEE: WARNING: undefined reference to variable: stderr
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1843: ASSERTION FAIL: parser->nread == 1
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1960: ASSERTION FAIL: 0 && "unhandled state"
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1927: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
@@ -10,222 +6,51 @@ KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1946: ASSERTION FAIL: parser->content_length == 0
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1960: ASSERTION FAIL: 0 && "unhandled state"
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1798: ASSERTION FAIL: parser->content_length != 0 && parser->content_length != (9223372036854775807LL * 2ULL + 1)
-KLEE: WARNING ONCE: calling external: memchr(169300656, 0, 0)
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:915: memory error: out of bound pointer
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1490: ASSERTION FAIL: 0 && "Shouldn't get here."
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:1344: ASSERTION FAIL: 0 && "Unknown header_state"
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:916: memory error: out of bound pointer
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/http_parser.c:918: memory error: out of bound pointer
-KLEE: WARNING ONCE: calling external: fwrite(169529416, 1, 134, 1325037920)
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-KLEE: WARNING ONCE: flushing 328060 bytes on read, may be slow and/or crash: MO121[328060] allocated at global:messages
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
-
-
- *** Error http_should_keep_alive() should have same value in both on_message_complete and on_headers_complete but it doesn't! ***
-
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
+KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
 KLEE: ERROR: /home/jharvard/cs260/project/fuzzy-llama/http-parser/parser_symbolic_test.c:1813: ASSERTION FAIL: 0
 ERROR: fork failed (for STP)

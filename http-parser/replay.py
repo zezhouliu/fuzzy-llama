@@ -8,7 +8,7 @@ def main():
 	s = s.split('\n')
 	pattern = r"'(.*?)'"
 	m = re.search(pattern, s[-2])
-	arg = m.group().replace("'", "")
+	arg = m.group().replace("'", "").replace("\\x", "")
 	subprocess.call(['./replay', arg])
 	
 

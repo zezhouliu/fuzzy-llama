@@ -11,40 +11,37 @@
 
 void
 print_http_parser(http_parser *p){
-  printf("%u", p->type);
-  printf("%u", p->flags);       
-  printf("%u", p->state);       
-  printf("%u", p->header_state);
-  printf("%u", p->index);       
-  printf("%u", p->nread);       
-  printf("%llu", p->content_length);       
-  printf("%hu", p->http_major);
-  printf("%hu", p->http_minor);
-  printf("%u", p->status_code); /* responses only */
-  printf("%u", p->method);       /* requests only */
-  printf("%u", p->http_errno);
-  printf("%u", p->upgrade);
-  printf("%s", p->data); 
+  printf("%u\n", p->type);
+  printf("%u\n", p->flags);       
+  printf("%u\n", p->state);       
+  printf("%u\n", p->header_state);
+  printf("%u\n", p->index);       
+  printf("%u\n", p->nread);       
+  printf("%llu\n", p->content_length);       
+  printf("%hu\n", p->http_major);
+  printf("%hu\n", p->http_minor);
+  printf("%u\n", p->status_code); /* responses only */
+  printf("%u\n", p->method);       /* requests only */
+  printf("%u\n", p->http_errno);
+  printf("%u\n", p->upgrade);
+  printf("%u\n", p->data); 
 
 }
 
 int 
 main(int argc, char *argv[]){
-	char* s = argv[1];
-	/* allocate the buffer */
-	char * buffer = malloc((strlen(s) / 2) + 1);
-	
-	char *h = s; /* this will walk through the hex string */
-	char *b = buffer; /* point inside the buffer */
-	
-	/* offset into this string is the numeric value */
-	char xlate[] = "0123456789abcdef";
-	
-	for ( ; *h; h += 2, ++b) /* go by twos through the hex string */
-	   *b = ((strchr(xlate, *h) - xlate) * 16) /* multiply leading digit by 16 */
-	       + ((strchr(xlate, *(h+1)) - xlate));	
 
+    char *hexstring = argv[1];
+    const char*pos = hexstring;
+    unsigned char *val = malloc(sizeof(hexstring));
+    size_t count = 0;
 
-	print_http_parser((http_parser *)buffer);
+     /* WARNING: no sanitization or error-checking whatsoever */
+    for(count = 0; count < sizeof(val)/sizeof(val[0]); count++) {
+        sscanf(pos, "%2hhx", &val[count]);
+        pos += 2 * sizeof(char);
+    }
+    
+    print_http_parser((http_parser *)val);
 
 }
