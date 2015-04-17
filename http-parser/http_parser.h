@@ -205,11 +205,7 @@ struct http_parser {
   /** PRIVATE **/
   unsigned int type : 2;         /* enum http_parser_type */
   unsigned int flags : 7;        /* F_* values from 'flags' enum; semi-public */
-#if KLEE 
-  unsigned int state;        /* enum state from http_parser.c */ 
-#else
   unsigned int state : 7;        /* enum state from http_parser.c */ 
-#endif
   unsigned int header_state : 8; /* enum header_state from http_parser.c */
   unsigned int index : 8;        /* index into current matcher */
 

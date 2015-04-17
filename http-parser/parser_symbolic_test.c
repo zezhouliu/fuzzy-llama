@@ -3617,10 +3617,17 @@ int parser_chunked_states(){
 int
 valid(){
 	
-	if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
-		return 1;
-	}	
-	return 0;
+  if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
+    return 1;
+  }	
+  if(!((parser->state == s_chunk_size_start) && !(parser->nread == 1))){
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0))){
+    return 1; 
+  }
+
+  return 0;
 }
 
 int
