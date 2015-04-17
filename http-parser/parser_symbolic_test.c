@@ -25,6 +25,7 @@
 #include <stdlib.h> /* rand */
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <klee/klee.h>
 
 #if defined(__APPLE__)
