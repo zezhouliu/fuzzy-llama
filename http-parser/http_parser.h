@@ -336,6 +336,36 @@ void http_parser_pause(http_parser *parser, int paused);
 /* Checks if this is the final chunk of the body. */
 int http_body_is_final(const http_parser *parser);
 
+enum header_states
+  { h_general = 0
+  , h_C
+  , h_CO
+  , h_CON
+
+  , h_matching_connection
+  , h_matching_proxy_connection
+  , h_matching_content_length
+  , h_matching_transfer_encoding
+  , h_matching_upgrade
+
+  , h_connection
+  , h_content_length
+  , h_transfer_encoding
+  , h_upgrade
+
+  , h_matching_transfer_encoding_chunked
+  , h_matching_connection_token_start
+  , h_matching_connection_keep_alive
+  , h_matching_connection_close
+  , h_matching_connection_upgrade
+  , h_matching_connection_token
+
+  , h_transfer_encoding_chunked
+  , h_connection_keep_alive
+  , h_connection_close
+  , h_connection_upgrade
+  };
+
 enum state
   { s_dead = 1 /* important that this is > 0 */
 
