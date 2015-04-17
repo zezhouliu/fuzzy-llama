@@ -25,6 +25,7 @@
 #include <stdlib.h> /* rand */
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <klee/klee.h>
 
 #if defined(__APPLE__)
@@ -3501,7 +3502,8 @@ sym_port(char *port)
   char *buf = malloc(length);
   int n;
 
-  n = sprintf(buf,str,port);
+  if(port)
+  	n = sprintf(buf,str,port);
 
   if(n != length){
     printf("%s", buf);
@@ -3515,15 +3517,40 @@ sym_port(char *port)
 }
 
 const char *
-sym_method(char *method)
+sym_keep_alive(char *keep)
 {
-  char str [] = "%s /favicon.ico HTTP/1.1\r\n"
-         "Host: 0.0.0.0=5000\r\n"
+  char str [] = "GET /favicon.ico HTTP/1.1\r\n"
+         "Host: 0.0.0.0=8000\r\n"
          "User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008061015 Firefox/3.0\r\n"
          "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
          "Accept-Language: en-us,en;q=0.5\r\n"
          "Accept-Encoding: gzip,deflate\r\n"
          "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+         "Keep-Alive: %s\r\n"
+         "Connection: keep-alive\r\n"
+         "\r\n\0";
+  // Need to subtract two to prevent double counting
+  unsigned length = strlen(str)-2 + strlen(keep);
+  char *buf = malloc(length);
+  int n;
+
+  n = sprintf(buf,str,keep);
+
+  if(n != length){
+    printf("%s", buf);
+    printf("%s", keep);
+    free(buf);
+    printf("Error Copied: n bytes: %d, Expected length: %d\r\n", n, length);
+  }
+
+  printf("%s", buf);
+  return (const char *)buf;  
+}
+
+sym_method(char *method)
+{
+  char str [] = "%s /favicon.ico HTTP/1.1\r\n"
+         "Host: 0.0.0.0=5000\r\n"
          "Keep-Alive: 300\r\n"
          "Connection: keep-alive\r\n"
          "\r\n\0";
@@ -3577,92 +3604,186 @@ sym_version(char *version)
 }
 
 
+int parser_chunked_states(){
+	enum state p_state = (enum state) parser->state;
+	return (p_state == s_chunk_size_start 
+		|| p_state == s_chunk_size
+		|| p_state == s_chunk_parameters
+		|| p_state == s_chunk_size_almost_done
+		|| p_state == s_chunk_data
+		|| p_state == s_chunk_data_almost_done
+		|| p_state == s_chunk_data_done);
+}
+
+int valid_parser_header_state() {
+  switch (parser->header_state) {
+            case h_general:
+            case h_C:
+            case h_CO:
+            case h_CON:
+            case h_matching_connection:
+            case h_matching_proxy_connection:
+            case h_matching_content_length:
+            case h_matching_transfer_encoding:
+            case h_matching_upgrade:
+            case h_connection:
+            case h_content_length:
+            case h_transfer_encoding:
+            case h_upgrade:
+              return 0;
+              break;
+            default:
+              return 1;
+              break;
+  }
+}
+
+int
+valid(){
+	
+  if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
+    return 1;
+  }	
+  if(!((parser->state == s_chunk_size_start) && !(parser->nread == 1))){
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0))){
+    return 1; 
+  }
+  if(!((parser->state == s_header_field) && !(valid_parser_header_state()))){
+	 return 1;
+  }
+  if(!((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding))) {
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX)))) {
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data_almost_done) && (parser->content_length != 0))) {
+    return 1; 
+  }
+  if(!((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX)))) {
+    return 1; 
+  }
+  return 0;
+}
+
+
+int
+transition(char *buf, int len){
+	int n;
+	n = http_parser_execute(parser, &settings_dontcall, buf, len);
+	return valid();
+}
+
 int
 main (int argc, char **argv)
 {
   parser = NULL;
-  int i, j, k;
-  int request_count;
-  int response_count;
-  unsigned long version;
-  unsigned major;
-  unsigned minor;
-  unsigned patch;
-  const char *buf;
-  char flag;
-  
-  if(argc > 1 && argv[1][0] == '-'){
-    flag = argv[1][1]; 
-  } else{
-    printf("Please specify a flag\r\n");
-    return 0;
-  } 
+  char buf[2];
+  klee_make_symbolic(&buf, sizeof buf, "eddie's buf");
+  klee_assume(buf[1] == '\0');
 
-  switch(flag){
-	case 'p':
-        {
-
-            char p[5] = {'\0'};
-#if KLEE
-            klee_make_symbolic(p, sizeof p, "p");
-            klee_assume(p[4] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>4) ? 4 : strlen(argv[2])));
-#endif // KLEE
-
-            buf = sym_port(p);
-            test_simple_incrementally(buf, HPE_UNKNOWN);			
-	    free((void *)buf);
-	    break;
-        }
-  case 'm':
-        {
-
-            char method[8] = {'\0'};
-#if KLEE
-            klee_make_symbolic(method, sizeof method, "method");
-            klee_assume(method[7] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-#endif // KLEE
-
-            buf = sym_method(method);
-            test_simple_incrementally(buf, HPE_UNKNOWN);      
-      free((void *)buf);
-      break;
-        }
-  case 'v':
-        {
-
-            char version[11] = {'\0'};
-#if KLEE
-            klee_make_symbolic(version, sizeof version, "version");
-            klee_assume(version[10] == '\0');
-#else
-            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-#endif // KLEE
-
-            buf = sym_version(version);
-            test_simple_incrementally(buf, HPE_UNKNOWN);      
-      free((void *)buf);
-      break;
-        }
-	case 'g':
-        {
-          char d[SYM_BUF_SZ] = {'\0'};
-	  if(argv[2]){
-             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-          }
-          buf = (const char *)d;
-#if KLEE
-	  klee_make_symbolic(buf, sizeof d, "buf");
-  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-#else
-  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-#endif // KLEE
-	  break;
-       }	
+  parser_init(HTTP_BOTH);
+  if(valid()){
+	if(!transition(buf, 1)){
+		klee_assert(0);	
+	} 
   }
+
+ 
+//  const char *buf;
+//  char flag;
+//  
+//  if(argc > 1 && argv[1][0] == '-'){
+//    flag = argv[1][1]; 
+//  } else{
+//    printf("Please specify a flag\r\n");
+//    return 0;
+//  } 
+//
+//  switch(flag){
+//	case 'p':
+//        {
+//
+//           char p[SYM_BUF_SZ];
+//#if KLEE
+//            klee_make_symbolic(p, sizeof p, "p");
+//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//#endif // KLEE
+//
+//
+//            buf = sym_port(p);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);			
+//	    free((void *)buf);
+//	    break;
+//        }
+//	case 'u':
+//        {
+//
+//            char p[SYM_BUF_SZ];
+//#if KLEE
+//            klee_make_symbolic(p, sizeof p, "p");
+//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//            printf("I am here");
+//#endif // KLEE
+//            buf = sym_keep_alive(argv[2]);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);			
+//	    free((void *)buf);
+//	    break;
+//	}
+//  case 'm':
+//        {
+//
+//            char method[8] = {'\0'};
+//#if KLEE
+//            klee_make_symbolic(method, sizeof method, "method");
+//            klee_assume(method[7] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+//#endif // KLEE
+//
+//            buf = sym_method(method);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);      
+//      free((void *)buf);
+//      break;
+//        }
+//  case 'v':
+//        {
+//
+//            char version[11] = {'\0'};
+//#if KLEE
+//            klee_make_symbolic(version, sizeof version, "version");
+//            klee_assume(version[10] == '\0');
+//#else
+//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
+//#endif // KLEE
+//
+//            buf = sym_version(version);
+//            test_simple_incrementally(buf, HPE_UNKNOWN);      
+//      free((void *)buf);
+//      break;
+//        }
+//	case 'g':
+//        {
+//          char d[SYM_BUF_SZ] = {'\0'};
+//	  if(argv[2]){
+//             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
+//          }
+//          buf = (const char *)d;
+//#if KLEE
+//	  klee_make_symbolic(buf, sizeof d, "buf");
+//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
+//#else
+//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
+//#endif // KLEE
+//	  break;
+//       }	
+//  }
 
   return 0;
 }
