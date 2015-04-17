@@ -25,6 +25,7 @@
 #include <stdlib.h> /* rand */
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <klee/klee.h>
 
 #if defined(__APPLE__)
@@ -3614,6 +3615,29 @@ int parser_chunked_states(){
 		|| p_state == s_chunk_data_done);
 }
 
+int valid_parser_header_state() {
+  switch (parser->header_state) {
+            case h_general:
+            case h_C:
+            case h_CO:
+            case h_CON:
+            case h_matching_connection:
+            case h_matching_proxy_connection:
+            case h_matching_content_length:
+            case h_matching_transfer_encoding:
+            case h_matching_upgrade:
+            case h_connection:
+            case h_content_length:
+            case h_transfer_encoding:
+            case h_upgrade:
+              return 0;
+              break;
+            default:
+              return 1;
+              break;
+  }
+}
+
 int
 valid(){
 	
@@ -3626,14 +3650,29 @@ valid(){
   if(!((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0))){
     return 1; 
   }
-
+  if(!((parser->state == s_header_field) && !(valid_parser_header_state()))){
+	 return 1;
+  }
+  if(!((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding))) {
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX)))) {
+    return 1; 
+  }
+  if(!((parser->state == s_chunk_data_almost_done) && (parser->content_length != 0))) {
+    return 1; 
+  }
+  if(!((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX)))) {
+    return 1; 
+  }
   return 0;
 }
+
 
 int
 transition(char *buf, int len){
 	int n;
-	n = http_parser_execute(parser, &settings, buf, len);
+	n = http_parser_execute(parser, &settings_dontcall, buf, len);
 	return valid();
 }
 
