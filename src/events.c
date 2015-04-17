@@ -13,6 +13,7 @@
  */
 pollsocket_t* pollsocket_create(vector* sockets)
 {
+
 	long num_sockets = vector_count(sockets);
 
 	// Validate all sockets before adding 
@@ -139,6 +140,13 @@ int poll_sockets(pollsocket_t* ps, int timeout)
 
 
 	int result = 0;
+
+	printf("Polling on...\n");
+
+	for (unsigned i = 0; i < ps->size; ++i)
+	{
+		printf("%d\n", ps->pfds[i].fd);
+	}
 	result = poll (ps->pfds, ps->size, timeout);
 
 	return result;

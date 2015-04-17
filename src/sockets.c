@@ -334,10 +334,11 @@ socket_t* socket_connect(unsigned short port, char* addr)
 
     // 9734 default port
     s->port = port ? port : SERVER_PORT;
+    printf("sport: %d\n", s->port);
     s->name.sin_port = htons(s->port);
 
     s->name.sin_family = AF_INET;
-    s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
+    // s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
 
     // Assign a file descriptor and validate
     s->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -346,6 +347,8 @@ socket_t* socket_connect(unsigned short port, char* addr)
         log_error("%s:L %d: could not create socket\n", __func__, __LINE__);
         assert(0);
     }
+
+    inet_pton(AF_INET, addr, &(s->name.sin_addr));
 
     int result = connect(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name));
     // Try to bind the socket
