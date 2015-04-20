@@ -415,15 +415,7 @@ int main(void)
 
     // 1 Acceptor, 4 Clients
     vector* sockets = vector_create_with_size(5);
-<<<<<<< HEAD
-    vector_set(sockets, 0, server_sock);
 
-    pollsocket_t* ps = pollsocket_create(sockets);
-
-    while (1)
-    {
-        int result = poll_sockets(ps, 10000);
-=======
     vector_push(sockets, server_sock);
 
     printf("SERVER SOCKET: %d\n", socket_get_fd(server_sock));
@@ -438,7 +430,7 @@ int main(void)
         printf("Rep %d\n", count);
 
         int result = poll_sockets(ps, 1000);
->>>>>>> f94204346f9adef2b835868333baaab74d58d996
+
         if (result < 0)
         {
             log_error("%s, %d: polling error!\n", __func__, __LINE__);
@@ -450,13 +442,7 @@ int main(void)
         else
         {
             // Check for events on the different sockets
-<<<<<<< HEAD
-            
-        }
-        client_sock = socket_accept(server_sock);
-        (void) client_sock;
-        printf("Accepted client at: %d\n", socket_get_fd(client_sock));
-=======
+
             struct pollfd* pfds = ps->pfds;
 
             for (unsigned int i = 0; i < ps->size; ++i)
@@ -477,7 +463,6 @@ int main(void)
             }
         }
        
->>>>>>> f94204346f9adef2b835868333baaab74d58d996
         /* Single threaded for now... */
         // accept_request(client_sock);
     }

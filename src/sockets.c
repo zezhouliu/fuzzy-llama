@@ -130,23 +130,12 @@ socket_t * socket_startup(unsigned short port){
 	disjoint behaviors;
 */
 void socket_close(socket_t* s){
-<<<<<<< HEAD
 
 	if(!s)
     {
         errno = 1;
 		return;
 	}
-
-=======
-
-	if(!s)
-    {
-        errno = 1;
-		return;
-	}
-
->>>>>>> f94204346f9adef2b835868333baaab74d58d996
 	// If open, then close
 	if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)	
     {
