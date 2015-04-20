@@ -1913,6 +1913,142 @@ dontcall_response_status_cb (http_parser *p, const char *buf, size_t len)
   abort();
 }
 
+
+
+// VeriServe
+int
+verify_message_begin (http_parser *p)
+{
+  klee_assert(p->state == s_res_or_resp_H
+  || p->state == s_res_H
+  || p->state == s_res_method);  
+}
+
+int
+verify_message_begin_cb (http_parser *p)
+{
+  klee_assert(p == parser);
+  verify_message_being(p);
+  return 0;
+}
+
+int
+verify_header_field_cb (http_parser *p, const char *buf, size_t len)
+{
+  assert(p == parser);
+  struct message *m = &messages[num_messages];
+
+  if (m->last_header_element != FIELD)
+    m->num_headers++;
+
+  strlncat(m->headers[m->num_headers-1][0],
+           sizeof(m->headers[m->num_headers-1][0]),
+           buf,
+           len);
+
+  m->last_header_element = FIELD;
+
+  return 0;
+}
+
+int
+verify_header_value_cb (http_parser *p, const char *buf, size_t len)
+{
+  assert(p == parser);
+  struct message *m = &messages[num_messages];
+
+  strlncat(m->headers[m->num_headers-1][1],
+           sizeof(m->headers[m->num_headers-1][1]),
+           buf,
+           len);
+
+  m->last_header_element = VALUE;
+
+  return 0;
+}
+
+int
+verify_request_url_cb (http_parser *p, const char *buf, size_t len)
+{
+  assert(p == parser);
+  strlncat(messages[num_messages].request_url,
+           sizeof(messages[num_messages].request_url),
+           buf,
+           len);
+  return 0;
+}
+
+int
+verify_response_status_cb (http_parser *p, const char *buf, size_t len)
+{
+  assert(p == parser);
+  strlncat(messages[num_messages].response_status,
+           sizeof(messages[num_messages].response_status),
+           buf,
+           len);
+  return 0;
+}
+
+int
+verify_body_cb (http_parser *p, const char *buf, size_t len)
+{
+  assert(p == parser);
+  strlncat(messages[num_messages].body,
+           sizeof(messages[num_messages].body),
+           buf,
+           len);
+  messages[num_messages].body_size += len;
+  check_body_is_final(p);
+ // printf("body_cb: '%s'\n", requests[num_messages].body);
+  return 0;
+}
+
+int
+verify_headers_complete_cb (http_parser *p)
+{
+  assert(p == parser);
+  messages[num_messages].method = parser->method;
+  messages[num_messages].status_code = parser->status_code;
+  messages[num_messages].http_major = parser->http_major;
+  messages[num_messages].http_minor = parser->http_minor;
+  messages[num_messages].headers_complete_cb_called = TRUE;
+  messages[num_messages].should_keep_alive = http_should_keep_alive(parser);
+  return 0;
+}
+
+int
+verify_message_complete_cb (http_parser *p)
+{
+  assert(p == parser);
+  if (messages[num_messages].should_keep_alive != http_should_keep_alive(parser))
+  {
+    fprintf(stderr, "\n\n *** Error http_should_keep_alive() should have same "
+                    "value in both on_message_complete and on_headers_complete "
+                    "but it doesn't! ***\n\n");
+    assert(0);
+    abort();
+  }
+
+  if (messages[num_messages].body_size &&
+      http_body_is_final(p) &&
+      !messages[num_messages].body_is_final)
+  {
+    fprintf(stderr, "\n\n *** Error http_body_is_final() should return 1 "
+                    "on last on_body callback call "
+                    "but it doesn't! ***\n\n");
+    assert(0);
+    abort();
+  }
+
+  messages[num_messages].message_complete_cb_called = TRUE;
+
+  messages[num_messages].message_complete_on_eof = currently_parsing_eof;
+
+  num_messages++;
+  return 0;
+}
+
+
 static http_parser_settings settings_dontcall =
   {.on_message_begin = dontcall_message_begin_cb
   ,.on_header_field = dontcall_header_field_cb
@@ -2013,6 +2149,20 @@ static http_parser_settings settings =
   ,.on_headers_complete = headers_complete_cb
   ,.on_message_complete = message_complete_cb
   };
+
+// VeriServe
+static http_parser_settings verify_settings =
+  {.on_message_begin = verify_message_begin_cb
+  ,.on_header_field = verify_header_field_cb
+  ,.on_header_value = verify_header_value_cb
+  ,.on_url = verify_request_url_cb
+  ,.on_status = verify_response_status_cb
+  ,.on_body = verify_body_cb
+  ,.on_headers_complete = verify_headers_complete_cb
+  ,.on_message_complete = verify_message_complete_cb
+  };
+
+
 
 static http_parser_settings settings_count_body =
   {.on_message_begin = message_begin_cb
@@ -3639,7 +3789,9 @@ int valid_parser_header_state() {
 }
 
 int
-valid(){
+valid ()
+{
+	
   if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
     return 1;
   }	
@@ -3689,100 +3841,6 @@ main (int argc, char **argv)
 		klee_assert(0);	
 	} 
   }
-
- 
-//  const char *buf;
-//  char flag;
-//  
-//  if(argc > 1 && argv[1][0] == '-'){
-//    flag = argv[1][1]; 
-//  } else{
-//    printf("Please specify a flag\r\n");
-//    return 0;
-//  } 
-//
-//  switch(flag){
-//	case 'p':
-//        {
-//
-//           char p[SYM_BUF_SZ];
-//#if KLEE
-//            klee_make_symbolic(p, sizeof p, "p");
-//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
-//#else
-//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-//#endif // KLEE
-//
-//
-//            buf = sym_port(p);
-//            test_simple_incrementally(buf, HPE_UNKNOWN);			
-//	    free((void *)buf);
-//	    break;
-//        }
-//	case 'u':
-//        {
-//
-//            char p[SYM_BUF_SZ];
-//#if KLEE
-//            klee_make_symbolic(p, sizeof p, "p");
-//            klee_assume(p[SYM_BUF_SZ-1] == '\0');
-//#else
-//            memcpy(p, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-//            printf("I am here");
-//#endif // KLEE
-//            buf = sym_keep_alive(argv[2]);
-//            test_simple_incrementally(buf, HPE_UNKNOWN);			
-//	    free((void *)buf);
-//	    break;
-//	}
-//  case 'm':
-//        {
-//
-//            char method[8] = {'\0'};
-//#if KLEE
-//            klee_make_symbolic(method, sizeof method, "method");
-//            klee_assume(method[7] == '\0');
-//#else
-//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-//#endif // KLEE
-//
-//            buf = sym_method(method);
-//            test_simple_incrementally(buf, HPE_UNKNOWN);      
-//      free((void *)buf);
-//      break;
-//        }
-//  case 'v':
-//        {
-//
-//            char version[11] = {'\0'};
-//#if KLEE
-//            klee_make_symbolic(version, sizeof version, "version");
-//            klee_assume(version[10] == '\0');
-//#else
-//            memcpy(p, argv[2], ((strlen(argv[2])>7) ? 7 : strlen(argv[2])));
-//#endif // KLEE
-//
-//            buf = sym_version(version);
-//            test_simple_incrementally(buf, HPE_UNKNOWN);      
-//      free((void *)buf);
-//      break;
-//        }
-//	case 'g':
-//        {
-//          char d[SYM_BUF_SZ] = {'\0'};
-//	  if(argv[2]){
-//             memcpy(d, argv[2], ((strlen(argv[2])>SYM_BUF_SZ) ? SYM_BUF_SZ : strlen(argv[2])));
-//          }
-//          buf = (const char *)d;
-//#if KLEE
-//	  klee_make_symbolic(buf, sizeof d, "buf");
-//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-//#else
-//  	  test_simple_incrementally(buf, HPE_UNKNOWN);
-//#endif // KLEE
-//	  break;
-//       }	
-//  }
 
   return 0;
 }
