@@ -3640,10 +3640,9 @@ int valid_parser_header_state() {
 
 int
 valid(){
-	
-	if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
-		return 1;
-	}	
+  if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
+    return 1;
+  }	
   if(!((parser->state == s_chunk_size_start) && !(parser->nread == 1))){
     return 1; 
   }
@@ -3665,6 +3664,7 @@ valid(){
   if(!((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX)))) {
     return 1; 
   }
+  return 0;
 }
 
 

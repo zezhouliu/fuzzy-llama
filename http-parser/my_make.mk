@@ -3,6 +3,7 @@ out.o: parser_symbolic_test.o http_parser.o
 	llvm-link -v -o out.o http_parser.o parser_symbolic_test.o 
 
 parser_symbolic_test.o: parser_symbolic_test.c
+
 	llvm-gcc -I ~/klee/include/ --emit-llvm -DKLEE=1 -c -g parser_symbolic_test.c
 
 http_parser.o: http_parser.c

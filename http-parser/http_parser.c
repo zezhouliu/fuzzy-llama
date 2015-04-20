@@ -2060,6 +2060,7 @@ http_parser_init_state_sym (http_parser *parser, enum http_parser_type t)
   parser->http_errno = HPE_OK;
 }
 
+
 #if KLEE
 void
 http_parser_init_symbolic (http_parser *parser, enum http_parser_type t)

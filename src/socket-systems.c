@@ -4,6 +4,7 @@
     requires length > 0;
 
     behavior invalid:
+<<<<<<< HEAD
       assumes socket <= 0 || !\valid((char*)buffer + (0..length-1));
       assigns \nothing;
       ensures \result == -1;
@@ -13,6 +14,17 @@
 			assigns errno;
 			assigns ((char *) buffer)[0 .. length-1];
 			ensures (0 < \result <= length) || (\result == -1 && errno != 0);
+=======
+      assumes socket < 0 || !\valid((char*)buffer + (0..length-1));
+      assigns errno;
+      ensures \result == -1;
+
+    behavior valid_error:
+		assumes socket >= 0 && \valid((char*)buffer + (0..length-1));
+		assigns errno;
+		assigns ((char *) buffer)[0 .. \result - 1];
+		ensures (0 <= \result <= length) || (\result == -1 && errno != 0);
+>>>>>>> f94204346f9adef2b835868333baaab74d58d996
 
     complete behaviors;
 		disjoint behaviors;
@@ -20,7 +32,10 @@
 ssize_t
 recv(int socket, void *buffer, size_t length, int flags);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f94204346f9adef2b835868333baaab74d58d996
 /*@
  	requires length >= 0;
  	assigns errno;

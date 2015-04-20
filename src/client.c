@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     // Local addr for now
     unsigned short port = SERVER_PORT;
     char* addr = "127.0.0.1";
+    // char* addr = NULL;
 
     s = socket_connect(port, addr);
 
@@ -31,6 +32,8 @@ int main(int argc, char *argv[])
     while(1)
     {
         // Just hang for now
+        socket_send(s, "Hi\n", 2, 0);
+        // printf("RES: %d\n", res);
     }
 
     return 0;

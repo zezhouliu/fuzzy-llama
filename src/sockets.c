@@ -130,6 +130,7 @@ socket_t * socket_startup(unsigned short port){
 	disjoint behaviors;
 */
 void socket_close(socket_t* s){
+<<<<<<< HEAD
 
 	if(!s)
     {
@@ -137,6 +138,15 @@ void socket_close(socket_t* s){
 		return;
 	}
 
+=======
+
+	if(!s)
+    {
+        errno = 1;
+		return;
+	}
+
+>>>>>>> f94204346f9adef2b835868333baaab74d58d996
 	// If open, then close
 	if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)	
     {
@@ -334,10 +344,11 @@ socket_t* socket_connect(unsigned short port, char* addr)
 
     // 9734 default port
     s->port = port ? port : SERVER_PORT;
+    printf("sport: %d\n", s->port);
     s->name.sin_port = htons(s->port);
 
     s->name.sin_family = AF_INET;
-    s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
+    // s->name.sin_addr.s_addr = addr ? inet_addr(addr) : htonl(INADDR_ANY);
 
     // Assign a file descriptor and validate
     s->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -346,6 +357,8 @@ socket_t* socket_connect(unsigned short port, char* addr)
         log_error("%s:L %d: could not create socket\n", __func__, __LINE__);
         assert(0);
     }
+
+    inet_pton(AF_INET, addr, &(s->name.sin_addr));
 
     int result = connect(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name));
     // Try to bind the socket
