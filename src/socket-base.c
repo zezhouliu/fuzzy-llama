@@ -53,8 +53,11 @@ int socket_get_fd(socket_t* s)
         return s->fd;
     }
 
+<<<<<<< HEAD
+=======
     printf("%d\n", s->status);
 
+>>>>>>> f94204346f9adef2b835868333baaab74d58d996
     return -1;
 }
 

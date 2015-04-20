@@ -3640,7 +3640,6 @@ int valid_parser_header_state() {
 
 int
 valid(){
-	
   if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
     return 1;
   }	

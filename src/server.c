@@ -415,6 +415,7 @@ int main(void)
 
     // 1 Acceptor, 4 Clients
     vector* sockets = vector_create_with_size(5);
+
     vector_push(sockets, server_sock);
 
     printf("SERVER SOCKET: %d\n", socket_get_fd(server_sock));
@@ -432,7 +433,12 @@ int main(void)
         ++count;
         printf("Rep %d\n", count);
 
+<<<<<<< HEAD
         int result = poll_sockets(ps, 5000);
+=======
+        int result = poll_sockets(ps, 1000);
+
+>>>>>>> 8a881cf14c2d6e8edd0ad64faa3583834ac8bc3a
         if (result < 0)
         {
             log_error("%s, %d: polling error!\n", __func__, __LINE__);
@@ -446,6 +452,7 @@ int main(void)
             printf("Got a response!\n");
 
             // Check for events on the different sockets
+
             struct pollfd* pfds = ps->pfds;
 
             for (unsigned int i = 0; i < ps->size; ++i)

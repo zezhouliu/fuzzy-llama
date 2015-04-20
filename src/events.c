@@ -142,7 +142,7 @@ int poll_sockets(pollsocket_t* ps, int timeout)
     int result = 0;
 
     printf("Polling on...\n");
-
+    
     for (unsigned i = 0; i < ps->size; ++i)
     {
         printf("%d\n", ps->pfds[i].fd);
