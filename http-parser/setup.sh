@@ -10,7 +10,7 @@ setup_prep(){
 
 setup_klee(){
 	#exec klee --optimize --emit-all-errors --libc=uclibc --posix-runtime ./out.o $1
-	exec klee --optimize --emit-all-errors ./out.o $1
+	exec klee --optimize --emit-all-errors ./out.o --sym-arg 1
 }
 
 setup_bin(){
@@ -22,7 +22,7 @@ setup_bin(){
 
 setup_all(){
 	setup_prep
-	setup_klee $1
+	setup_klee
 }
 
 setup_options(){
