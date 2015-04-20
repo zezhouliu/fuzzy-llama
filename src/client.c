@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     printf("Connected at %p\n", (void*) s);
     while(1)
     {
+        // printf("Sending...\n");
         // Just hang for now
         socket_send(s, "Hi\n", 2, 0);
         // printf("RES: %d\n", res);

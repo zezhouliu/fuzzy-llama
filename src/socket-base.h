@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <netdb.h>
 
 #include "utils.h"
 

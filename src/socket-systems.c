@@ -9,28 +9,28 @@
       ensures \result == -1;
 
     behavior valid_error:
-		assumes socket >= 0 && \valid((char*)buffer + (0..length-1));
-		assigns errno;
-		assigns ((char *) buffer)[0 .. \result - 1];
-		ensures (0 <= \result <= length) || (\result == -1 && errno != 0);
+        assumes socket >= 0 && \valid((char*)buffer + (0..length-1));
+        assigns errno;
+        assigns ((char *) buffer)[0 .. \result - 1];
+        ensures (0 <= \result <= length) || (\result == -1 && errno != 0);
 
     complete behaviors;
-		disjoint behaviors;
+        disjoint behaviors;
 */
 ssize_t
 recv(int socket, void *buffer, size_t length, int flags);
 
 /*@
- 	requires length >= 0;
- 	assigns errno;
+    requires length >= 0;
+    assigns errno;
 
- 	behavior valid_error:
- 		assumes sockfd > 0 && \valid((char *)buffer + (0..length-1));
-		ensures (0 < \result <= length) || (\result == -1 && errno != 0);
+    behavior valid_error:
+        assumes sockfd > 0 && \valid((char *)buffer + (0..length-1));
+        ensures (0 < \result <= length) || (\result == -1 && errno != 0);
 
- 	behavior invalid:
- 		assumes sockfd <= 0 || !\valid((char *) buffer + (0 .. length - 1));
- 		ensures \result == -1;
+    behavior invalid:
+        assumes sockfd <= 0 || !\valid((char *) buffer + (0 .. length - 1));
+        ensures \result == -1;
 
 
   complete behaviors;

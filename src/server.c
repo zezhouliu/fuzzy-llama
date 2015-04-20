@@ -423,12 +423,16 @@ int main(void)
     (void) ps;
 
     int count = 0;
+
+    printf("Trying to accept\n");
+    client_sock = socket_accept(server_sock);
+
     while (1)
     {
         ++count;
         printf("Rep %d\n", count);
 
-        int result = poll_sockets(ps, 1000);
+        int result = poll_sockets(ps, 5000);
         if (result < 0)
         {
             log_error("%s, %d: polling error!\n", __func__, __LINE__);
@@ -439,25 +443,36 @@ int main(void)
         }
         else
         {
+            printf("Got a response!\n");
+
             // Check for events on the different sockets
             struct pollfd* pfds = ps->pfds;
 
             for (unsigned int i = 0; i < ps->size; ++i)
             {
                 printf("pfds[%d]: %d\n", i, pfds[i].revents);
+
+                // Listening server: accept new connections here
+                if (i == 0)
+                {
+                    struct pollfd pfd = pfds[0];
+                    if (pfd.revents & POLLIN)
+                    {
+                        client_sock = socket_accept(server_sock);
+                
+                        // Track our added sockets
+                        vector_push(sockets, client_sock);
+
+                        printf("Accepted client at: %d\n", socket_get_fd(client_sock));
+                    }
+                }
+                else if (pfds[i].revents & POLLIN)
+                {
+                    // Other sockets, we need to handle the incoming data
+
+                }
             }
 
-            // Handle the first guys separately
-            struct pollfd pfd = pfds[0];
-            if (pfd.revents & POLLIN)
-            {
-                client_sock = socket_accept(server_sock);
-        
-                // Track our added sockets
-                vector_push(sockets, client_sock);
-
-                printf("Accepted client at: %d\n", socket_get_fd(client_sock));
-            }
         }
        
         /* Single threaded for now... */
