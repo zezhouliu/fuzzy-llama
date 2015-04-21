@@ -13,8 +13,13 @@ long vector_size(vector*);
 *
 * @return a new vector
 * * * * * * * * * */
-vector* vector_create(void) 
-{
+
+/*@
+    
+
+*/
+
+vector* vector_create(void) {
 
     vector* v = malloc(sizeof(vector));;
     vector_init(v);
