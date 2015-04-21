@@ -96,15 +96,27 @@ void vector_init(vector *v){
 * param[in]: v, a vector
 * pre@: v is a valid vector
 **/
-/*
+/*@
     requires \valid(v);
+    behavior alloc:
+        assumes !is_allocable((unsigned long) (i * sizeof(void *)));
+        ensures \fresh{Old, Here}(v->data, i * sizeof(void *));
+        ensures (i > 0 ==> v->data != \null && v->size == i && v->count == 0);
+    behavior null:
+        assumes !is_allocable((unsigned long) (i * sizeof(void *)));
+        assigns \nothing;
+        ensures \result == false;
+
+    complete behaviors;
+    disjoint behaviors;
 
 */
 bool vector_init_with_size(vector *v, size_t i){
-    v->data = calloc(i,sizeof(void*));  // array to track data
-    if(v->data == NULL){
+    void * ptr = calloc(i,sizeof(void*));  // array to track data
+    if(ptr == NULL){
         return false;
     }
+    v->data = ptr;
     v->size = i;     // size of the vector
     v->count = 0;    // number of elements in vector
     return true;
@@ -118,6 +130,7 @@ bool vector_init_with_size(vector *v, size_t i){
 **/
 
 /*@
+    requires \valid(v);
     behavior null:
         assumes v == \null;
         assigns \nothing;
@@ -126,8 +139,6 @@ bool vector_init_with_size(vector *v, size_t i){
         assumes v != \null && \valid(v);
         assigns \nothing;
         ensures \result == v->count;
-    behavior invalid:
-        assumes !\valid(v);
 */
 size_t vector_count(vector *v){
     if (!v) {
@@ -135,13 +146,21 @@ size_t vector_count(vector *v){
     }
     return v->count;
 }
-/**
-* vector_count(v): returns size of v
-*
-* param[in]: v, a vector
-* pre@: v is a valid vector
-**/
+/*@
+    requires \valid(v);
+    behavior null:
+        assumes v == \null;
+        assigns \nothing;
+        ensures \result == 0;
+    behavior valid:
+        assumes v != \null && \valid(v);
+        assigns \nothing;
+        ensures \result == v->size;
+*/
 size_t vector_size(vector *v){
+    if(v == NULL){
+        return 0;
+    }
     return v->size;
 }
 
