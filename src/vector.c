@@ -3,8 +3,8 @@
 // Private
 
 void vector_init(vector*);
-void vector_init_with_size(vector*, long);
-long vector_size(vector*);
+void vector_init_with_size(vector*, size_t);
+size_t vector_size(vector*);
 
 /* * * * * * * * * *
 * vector_create()
@@ -15,13 +15,22 @@ long vector_size(vector*);
 * * * * * * * * * */
 
 /*@
-    
-
+  behavior null:
+        assumes !is_allocable((unsigned int)sizeof(vector));
+        ensures \result == \null;
+  behavior success:
+        assumes is_allocable((unsigned int)sizeof(vector));
+        allocates \result;
+        ensures \fresh{Old, Here}(\result, sizeof(vector));
+        ensures (\result->data == \null && \result->size == 0 && result->count == 0);
+    complete behaviors;
+    disjoint behaviors;
 */
-
 vector* vector_create(void) {
-
-    vector* v = malloc(sizeof(vector));;
+    vector* v = calloc(1, sizeof(vector));;
+    if(!v){
+        return NULL;
+    }
     vector_init(v);
     return v;
 
@@ -36,9 +45,9 @@ vector* vector_create(void) {
 *
 * @return a new vector with capacity s
 * * * * * * * * * */
-vector* vector_create_with_size(long s) {
+vector* vector_create_with_size(size_t s) {
 
-    vector* v = malloc(sizeof(vector));
+    vector* v = calloc(1, sizeof(vector));
     vector_init_with_size(v, s);
     return v;
 
@@ -67,11 +76,14 @@ void vector_init(vector *v)
 * param[in]: v, a vector
 * pre@: v is a valid vector
 **/
-void vector_init_with_size(vector *v, long i)
+/*
+    requires \valid(v);
+
+*/
+void vector_init_with_size(vector *v, size_t i)
 {
-    v->data = malloc(sizeof(void*) * i);  // array to track data
+    v->data = calloc(i,sizeof(void*));  // array to track data
     v->size = i;     // size of the vector
-    memset(v->data, '\0', sizeof(void*) * v->size);
     v->count = 0;    // number of elements in vector
 }
 
@@ -142,6 +154,8 @@ void vector_push(vector *v, void *e)
 * pre@: 0 <= index < v.size()
 * post@: sets the element at index i
 **/
+
+
 void vector_set(vector *v, long index, void *e)
 {
     // safety check to access only within the vector size
