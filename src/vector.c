@@ -281,7 +281,14 @@ void vector_push(vector *v, void *e){
 * post@: sets the element at index i
 **/
 
+/*@
+    requires \valid(v);
+    requires \valid(v->data + (0.. v->size - 1));
+    requires index < v->count <= v->size;
+    assigns v->data[index];
+    ensures v->data[index] == e;
 
+*/
 void vector_set(vector *v, size_t index, void *e)
 {
     // safety check to access only within the vector size
@@ -301,13 +308,19 @@ void vector_set(vector *v, size_t index, void *e)
 * pre@: 0 <= index < v.size()
 * post@: returns element at index
 **/
-void *vector_get(vector *v, long index)
-{
+
+/*@
+    requires \valid(v);
+    requires \valid(v->data + (0 .. v->size - 1));
+    requires index < v->count <= v->size;
+    assigns \nothing;
+    ensures v->data[index] == \result;
+*/
+void * vector_get(vector *v, size_t index){
     // safety check to access only within the vector size
     if (index >= v->count) {
         return NULL;
     }
-
     return v->data[index];
 }
 
@@ -320,8 +333,19 @@ void *vector_get(vector *v, long index)
 * pre@: 0 <= index < v.size()
 * post@: returns vector with element at index i removed
 **/
-void vector_delete(vector *v, long index)
-{
+
+/*@
+    requires \valid(v);
+    requires index < v->count <= v->size;
+    requires \valid(v->data + (0 .. v->size - 1));
+    assigns \valid(v->data + (0 .. v->size - 1));
+    ensures \forall int i; 0 < i < index ==> v->data[i] == \old(v->data[i]);
+    ensures \forall int i; index <= i < v->count ==> v->data[i] == \old(v->data[i + 1]);
+    ensures v->count == \old(v->count) - 1;
+    ensures v->data[\old(v->count)] == NULL;
+
+*/
+void vector_delete(vector * v, size_t index){
     // if index exceeds vector count, return
     if (index >= v->count) {
         return;
@@ -329,15 +353,12 @@ void vector_delete(vector *v, long index)
 
     // else, we want to just delete the element and shift the
     // rest of the elements down
-    long i;
-    for (i = index; i < v->count - 1; ++i) {
-        if (v->data[i + 1] != NULL) {
-            v->data[i] = v->data[i + 1];
-        }
+    for (size_t i = index; i < v->count - 1; ++i) {
+        v->data[i] = v->data[i + 1];
     }
 
     // set last element as NULL and decrement count
-    v->data[index] = NULL;
+    v->data[v->count - 1] = NULL;
     v->count--;
 }
 
@@ -348,8 +369,13 @@ void vector_delete(vector *v, long index)
 * pre@: v is a valid vector
 * post@: frees relevant data in v
 **/
-void vector_free(vector *v)
-{
+/*@
+    requires \valid(v);
+    requires \valid(v->data);
+    ensures \freed(v->data);
+    ensures \freed(v);
+*/
+void vector_free(vector * v){
     if (v && v->data)
     {
         free(v->data);
