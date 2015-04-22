@@ -10,7 +10,7 @@ typedef struct vector_ {
 
 vector* vector_create(void);
 vector* vector_create_with_size(size_t s);
-long vector_count(vector*);
+size_t vector_count(vector*);
 
 void vector_push(vector*, void*);
 void vector_set(vector*, size_t, void*);
