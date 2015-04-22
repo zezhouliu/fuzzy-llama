@@ -3755,6 +3755,9 @@ valid ()
 int
 transition(char *buf, int len){
 	int n;
+#if KLEE == 0
+  printf("%s", buf);
+#endif
 	n = http_parser_execute(parser, &settings_verify, buf, len);
 	return valid();
 }
@@ -3768,13 +3771,14 @@ main (int argc, char **argv)
   //klee_assume(buf[1] == '\0');
   if(argc < 2){
     printf("Not Enough Arguments");
+    return;
   }
   parser_init(HTTP_BOTH);
   if(valid()){
 	if(!transition(argv[1], 1)){
+        printf("%s", argv[1]);
 		klee_assert(0);	
 	} 
   }
-
   return 0;
 }

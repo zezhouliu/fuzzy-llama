@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdio.h>
 #include <klee/klee.h>
 
 #ifndef ULLONG_MAX
@@ -1926,6 +1927,9 @@ reexecute:
         break;
 
       default:
+#if KLEE == 0
+    printf("%s", parser->data);
+#endif
         assert(0 && "unhandled state");
         SET_ERRNO(HPE_INVALID_INTERNAL_STATE);
         goto error;
