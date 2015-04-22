@@ -46,18 +46,11 @@ sstatus_t socket_get_status(socket_t* s)
 	complete behaviors valid_closed, valid_open;
 	disjoint behaviors valid_closed, valid_open;
 */
-int socket_get_fd(socket_t* s)
-{
+int socket_get_fd(socket_t* s){
     if(s && s->status == SOCKET_OPEN)
     {
         return s->fd;
     }
-
-<<<<<<< HEAD
-=======
     printf("%d\n", s->status);
-
->>>>>>> f94204346f9adef2b835868333baaab74d58d996
     return -1;
 }
-

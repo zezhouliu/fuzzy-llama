@@ -30,7 +30,7 @@
 */
 socket_t * socket_startup(unsigned short port)
 {
-    
+
     errno = 0;
 
     // Basic initialization routine
@@ -78,7 +78,7 @@ socket_t * socket_startup(unsigned short port)
 
     // Try to bind the socket
     // if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)
-    if (bind(s->fd, res->ai_addr, res->ai_addrlen) < 0)   
+    if (bind(s->fd, res->ai_addr, res->ai_addrlen) < 0)
     {
         log_error("%s:L %d: could not bind socket", __func__, __LINE__);
         goto failure;
@@ -146,7 +146,7 @@ void socket_close(socket_t* s){
     }
 
     // If open, then close
-    if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)   
+    if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)
     {
         close(s->fd);
         s->status = SOCKET_CLOSED;
@@ -312,8 +312,7 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
     assigns buf[0..size-1];
     ensures \result > 0 && \result == size;
 */
-ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
-{
+ssize_t socket_recv(socket_t* s, char* buf, int size, int flags){
     assert(s);
     assert(s->status == SOCKET_OPEN);
 
@@ -340,8 +339,7 @@ ssize_t socket_recv(socket_t* s, char* buf, int size, int flags)
     complete behaviors null_addr, addr;
     disjoint behaviors null_addr, addr;
 */
-socket_t* socket_connect(unsigned short port, char* addr)
-{
+socket_t* socket_connect(unsigned short port, char* addr){
     (void) port;
 
     // Basic initialization routine

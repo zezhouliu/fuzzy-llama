@@ -2,9 +2,10 @@
 
 // Private
 
+const size_t INIT_VEC_SIZE = 16;
 void vector_init(vector*);
-void vector_init_with_size(vector*, long);
-long vector_size(vector*);
+bool vector_init_with_size(vector*, size_t);
+size_t vector_size(vector*);
 
 /* * * * * * * * * *
 * vector_create()
@@ -13,10 +14,24 @@ long vector_size(vector*);
 *
 * @return a new vector
 * * * * * * * * * */
-vector* vector_create(void) 
-{
 
-    vector* v = malloc(sizeof(vector));;
+/*@
+    behavior null:
+        assumes !is_allocable((unsigned long)sizeof(vector));
+        ensures \result == \null;
+    behavior success:
+        assumes is_allocable((unsigned long)sizeof(vector));
+        allocates \result;
+        ensures \fresh{Old, Here}(\result, sizeof(vector));
+        ensures (\result->data == \null && \result->size == 0 && \result->count == 0);
+    complete behaviors;
+    disjoint behaviors;
+*/
+vector* vector_create(void) {
+    vector* v = (vector *) calloc(1, sizeof(vector));;
+    if(!v){
+        return NULL;
+    }
     vector_init(v);
     return v;
 
@@ -31,10 +46,31 @@ vector* vector_create(void)
 *
 * @return a new vector with capacity s
 * * * * * * * * * */
-vector* vector_create_with_size(long s) {
 
-    vector* v = malloc(sizeof(vector));
-    vector_init_with_size(v, s);
+/*@
+    behavior alloc:
+        assumes is_allocable((unsigned long) (sizeof(vector) + s * sizeof(void *)));
+        allocates \result;
+        allocates \result->data;
+        ensures \fresh(\result, sizeof(vector));
+        ensures \fresh(\result->data, s * sizeof(void *));
+        ensures (s > 0 ==> \result->data != NULL && \result->count == 0 && \result->size == s);
+
+    behavior null:
+        assumes !is_allocable((unsigned long) (sizeof(vector) + s * sizeof(void *)));
+        ensures \result == \null;
+
+    complete behaviors;
+    disjoint behaviors;
+
+*/
+vector* vector_create_with_size(size_t s) {
+
+    vector* v = calloc(1, sizeof(vector));
+    if(!vector_init_with_size(v, s)){
+        free(v);
+        return NULL;
+    }
     return v;
 
 }
@@ -45,8 +81,7 @@ vector* vector_create_with_size(long s) {
 * param[in]: v, a vector
 * pre@: v is a valid vector
 **/
-void vector_init(vector *v)
-{
+void vector_init(vector *v){
     v->data = NULL;  // array to track data
     v->size = 0;     // size of the vector
     v->count = 0;    // number of elements in vector
@@ -62,12 +97,30 @@ void vector_init(vector *v)
 * param[in]: v, a vector
 * pre@: v is a valid vector
 **/
-void vector_init_with_size(vector *v, long i)
-{
-    v->data = malloc(sizeof(void*) * i);  // array to track data
+/*@
+    requires \valid(v);
+    behavior alloc:
+        assumes !is_allocable((unsigned long) (i * sizeof(void *)));
+        ensures \fresh(v->data, i * sizeof(void *));
+        ensures (i > 0 ==> v->data != \null && v->size == i && v->count == 0);
+    behavior null:
+        assumes !is_allocable((unsigned long) (i * sizeof(void *)));
+        assigns \nothing;
+        ensures \result == false;
+
+    complete behaviors;
+    disjoint behaviors;
+
+*/
+bool vector_init_with_size(vector *v, size_t i){
+    void * ptr = calloc(i,sizeof(void*));  // array to track data
+    if(ptr == NULL){
+        return false;
+    }
+    v->data = ptr;
     v->size = i;     // size of the vector
-    memset(v->data, '\0', sizeof(void*) * v->size);
     v->count = 0;    // number of elements in vector
+    return true;
 }
 
 /**
@@ -76,22 +129,28 @@ void vector_init_with_size(vector *v, long i)
 * param[in]: v, a vector
 * pre@: v is a valid vector
 **/
-long vector_count(vector *v)
-{
-    if (!v) {
+
+/*@
+    requires \valid(v);
+    assigns \nothing;
+    ensures \result == v->count;
+*/
+size_t vector_count(vector *v){
+    if (v == NULL) {
         return 0;
     }
-
     return v->count;
 }
-/**
-* vector_count(v): returns size of v
-*
-* param[in]: v, a vector
-* pre@: v is a valid vector
-**/
-long vector_size(vector *v)
-{
+/*@
+    requires \valid(v);
+    assigns \nothing;
+    ensures \result == v->size;
+
+*/
+size_t vector_size(vector *v){
+    if(v == NULL){
+        return 0;
+    }
     return v->size;
 }
 
@@ -104,28 +163,88 @@ long vector_size(vector *v)
 * @pre: 0 <= index < v.size()
 * @post: pushes an element into v
 **/
-void vector_push(vector *v, void *e)
-{
-    if (!v)
-    {
-        v = vector_create();
+
+/*@
+    requires \valid(v);
+    requires v->count <= v->size;
+
+    behavior zero_alloc:
+        assumes \valid(v) && v->size == 0 &&
+            is_allocable((unsigned long)(INIT_VEC_SIZE * sizeof(void *)));
+        ensures v->size == INIT_VEC_SIZE;
+        ensures v->count == 1;
+        ensures \fresh(v->data, INIT_VEC_SIZE * sizeof(void *));
+        ensures v->data[0] == e;
+        ensures \forall int i; 1 <= i <= (v->size - 1) ==> v->data[i] == \null;
+
+    behavior zero_fail:
+        assumes \valid(v) && v->size == 0 &&
+            !is_allocable((unsigned long)(INIT_VEC_SIZE * sizeof(void *)));
+        assigns \nothing;
+
+    behavior bad_data:
+        assumes \valid(v) && !\valid(v->data + (0 .. v->size - 1));
+
+    behavior simple:
+        assumes \valid(v) && v->size > 0;
+        assumes \valid(v->data+ (0 .. v->size));
+        assumes v->count < v->size;
+        assigns v->data[\old(v->count)];
+        ensures \forall int i; 0 <= i < v->count - 1 ==> v->data[i] == \old(v->data[i]);
+        ensures v->data[\old(v->count)] == e;
+        ensures v->count == \old(v->count) + 1;
+
+    behavior grow_success:
+        assumes \valid(v) && v->size > 0;
+        assumes \valid(v->data+ (0 .. v->size));
+        assumes v->count == v->size;
+        assumes is_allocable((unsigned long) (v->size * 2 * sizeof(void *)));
+        assigns v->data;
+        ensures v->size == 2 * \old(v->size);
+        ensures \fresh(v->data, v->size * sizeof(void *));
+        ensures \forall int i; 0 <= i < v->count - 1 ==> v->data[i] == \old(v->data[i]);
+        ensures v->data[\old(v->count)] == e;
+        ensures v->count == \old(v->count) * 2;
+
+    behavior grow_fail:
+        assumes \valid(v) && v->size > 0;
+        assumes \valid(v->data+ (0 .. v->size));
+        assumes v->count == v->size;
+        assumes !is_allocable((unsigned long) (v->size * 2 * sizeof(void *)));
+        assigns \nothing;
+
+    complete behaviors;
+    disjoint behaviors;
+
+
+*/
+void vector_push(vector *v, void *e){
+    if (v == NULL){
+        return;
     }
 
     if (v->size == 0) {
-        v->size = 10;
-        v->data = malloc(sizeof(void*) * v->size);
-        memset(v->data, '\0', sizeof(void*) * v->size);
+        void ** ptr = calloc(INIT_VEC_SIZE, sizeof(void *));
+        if(ptr == NULL){
+            return;
+        }
+        v->data = ptr;
+        v->size = INIT_VEC_SIZE;
     }
 
     // condition to increase v->data:
     // last slot exhausted
     if (v->size == v->count) {
+        void ** ptr = realloc(v->data, sizeof(void *) * v->size * 2);
+        if(ptr == NULL){
+            return;
+        }
         v->size *= 2;
-        v->data = realloc(v->data, sizeof(void*) * v->size);
+        v->data = ptr;
     }
 
     v->data[v->count] = e;
-    ++(v->count);
+    v->count++;
 }
 
 /**
@@ -137,10 +256,19 @@ void vector_push(vector *v, void *e)
 * pre@: 0 <= index < v.size()
 * post@: sets the element at index i
 **/
-void vector_set(vector *v, long index, void *e)
+
+/*@
+    requires \valid(v);
+    requires \valid(v->data + (0.. v->size - 1));
+    requires index < v->count <= v->size;
+    assigns v->data[index];
+    ensures v->data[index] == e;
+
+*/
+void vector_set(vector *v, size_t index, void *e)
 {
     // safety check to access only within the vector size
-    if (index >= v->count) {
+    if (v == NULL || index >= v->count) {
         return;
     }
 
@@ -156,13 +284,19 @@ void vector_set(vector *v, long index, void *e)
 * pre@: 0 <= index < v.size()
 * post@: returns element at index
 **/
-void *vector_get(vector *v, long index)
-{
+
+/*@
+    requires \valid(v);
+    requires \valid(v->data + (0 .. v->size - 1));
+    requires index < v->count <= v->size;
+    assigns \nothing;
+    ensures v->data[index] == \result;
+*/
+void * vector_get(vector *v, size_t index){
     // safety check to access only within the vector size
     if (index >= v->count) {
         return NULL;
     }
-
     return v->data[index];
 }
 
@@ -175,8 +309,19 @@ void *vector_get(vector *v, long index)
 * pre@: 0 <= index < v.size()
 * post@: returns vector with element at index i removed
 **/
-void vector_delete(vector *v, long index)
-{
+
+/*@
+    requires \valid(v);
+    requires index < v->count <= v->size;
+    requires \valid(v->data + (0 .. v->size - 1));
+    assigns v->data[0 .. v->size - 1];
+    ensures \forall int i; 0 < i < index ==> v->data[i] == \old(v->data[i]);
+    ensures \forall int i; index <= i < v->count ==> v->data[i] == \old(v->data[i + 1]);
+    ensures v->count == \old(v->count) - 1;
+    ensures v->data[\old(v->count)] == NULL;
+
+*/
+void vector_delete(vector * v, size_t index){
     // if index exceeds vector count, return
     if (index >= v->count) {
         return;
@@ -184,15 +329,12 @@ void vector_delete(vector *v, long index)
 
     // else, we want to just delete the element and shift the
     // rest of the elements down
-    long i;
-    for (i = index; i < v->count - 1; ++i) {
-        if (v->data[i + 1] != NULL) {
-            v->data[i] = v->data[i + 1];
-        }
+    for (size_t i = index; i < v->count - 1; ++i) {
+        v->data[i] = v->data[i + 1];
     }
 
     // set last element as NULL and decrement count
-    v->data[index] = NULL;
+    v->data[v->count - 1] = NULL;
     v->count--;
 }
 
@@ -203,8 +345,13 @@ void vector_delete(vector *v, long index)
 * pre@: v is a valid vector
 * post@: frees relevant data in v
 **/
-void vector_free(vector *v)
-{
+/*@
+    requires \valid(v);
+    requires \valid(v->data);
+    frees v->data;
+    frees v;
+*/
+void vector_free(vector * v){
     if (v && v->data)
     {
         free(v->data);
