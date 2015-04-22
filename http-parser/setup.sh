@@ -3,9 +3,9 @@
 setup_prep(){
 
 	if [ -f out.o ] || [ -f http_parser.o ] || [ -f http_parser.o ]; then 
-		eval make -f my_make.mk clean
+		make -f my_make.mk clean
 	fi
-	eval make -f my_make.mk out.o
+	make -f my_make.mk out.o
 }
 
 setup_klee(){
