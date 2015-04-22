@@ -52,8 +52,8 @@ vector* vector_create(void) {
         assumes is_allocable((unsigned long) (sizeof(vector) + s * sizeof(void *)));
         allocates \result;
         allocates \result->data;
-        ensures \fresh{Old, Here}(\result, sizeof(vector));
-        ensures \fresh{Old, Here}(\result->data, s * sizeof(void *));
+        ensures \fresh(\result, sizeof(vector));
+        ensures \fresh(\result->data, s * sizeof(void *));
         ensures (s > 0 ==> \result->data != NULL && \result->count == 0 && \result->size == s);
 
     behavior null:
@@ -101,7 +101,7 @@ void vector_init(vector *v){
     requires \valid(v);
     behavior alloc:
         assumes !is_allocable((unsigned long) (i * sizeof(void *)));
-        ensures \fresh{Old, Here}(v->data, i * sizeof(void *));
+        ensures \fresh(v->data, i * sizeof(void *));
         ensures (i > 0 ==> v->data != \null && v->size == i && v->count == 0);
     behavior null:
         assumes !is_allocable((unsigned long) (i * sizeof(void *)));
@@ -131,45 +131,21 @@ bool vector_init_with_size(vector *v, size_t i){
 **/
 
 /*@
-    behavior null:
-        assumes v == \null;
-        assigns \nothing;
-        ensures \result == 0;
-
-    behavior valid:
-        assumes v != \null && \valid(v);
-        assigns \nothing;
-        ensures \result == v->count;
-
-    behavior invalid:
-        assumes !\valid(v);
-
-    complete behaviors;
-    disjoint behaviors;
+    requires \valid(v);
+    assigns \nothing;
+    ensures \result == v->count;
 */
 size_t vector_count(vector *v){
-    if (!v) {
+    if (v == NULL) {
         return 0;
     }
     return v->count;
 }
 /*@
-    behavior null:
-        assumes v == \null;
-        assigns \nothing;
-        ensures \result == 0;
+    requires \valid(v);
+    assigns \nothing;
+    ensures \result == v->size;
 
-    behavior valid:
-        assumes \valid(v);
-        assigns \nothing;
-        ensures \result == v->size;
-
-    behavior invalid:
-        assumes !\valid(v);
-
-
-    complete behaviors;
-    disjoint behaviors;
 */
 size_t vector_size(vector *v){
     if(v == NULL){
@@ -197,7 +173,7 @@ size_t vector_size(vector *v){
             is_allocable((unsigned long)(INIT_VEC_SIZE * sizeof(void *)));
         ensures v->size == INIT_VEC_SIZE;
         ensures v->count == 1;
-        ensures \fresh{Old, Here}(v->data, INIT_VEC_SIZE * sizeof(void *));
+        ensures \fresh(v->data, INIT_VEC_SIZE * sizeof(void *));
         ensures v->data[0] == e;
         ensures \forall int i; 1 <= i <= (v->size - 1) ==> v->data[i] == \null;
 
@@ -225,7 +201,7 @@ size_t vector_size(vector *v){
         assumes is_allocable((unsigned long) (v->size * 2 * sizeof(void *)));
         assigns v->data;
         ensures v->size == 2 * \old(v->size);
-        ensures \fresh{Old, Here}(v->data, v->size * sizeof(void *));
+        ensures \fresh(v->data, v->size * sizeof(void *));
         ensures \forall int i; 0 <= i < v->count - 1 ==> v->data[i] == \old(v->data[i]);
         ensures v->data[\old(v->count)] == e;
         ensures v->count == \old(v->count) * 2;
