@@ -1927,9 +1927,6 @@ reexecute:
         break;
 
       default:
-#if KLEE == 0
-    printf("%s", parser->data);
-#endif
         assert(0 && "unhandled state");
         SET_ERRNO(HPE_INVALID_INTERNAL_STATE);
         goto error;
