@@ -57,7 +57,7 @@ vector* vector_create(void) {
         ensures (s > 0 ==> \result->data != NULL && \result->count == 0 && \result->size == s);
 
     behavior null:
-        !assumes is_allocable((unsigned long) (sizeof(vector) + s * sizeof(void *)));
+        assumes !is_allocable((unsigned long) (sizeof(vector) + s * sizeof(void *)));
         ensures \result == \null;
 
     complete behaviors;
