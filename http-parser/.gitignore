@@ -15,7 +15,7 @@ parsertrace_g
 *.a
 *.swp
 klee-out*
-klee-last/
+klee-last*
 
 # Visual Studio uglies
 *.suo
