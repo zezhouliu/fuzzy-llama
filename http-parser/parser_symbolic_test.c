@@ -3685,7 +3685,7 @@ sym_version(char *version)
   return (const char *)buf;  
 }
 
-
+#if KLEE
 int parser_possible_state(){
 	klee_assume(parser->state == s_dead ||
 	parser->state == s_start_req_or_res ||
@@ -3751,8 +3751,7 @@ int parser_possible_state(){
 	parser->state == s_message_done);
 
 }
-
-
+#endif
 
 
 int parser_chunked_states(){
@@ -3834,14 +3833,13 @@ transition(char *buf, int len){
 int
 main (int argc, char **argv)
 {
+#if KLEE
   parser = NULL;
-  //char buf[2];
-  //klee_make_symbolic(&buf, sizeof buf, "eddie's buf");
-  //klee_assume(buf[1] == '\0');
-  if(argc < 2){
+  if(argc < 3){
     printf("Not Enough Arguments");
     return;
   }
+  
   parser_init(HTTP_BOTH);
   parser_possible_state();
 
@@ -3852,4 +3850,10 @@ main (int argc, char **argv)
 	} 
   }
   return 0;
+#else 
+  int i;
+  for(i = 0; i < argc; i++){
+    printf("%s",argv[i]);
+  }
+#endif
 }
