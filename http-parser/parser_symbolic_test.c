@@ -3793,7 +3793,7 @@ int
 valid ()
 {
 	
-  if(!(parser_chunked_states() && !(parser->flags & F_CHUNKED))){
+  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)){
     return 1;
   }	
   if((parser->state == s_chunk_size_start) && !(parser->nread == 1)){
