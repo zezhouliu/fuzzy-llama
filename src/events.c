@@ -32,7 +32,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
     }
 
     // Create a pollsocket_t* with valid descriptors
-    pollsocket_t* ps = (pollsocket_t *) malloc(sizeof(pollsocket_t));
+    pollsocket_t* ps = calloc(1, sizeof(pollsocket_t));
     if (!ps)
     {
         log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);
@@ -42,7 +42,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
     ps->size = valid_count;
 
     // Malloc valid_count number of pollfds
-    ps->pfds = malloc(sizeof(struct pollfd) * valid_count);
+    ps->pfds = calloc(valid_count, sizeof(struct pollfd));
 
     for (unsigned int i = 0; i < valid_count; ++i)
     {
@@ -89,7 +89,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
     if (ps->size != valid_count)
     {
         free(ps->pfds);
-        ps->pfds = malloc(sizeof(struct pollfd) * valid_count);
+        ps->pfds = calloc(valid_count, sizeof(struct pollfd));
     }
 
     for (unsigned int i = 0; i < valid_count; ++i)
