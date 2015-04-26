@@ -6,17 +6,16 @@
  * pollsocket_create(sockets)
  *
  * @Brief: Creates pollsocket_t to handle socket polling
- * 
+ *
  * @param  sockets, vector* containing socket_t*
  * @post:  all socket_t* contained contain valid ufds
  * @return pollsocket_t* wrapper for socket
  */
-pollsocket_t* pollsocket_create(vector* sockets)
-{
+pollsocket_t* pollsocket_create(vector* sockets){
 
     long num_sockets = vector_count(sockets);
 
-    // Validate all sockets before adding 
+    // Validate all sockets before adding
     unsigned int valid_count = 0;
     long valid_indices[num_sockets];
 
@@ -36,7 +35,7 @@ pollsocket_t* pollsocket_create(vector* sockets)
     pollsocket_t* ps = (pollsocket_t *) malloc(sizeof(pollsocket_t));
     if (!ps)
     {
-        log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);       
+        log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);
     }
 
     // Track the count
@@ -69,7 +68,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
     vector* sockets = ps->sockets;
     long num_sockets = vector_count(sockets);
 
-    // Validate all sockets before adding 
+    // Validate all sockets before adding
     unsigned int valid_count = 0;
     long valid_indices[num_sockets];
 
@@ -92,7 +91,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
         free(ps->pfds);
         ps->pfds = malloc(sizeof(struct pollfd) * valid_count);
     }
-    
+
     for (unsigned int i = 0; i < valid_count; ++i)
     {
         unsigned int idx = valid_indices[i];
@@ -101,7 +100,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
         socket_t* s = vector_get(sockets, idx);
         (ps->pfds[i]).fd = socket_get_fd(s);
 
-        // First one is ALWAYS the listener (since its the accepter) , 
+        // First one is ALWAYS the listener (since its the accepter) ,
         // else everyone else is both listener and reader
         if (i == 0)
         {
@@ -122,12 +121,11 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
  *
  * @Brief: Wrapper for poll(struct pollfd *ufds,unsigned int nfds,int timeout)
  *      Instead, we apply verification before we allow for polling
- * @param[in]: ufds, pollsocket_t* containing wrapper 
+ * @param[in]: ufds, pollsocket_t* containing wrapper
  * @param[in]: nfds, unsigned int count of fds
  * @param[in]: timeout, int
  */
-int poll_sockets(pollsocket_t* ps, int timeout)
-{
+int poll_sockets(pollsocket_t* ps, int timeout){
 
     // if valid pollsockets and count > 0
     if (!ps)
@@ -135,14 +133,14 @@ int poll_sockets(pollsocket_t* ps, int timeout)
         log_error("%s, %d: Error invalid ufds\n", __func__, __LINE__);
         return -1;
     }
-    
+
     pollsocket_validate(ps);
 
 
     int result = 0;
 
     printf("Polling on...\n");
-    
+
     for (unsigned i = 0; i < ps->size; ++i)
     {
         printf("%d\n", ps->pfds[i].fd);
