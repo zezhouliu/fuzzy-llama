@@ -13,6 +13,11 @@
  */
 pollsocket_t* pollsocket_create(vector* sockets){
 
+    if (!sockets)
+    {
+        return NULL;
+    }
+
     long num_sockets = vector_count(sockets);
 
     // Validate all sockets before adding
@@ -38,8 +43,9 @@ pollsocket_t* pollsocket_create(vector* sockets){
         log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);
     }
 
-    // Track the count
+    // Track the count and sockets vector
     ps->size = valid_count;
+    ps->sockets = sockets;
 
     // Malloc valid_count number of pollfds
     ps->pfds = calloc(valid_count, sizeof(struct pollfd));
@@ -67,7 +73,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
     // validate all the sockets (that they're valid)
     vector* sockets = ps->sockets;
     long num_sockets = vector_count(sockets);
-
+    
     // Validate all sockets before adding
     unsigned int valid_count = 0;
     long valid_indices[num_sockets];
@@ -86,10 +92,11 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
 
     // If the size is different from the previous size, we want
     // to malloc to resize the number of pfds
-    if (ps->size != valid_count)
+    if (ps->size < valid_count)
     {
         free(ps->pfds);
         ps->pfds = calloc(valid_count, sizeof(struct pollfd));
+        ps->size = valid_count;
     }
 
     for (unsigned int i = 0; i < valid_count; ++i)
@@ -135,7 +142,6 @@ int poll_sockets(pollsocket_t* ps, int timeout){
     }
 
     pollsocket_validate(ps);
-
 
     int result = 0;
 

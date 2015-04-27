@@ -452,6 +452,11 @@ int main(void)
 
             for (unsigned int i = 0; i < ps->size; ++i)
             {
+                if (pfds[i].revents == 0)
+                {
+                    continue;
+                }   
+
                 printf("pfds[%d]: %d\n", i, pfds[i].revents);
 
                 // Listening server: accept new connections here
@@ -471,7 +476,9 @@ int main(void)
                 else if (pfds[i].revents & POLLIN)
                 {
                     // Other sockets, we need to handle the incoming data
-
+                    char buf[2048];
+                    recv(pfds[i].fd, buf, sizeof(buf), 0);
+                    printf("%s\n", buf);
                 }
             }
 
