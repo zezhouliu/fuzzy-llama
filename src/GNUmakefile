@@ -1,7 +1,7 @@
 # Default optimization level
 O ?= 3
 
-all: utils vector socket-base socket-systems sockets events client server
+all: clean utils vector socket-base socket-systems sockets events client server
 
 LIBS = -lm
 
