@@ -3781,10 +3781,10 @@ int valid_parser_header_state() {
             case h_content_length:
             case h_transfer_encoding:
             case h_upgrade:
-              return 0;
+              return 1;
               break;
             default:
-              return 1;
+              return 0;
               break;
   }
 }
@@ -3792,32 +3792,31 @@ int valid_parser_header_state() {
 int
 valid ()
 {
-	
-  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)){
-    return 1;
-  }	
-  if((parser->state == s_chunk_size_start) && !(parser->nread == 1)){
-    return 1; 
+	if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
+    return 0; 
+  }
+  if((parser->state == s_chunk_size_start) && !(parser->nread == 1)) { 
+    return 0; 
   }
   if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)){
-    return 1; 
+    return 0; 
   }
   if((parser->state == s_header_field) && !(valid_parser_header_state())){
-	 return 1;
+   return 0;
   }
-  if(!((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding))) {
-    return 1; 
+  if((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding)) {
+    return 0; 
   }
   if((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
-    return 1; 
+    return 0; 
   }
-  if((parser->state == s_chunk_data_almost_done) && (parser->content_length != 0)) {
-    return 1; 
+  if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)) {
+    return 0; 
   }
   if((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
-    return 1; 
+    return 0; 
   }
-  return 0;
+  return 1;
 }
 
 
