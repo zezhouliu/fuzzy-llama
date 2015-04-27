@@ -425,8 +425,8 @@ int main(void)
 
     int count = 0;
 
-    printf("Trying to accept\n");
-    client_sock = socket_accept(server_sock);
+    // printf("Trying to accept\n");
+    // client_sock = socket_accept(server_sock);
 
     while (1)
     {
