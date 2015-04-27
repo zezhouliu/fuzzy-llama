@@ -433,12 +433,7 @@ int main(void)
         ++count;
         printf("Rep %d\n", count);
 
-<<<<<<< HEAD
         int result = poll_sockets(ps, 5000);
-=======
-        int result = poll_sockets(ps, 1000);
-
->>>>>>> 8a881cf14c2d6e8edd0ad64faa3583834ac8bc3a
         if (result < 0)
         {
             log_error("%s, %d: polling error!\n", __func__, __LINE__);
