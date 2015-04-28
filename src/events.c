@@ -117,7 +117,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
         }
         else
         {
-            (ps->pfds[i]).events = POLLIN | POLLOUT;
+            (ps->pfds[i]).events = POLLIN;
         }
     }
 
@@ -151,10 +151,15 @@ int poll_sockets(pollsocket_t* ps, int timeout){
 
     for (unsigned i = 0; i < ps->size; ++i)
     {
-        printf("%d, %d\n", ps->pfds[i].fd, ps->pfds[i].revents);
+        printf("BEFORE %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents); 
     }
 
     result = poll (ps->pfds, ps->size, timeout);
+
+    // for (unsigned i = 0; i < ps->size; ++i)
+    // {
+    //     printf("AFTER %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents); 
+    // }
 
     return result;
 }

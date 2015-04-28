@@ -425,9 +425,6 @@ int main(void)
 
     int count = 0;
 
-    // printf("Trying to accept\n");
-    // client_sock = socket_accept(server_sock);
-
     while (1)
     {
         ++count;
@@ -474,16 +471,22 @@ int main(void)
                         printf("Accepted client at: %d\n", socket_get_fd(client_sock));
                     }
                 }
-                else if (pfds[i].revents == POLLIN)
+                else if (pfds[i].revents & POLLIN)
                 {
+                    printf("Going into other...\n");
                     // Other sockets, we need to handle the incoming data
                     char buf[2048];
                     recv(pfds[i].fd, buf, sizeof(buf), 0);
                     printf("%s\n", buf);
                 }
+                else if (pfds[i].revents & POLLERR)
+                {
+                    printf("Error with socket %d\n", pfds[i].fd);
+                }
             }
 
         }
+
        
         /* Single threaded for now... */
         // accept_request(client_sock);
