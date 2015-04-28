@@ -57,6 +57,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
         // Match corresponding socket
         socket_t* s = vector_get(sockets, idx);
         (ps->pfds[i]).fd = socket_get_fd(s);
+        (ps->pfds[i]).revents = 0;
     }
 
     return ps;
@@ -106,6 +107,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps)
         // Match corresponding socket
         socket_t* s = vector_get(sockets, idx);
         (ps->pfds[i]).fd = socket_get_fd(s);
+        (ps->pfds[i]).revents = 0;
 
         // First one is ALWAYS the listener (since its the accepter) ,
         // else everyone else is both listener and reader
@@ -149,8 +151,9 @@ int poll_sockets(pollsocket_t* ps, int timeout){
 
     for (unsigned i = 0; i < ps->size; ++i)
     {
-        printf("%d\n", ps->pfds[i].fd);
+        printf("%d, %d\n", ps->pfds[i].fd, ps->pfds[i].revents);
     }
+
     result = poll (ps->pfds, ps->size, timeout);
 
     return result;

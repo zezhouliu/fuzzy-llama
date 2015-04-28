@@ -474,7 +474,7 @@ int main(void)
                         printf("Accepted client at: %d\n", socket_get_fd(client_sock));
                     }
                 }
-                else if (pfds[i].revents)
+                else if (pfds[i].revents == POLLIN)
                 {
                     // Other sockets, we need to handle the incoming data
                     char buf[2048];
