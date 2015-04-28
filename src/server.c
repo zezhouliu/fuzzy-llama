@@ -444,7 +444,7 @@ int main(void)
         }
         else
         {
-            printf("Got a response!\n");
+            printf("Got a response! %d\n", result);
 
             // Check for events on the different sockets
 
@@ -452,6 +452,7 @@ int main(void)
 
             for (unsigned int i = 0; i < ps->size; ++i)
             {
+                // Skip if the socket has no response
                 if (pfds[i].revents == 0)
                 {
                     continue;
@@ -473,7 +474,7 @@ int main(void)
                         printf("Accepted client at: %d\n", socket_get_fd(client_sock));
                     }
                 }
-                else if (pfds[i].revents & POLLIN)
+                else if (pfds[i].revents)
                 {
                     // Other sockets, we need to handle the incoming data
                     char buf[2048];
