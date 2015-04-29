@@ -254,93 +254,94 @@ test_symbolic_parser (const char *buf, enum http_errno err_expected)
 }
 
 #if KLEE
-void parser_possible_state(){
-	klee_assume(parser->state == s_dead);
-	klee_assume(parser->state == s_start_req_or_res);
-	klee_assume(parser->state == s_res_or_resp_H);
-	klee_assume(parser->state == s_start_res);
-	klee_assume(parser->state == s_res_H);
-	klee_assume(parser->state == s_res_HT);
-	klee_assume(parser->state == s_res_HTT);
-	klee_assume(parser->state == s_res_HTTP);
-	klee_assume(parser->state == s_res_first_http_major);
-	klee_assume(parser->state == s_res_http_major);
-	klee_assume(parser->state == s_res_first_http_minor);
-	klee_assume(parser->state == s_res_http_minor);
-	klee_assume(parser->state == s_res_first_status_code);
-	klee_assume(parser->state == s_res_status_code);
-	klee_assume(parser->state == s_res_status_start);
-	klee_assume(parser->state == s_res_status);
-	klee_assume(parser->state == s_res_line_almost_done);
-	klee_assume(parser->state == s_start_req);
-	klee_assume(parser->state == s_req_method);
-	klee_assume(parser->state == s_req_spaces_before_url);
-	klee_assume(parser->state == s_req_schema);
-	klee_assume(parser->state == s_req_schema_slash);
-	klee_assume(parser->state == s_req_schema_slash_slash);
-	klee_assume(parser->state == s_req_server_start);
-	klee_assume(parser->state == s_req_server);
-	klee_assume(parser->state == s_req_server_with_at);
-	klee_assume(parser->state == s_req_path);
-	klee_assume(parser->state == s_req_query_string_start);
-	klee_assume(parser->state == s_req_query_string);
-	klee_assume(parser->state == s_req_fragment_start);
-	klee_assume(parser->state == s_req_fragment);
-	klee_assume(parser->state == s_req_http_start);
-	klee_assume(parser->state == s_req_http_H);
-	klee_assume(parser->state == s_req_http_HT);
-	klee_assume(parser->state == s_req_http_HTT);
-	klee_assume(parser->state == s_req_http_HTTP);
-	klee_assume(parser->state == s_req_first_http_major);
-	klee_assume(parser->state == s_req_http_major);
-	klee_assume(parser->state == s_req_first_http_minor);
-	klee_assume(parser->state == s_req_http_minor);
-	klee_assume(parser->state == s_req_line_almost_done);
-	klee_assume(parser->state == s_header_field_start);
-	klee_assume(parser->state == s_header_field);
-	klee_assume(parser->state == s_header_value_discard_ws);
-	klee_assume(parser->state == s_header_value_discard_ws_almost_done);
-	klee_assume(parser->state == s_header_value_discard_lws);
-	klee_assume(parser->state == s_header_value_start);
-	klee_assume(parser->state == s_header_value);
-	klee_assume(parser->state == s_header_value_lws);
-	klee_assume(parser->state == s_header_almost_done);
-	klee_assume(parser->state == s_chunk_size_start);
-	klee_assume(parser->state == s_chunk_size);
-	klee_assume(parser->state == s_chunk_parameters);
-	klee_assume(parser->state == s_chunk_size_almost_done);
-	klee_assume(parser->state == s_headers_almost_done);
-	klee_assume(parser->state == s_headers_done);
-	klee_assume(parser->state == s_chunk_data);
-	klee_assume(parser->state == s_chunk_data_almost_done);
-	klee_assume(parser->state == s_chunk_data_done);
-	klee_assume(parser->state == s_body_identity);
-	klee_assume(parser->state == s_body_identity_eof);
-	klee_assume(parser->state == s_message_done);
+int valid_parser_states(){
+	switch(parser->state){
+	case s_dead:
+	case s_start_req_or_res:
+	case s_res_or_resp_H:
+	case s_start_res:
+	case s_res_H:
+	case s_res_HT:
+	case s_res_HTT:
+	case s_res_HTTP:
+	case s_res_first_http_major:
+	case s_res_http_major:
+	case s_res_first_http_minor:
+	case s_res_http_minor:
+	case s_res_first_status_code:
+	case s_res_status_code:
+	case s_res_status_start:
+	case s_res_status:
+	case s_res_line_almost_done:
+	case s_start_req:
+	case s_req_method:
+	case s_req_spaces_before_url:
+	case s_req_schema:
+	case s_req_schema_slash:
+	case s_req_schema_slash_slash:
+	case s_req_server_start:
+	case s_req_server:
+	case s_req_server_with_at:
+	case s_req_path:
+	case s_req_query_string_start:
+	case s_req_query_string:
+	case s_req_fragment_start:
+	case s_req_fragment:
+	case s_req_http_start:
+	case s_req_http_H:
+	case s_req_http_HT:
+	case s_req_http_HTT:
+	case s_req_http_HTTP:
+	case s_req_first_http_major:
+	case s_req_http_major:
+	case s_req_first_http_minor:
+	case s_req_http_minor:
+	case s_req_line_almost_done:
+	case s_header_field_start:
+	case s_header_field:
+	case s_header_value_discard_ws:
+	case s_header_value_discard_ws_almost_done:
+	case s_header_value_discard_lws:
+	case s_header_value_start:
+	case s_header_value:
+	case s_header_value_lws:
+	case s_header_almost_done:
+	case s_chunk_size_start:
+	case s_chunk_size:
+	case s_chunk_parameters:
+	case s_chunk_size_almost_done:
+	case s_headers_almost_done:
+	case s_headers_done:
+	case s_chunk_data:
+	case s_chunk_data_almost_done:
+	case s_chunk_data_done:
+	case s_body_identity:
+	case s_body_identity_eof:
+	case s_message_done:
+		return 1;
+	default:
+		return 0;
+	}
 }
 #endif
 
-
+#if KLEE
 int parser_chunked_states(){
 	int tmp;
-	enum state p_state = (enum state) parser->state;
-	if(p_state == s_chunk_size_start){
-		tmp = 0;
-	} else if (p_state == s_chunk_size){
-		tmp = 1;
-	} else if(p_state == s_chunk_parameters){
-		tmp = 2;
-	} else if(p_state == s_chunk_size_almost_done){
-		tmp = 3;
-	}else if(p_state == s_chunk_data){
-		tmp = 4;
-	}else if(p_state == s_chunk_data_almost_done){
-		tmp = 5;
-	}else if(p_state == s_chunk_data_done){
-		tmp = 6;
+	switch(parser->state) {
+	case s_chunk_size_start:
+	case s_chunk_size:
+	case s_chunk_parameters:
+	case s_chunk_size_almost_done:
+	case s_chunk_data:
+	case s_chunk_data_almost_done:
+	case s_chunk_data_done:
+		return 1;
+	default:
+		return 0;
 	}
-	klee_assume(tmp);
 }
+#endif
 
 int valid_parser_header_state() {
   switch (parser->header_state) {
@@ -364,7 +365,7 @@ int valid_parser_header_state() {
               break;
   }
 }
-
+#if KLEE
 int
 valid ()
 {
@@ -394,16 +395,33 @@ valid ()
   }
   return 1;
 }
+#endif
 
-
+#if KLEE
 int
 transition(char *buf, int len){
 	int n;
-#if KLEE == 0
-  printf("%s", buf);
-#endif
 	n = http_parser_execute(parser, &settings_verify, buf, len);
 	return valid();
+}
+#endif
+
+void
+print_http_parser(http_parser *p){
+  printf("\tp->type : %u\n", p->type);
+  printf("\tp->flags : %u\n", p->flags);       
+  printf("\tp->state : %u\n", p->state);       
+  printf("\tp->header_state : %u\n", p->header_state);
+  printf("\tp->index : %u\n", p->index);       
+  printf("\tp->nread : %u\n", p->nread);       
+  printf("\tp->content_length : %llu\n", p->content_length);       
+  printf("\tp->http_major : %hu\n", p->http_major);
+  printf("\tp->http_minor : %hu\n", p->http_minor);
+  printf("\tp->status_code : %u\n", p->status_code); /* responses only */
+  printf("\tp->method : %u\n", p->method);       /* requests only */
+  printf("\tp->http_errno : %u\n", p->http_errno);
+  printf("\tp->upgrade : %u\n", p->upgrade);
+  printf("\tp->data : %u\n", p->data); 
 }
 
 int
@@ -422,7 +440,7 @@ main (int argc, char **argv)
   parser = malloc(sizeof(http_parser));
   memcpy(parser, argv[2], sizeof(*parser));
 
-  parser_possible_state();
+  valid_parser_states();
   
   if(valid()){
 	if(!transition(argv[1], 1)){
@@ -432,9 +450,11 @@ main (int argc, char **argv)
   }
   return 0;
 #else 
-  int i;
-  for(i = 0; i < argc; i++){
-    printf("%s",argv[i]);
-  }
+  printf("Buffer : %s\n", argv[1]);
+  printf("Parser\n");
+  print_http_parser((http_parser *) argv[2]);
+  int n = http_parser_execute((http_parser *) argv[2], &settings_verify,argv[0],1);
+  printf("Characters Parsed: %d\n", n);
+  printf("\n");
 #endif
 }

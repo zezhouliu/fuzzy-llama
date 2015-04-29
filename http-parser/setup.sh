@@ -10,7 +10,8 @@ setup_prep(){
 
 setup_klee(){
 	#exec klee --optimize --emit-all-errors --libc=uclibc --posix-runtime ./out.o $1
-	exec klee --only-output-states-covering-new --optimize --emit-all-errors  --libc=uclibc --posix-runtime ./out.o --sym-args 2 2 40
+	#exec klee --only-output-states-covering-new --optimize --emit-all-errors  --libc=uclibc --posix-runtime ./out.o --sym-args 2 2 40
+	exec klee --optimize --emit-all-errors  --libc=uclibc --posix-runtime ./out.o --sym-args 2 2 40
 }
 
 setup_bin(){
