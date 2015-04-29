@@ -185,32 +185,32 @@ void phone_parser_init() {
 }
 
 void parser_possible_state() { 
-klee_assume(parser->s_prev == s_start || 
-parser->s_prev == s_digit_one ||
-parser->s_prev == s_digit_two ||
-parser->s_prev == s_digit_three ||
-parser->s_prev == s_digit_four ||
-parser->s_prev == s_digit_five ||
-parser->s_prev == s_digit_six ||
-parser->s_prev == s_digit_seven ||
-parser->s_prev == s_digit_eight ||
-parser->s_prev == s_digit_nine ||
-parser->s_prev == s_digit_done ||
-parser->s_prev == s_fail); 
 
-klee_assume(parser->s_cur == s_start || 
-parser->s_cur == s_digit_one ||
-parser->s_cur == s_digit_two ||
-parser->s_cur == s_digit_three ||
-parser->s_cur == s_digit_four ||
-parser->s_cur == s_digit_five ||
-parser->s_cur == s_digit_six ||
-parser->s_cur == s_digit_seven ||
-parser->s_cur == s_digit_eight ||
-parser->s_cur == s_digit_nine ||
-parser->s_cur == s_digit_done ||
-parser->s_cur == s_fail); 
+klee_assume(parser->s_prev == s_start);
+klee_assume(parser->s_prev == s_digit_one);
+klee_assume(parser->s_prev == s_digit_two);
+klee_assume(parser->s_prev == s_digit_three); 
+klee_assume(parser->s_prev == s_digit_four); 
+klee_assume(parser->s_prev == s_digit_five); 
+klee_assume(parser->s_prev == s_digit_six);
+klee_assume(parser->s_prev == s_digit_seven);
+klee_assume(parser->s_prev == s_digit_eight);
+klee_assume(parser->s_prev == s_digit_nine);
+klee_assume(parser->s_prev == s_digit_done)
+klee_assume(parser->s_prev == s_fail);
 
+klee_assume(parser->s_cur == s_start);
+klee_assume(parser->s_cur == s_digit_one);
+klee_assume(parser->s_cur == s_digit_two);
+klee_assume(parser->s_cur == s_digit_three); 
+klee_assume(parser->s_cur == s_digit_four); 
+klee_assume(parser->s_cur == s_digit_five); 
+klee_assume(parser->s_cur == s_digit_six);
+klee_assume(parser->s_cur == s_digit_seven);
+klee_assume(parser->s_cur == s_digit_eight);
+klee_assume(parser->s_cur == s_digit_nine);
+klee_assume(parser->s_cur == s_digit_done)
+klee_assume(parser->s_cur == s_fail);
 }
 
 /* Solution */
