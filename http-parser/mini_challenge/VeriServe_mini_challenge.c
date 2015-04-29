@@ -1,4 +1,5 @@
 #include <stdio.h> 
+#include <stdlib.h> 
 #include <assert.h>
 #include <string.h>
 #include <klee/klee.h>
@@ -36,7 +37,7 @@ void phone_parser_init();
 void parser_possible_state(); 
 
 // Globals 
-phone_parser * parser; 
+phone_parser *parser; 
 
 
 int
@@ -179,6 +180,7 @@ transition(char *buf, int len){
 }
 
 void phone_parser_init() { 
+  parser = (phone_parser *) malloc(sizeof(phone_parser));
   klee_make_symbolic(parser, sizeof(phone_parser), "parser");
 }
 
