@@ -137,38 +137,37 @@ parse_phone_char(enum state s, const char ch)
 
 
 int valid() { 
-  // if ((parser->s_prev == s_start) && !(parser->s_cur == s_digit_one || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_one) && !(parser->s_cur == s_digit_two || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_two) && !(parser->s_cur == s_digit_three || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_three) && !(parser->s_cur == s_digit_four || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_four) && !(parser->s_cur == s_digit_five || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_five) && !(parser->s_cur == s_digit_six || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_six) && !(parser->s_cur == s_digit_seven || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_seven) && !(parser->s_cur == s_digit_eight || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_eight) && !(parser->s_cur == s_digit_nine || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // if ((parser->s_prev == s_digit_nine) && !(parser->s_cur == s_digit_done || parser->s_cur == s_fail)) { 
-  //   return 0; 
-  // }
-  // return 1; 
-  return 0; 
+   if ((parser->s_prev == s_start) && !(parser->s_cur == s_digit_one || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_one) && !(parser->s_cur == s_digit_two || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_two) && !(parser->s_cur == s_digit_three || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_three) && !(parser->s_cur == s_digit_four || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_four) && !(parser->s_cur == s_digit_five || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_five) && !(parser->s_cur == s_digit_six || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_six) && !(parser->s_cur == s_digit_seven || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_seven) && !(parser->s_cur == s_digit_eight || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_eight) && !(parser->s_cur == s_digit_nine || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   if ((parser->s_prev == s_digit_nine) && !(parser->s_cur == s_digit_done || parser->s_cur == s_fail)) { 
+     return 0; 
+   }
+   return 1;  
 }
 
 int
@@ -176,8 +175,9 @@ transition(char *buf, int len){
   int s;
   s = parse_phone_char(parser->s_cur, *buf); 
   parser->s_prev = parser->s_cur; 
-  parser->s_cur = s; 
-  return valid();
+  parser->s_cur = s;
+  return 0;  
+ // return valid();
 }
 
 void phone_parser_init() { 
