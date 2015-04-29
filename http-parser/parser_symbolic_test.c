@@ -170,19 +170,15 @@ static http_parser_settings settings_verify =
 void
 parser_init (enum http_parser_type type)
 {
-  num_messages = 0;
-
+  
   assert(parser == NULL);
-
   parser = malloc(sizeof(http_parser));
-
 #if KLEE
   http_parser_init_symbolic(parser, type);
 #else
   http_parser_init(parser, type);
 #endif
 
-  memset(&messages, 0, sizeof messages);
 }
 
 void
@@ -256,70 +252,70 @@ test_symbolic_parser (const char *buf, enum http_errno err_expected)
 #if KLEE
 int valid_parser_states(){
 	switch(parser->state){
-	case s_dead:
-	case s_start_req_or_res:
-	case s_res_or_resp_H:
-	case s_start_res:
-	case s_res_H:
-	case s_res_HT:
-	case s_res_HTT:
-	case s_res_HTTP:
-	case s_res_first_http_major:
-	case s_res_http_major:
-	case s_res_first_http_minor:
-	case s_res_http_minor:
-	case s_res_first_status_code:
-	case s_res_status_code:
-	case s_res_status_start:
-	case s_res_status:
-	case s_res_line_almost_done:
-	case s_start_req:
-	case s_req_method:
-	case s_req_spaces_before_url:
-	case s_req_schema:
-	case s_req_schema_slash:
-	case s_req_schema_slash_slash:
-	case s_req_server_start:
-	case s_req_server:
-	case s_req_server_with_at:
-	case s_req_path:
-	case s_req_query_string_start:
-	case s_req_query_string:
-	case s_req_fragment_start:
-	case s_req_fragment:
-	case s_req_http_start:
-	case s_req_http_H:
-	case s_req_http_HT:
-	case s_req_http_HTT:
-	case s_req_http_HTTP:
-	case s_req_first_http_major:
-	case s_req_http_major:
-	case s_req_first_http_minor:
-	case s_req_http_minor:
-	case s_req_line_almost_done:
-	case s_header_field_start:
-	case s_header_field:
-	case s_header_value_discard_ws:
-	case s_header_value_discard_ws_almost_done:
-	case s_header_value_discard_lws:
-	case s_header_value_start:
-	case s_header_value:
-	case s_header_value_lws:
-	case s_header_almost_done:
-	case s_chunk_size_start:
-	case s_chunk_size:
-	case s_chunk_parameters:
-	case s_chunk_size_almost_done:
-	case s_headers_almost_done:
-	case s_headers_done:
-	case s_chunk_data:
-	case s_chunk_data_almost_done:
-	case s_chunk_data_done:
-	case s_body_identity:
-	case s_body_identity_eof:
-	case s_message_done:
-		return 1;
-	default:
+	  case s_dead:
+	  case s_start_req_or_res:
+	  case s_res_or_resp_H:
+	  case s_start_res:
+	  case s_res_H:
+	  case s_res_HT:
+	  case s_res_HTT:
+	  case s_res_HTTP:
+	  case s_res_first_http_major:
+	  case s_res_http_major:
+	  case s_res_first_http_minor:
+	  case s_res_http_minor:
+	  case s_res_first_status_code:
+	  case s_res_status_code:
+	  case s_res_status_start:
+	  case s_res_status:
+	  case s_res_line_almost_done:
+	  case s_start_req:
+	  case s_req_method:
+	  case s_req_spaces_before_url:
+	  case s_req_schema:
+	  case s_req_schema_slash:
+	  case s_req_schema_slash_slash:
+	  case s_req_server_start:
+	  case s_req_server:
+	  case s_req_server_with_at:
+	  case s_req_path:
+	  case s_req_query_string_start:
+	  case s_req_query_string:
+	  case s_req_fragment_start:
+	  case s_req_fragment:
+	  case s_req_http_start:
+	  case s_req_http_H:
+	  case s_req_http_HT:
+	  case s_req_http_HTT:
+	  case s_req_http_HTTP:
+	  case s_req_first_http_major:
+	  case s_req_http_major:
+	  case s_req_first_http_minor:
+	  case s_req_http_minor:
+	  case s_req_line_almost_done:
+	  case s_header_field_start:
+	  case s_header_field:
+	  case s_header_value_discard_ws:
+	  case s_header_value_discard_ws_almost_done:
+	  case s_header_value_discard_lws:
+	  case s_header_value_start:
+	  case s_header_value:
+	  case s_header_value_lws:
+	  case s_header_almost_done:
+	  case s_chunk_size_start:
+	  case s_chunk_size:
+	  case s_chunk_parameters:
+	  case s_chunk_size_almost_done:
+	  case s_headers_almost_done:
+	  case s_headers_done:
+	  case s_chunk_data:
+	  case s_chunk_data_almost_done:
+	  case s_chunk_data_done:
+	  case s_body_identity:
+	  case s_body_identity_eof:
+	  case s_message_done:
+	  	return 1;
+	  default:
 		return 0;
 	}
 }
@@ -329,15 +325,15 @@ int valid_parser_states(){
 int parser_chunked_states(){
 	int tmp;
 	switch(parser->state) {
-	case s_chunk_size_start:
-	case s_chunk_size:
-	case s_chunk_parameters:
-	case s_chunk_size_almost_done:
-	case s_chunk_data:
-	case s_chunk_data_almost_done:
-	case s_chunk_data_done:
-		return 1;
-	default:
+	  case s_chunk_size_start:
+	  case s_chunk_size:
+	  case s_chunk_parameters:
+	  case s_chunk_size_almost_done:
+	  case s_chunk_data:
+	  case s_chunk_data_almost_done:
+	  case s_chunk_data_done:
+	  	return 1;
+	  default:
 		return 0;
 	}
 }
@@ -359,16 +355,17 @@ int valid_parser_header_state() {
             case h_transfer_encoding:
             case h_upgrade:
               return 1;
-              break;
             default:
               return 0;
-              break;
   }
 }
 #if KLEE
 int
 valid ()
 {
+  if(!valid_parser_states()){
+    return 0;
+  }
   if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
     return 0; 
   }
@@ -432,23 +429,22 @@ main (int argc, char **argv)
   if(argc < 3)
     return 0;
   
-  // parser_init(HTTP_BOTH);
+  if(strlen(argv[1]) != 2)
+    return 0; 
+
   if(strlen(argv[2]) != sizeof(*parser))
     return 0;
   
-  
-  parser = malloc(sizeof(http_parser));
-  memcpy(parser, argv[2], sizeof(*parser));
+  //parser = malloc(sizeof(http_parser));
+  //memcpy(parser, argv[2], sizeof(*parser));
+  parser_init(HTTP_BOTH);
+  //parser = (http_parser *)argv[2];
 
-  valid_parser_states();
-  
   if(valid()){
 	if(!transition(argv[1], 1)){
-        printf("%s", argv[1]);
 		klee_assert(0);	
 	} 
   }
-  return 0;
 #else 
   printf("Buffer : %s\n", argv[1]);
   printf("Parser\n");
@@ -457,4 +453,6 @@ main (int argc, char **argv)
   printf("Characters Parsed: %d\n", n);
   printf("\n");
 #endif
+
+  return 0;
 }
