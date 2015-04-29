@@ -3687,82 +3687,220 @@ sym_version(char *version)
 
 #if KLEE
 int parser_possible_state(){
-	klee_assume(parser->state == s_dead ||
-	parser->state == s_start_req_or_res ||
-	parser->state == s_res_or_resp_H ||
-	parser->state == s_start_res ||
-	parser->state == s_res_H ||
-	parser->state == s_res_HT ||
-	parser->state == s_res_HTT ||
-	parser->state == s_res_HTTP ||
-	parser->state == s_res_first_http_major ||
-	parser->state == s_res_http_major ||
-	parser->state == s_res_first_http_minor ||
-	parser->state == s_res_http_minor ||
-	parser->state == s_res_first_status_code ||
-	parser->state == s_res_status_code ||
-	parser->state == s_res_status_start ||
-	parser->state == s_res_status ||
-	parser->state == s_res_line_almost_done ||
-	parser->state == s_start_req ||
-	parser->state == s_req_method ||
-	parser->state == s_req_spaces_before_url ||
-	parser->state == s_req_schema ||
-	parser->state == s_req_schema_slash ||
-	parser->state == s_req_schema_slash_slash ||
-	parser->state == s_req_server_start ||
-	parser->state == s_req_server ||
-	parser->state == s_req_server_with_at ||
-	parser->state == s_req_path ||
-	parser->state == s_req_query_string_start ||
-	parser->state == s_req_query_string ||
-	parser->state == s_req_fragment_start ||
-	parser->state == s_req_fragment ||
-	parser->state == s_req_http_start ||
-	parser->state == s_req_http_H ||
-	parser->state == s_req_http_HT ||
-	parser->state == s_req_http_HTT ||
-	parser->state == s_req_http_HTTP ||
-	parser->state == s_req_first_http_major ||
-	parser->state == s_req_http_major ||
-	parser->state == s_req_first_http_minor ||
-	parser->state == s_req_http_minor ||
-	parser->state == s_req_line_almost_done ||
-	parser->state == s_header_field_start ||
-	parser->state == s_header_field ||
-	parser->state == s_header_value_discard_ws ||
-	parser->state == s_header_value_discard_ws_almost_done ||
-	parser->state == s_header_value_discard_lws ||
-	parser->state == s_header_value_start ||
-	parser->state == s_header_value ||
-	parser->state == s_header_value_lws ||
-	parser->state == s_header_almost_done ||
-	parser->state == s_chunk_size_start ||
-	parser->state == s_chunk_size ||
-	parser->state == s_chunk_parameters ||
-	parser->state == s_chunk_size_almost_done ||
-	parser->state == s_headers_almost_done ||
-	parser->state == s_headers_done ||
-	parser->state == s_chunk_data ||
-	parser->state == s_chunk_data_almost_done ||
-	parser->state == s_chunk_data_done ||
-	parser->state == s_body_identity ||
-	parser->state == s_body_identity_eof ||
-	parser->state == s_message_done);
-
+	int tmp;
+	if(parser->state == s_dead){
+		tmp=1;
+	}
+	else if(parser->state == s_start_req_or_res){
+		tmp=2;
+	}
+	else if(parser->state == s_res_or_resp_H){
+		tmp=3;
+	}
+	else if(parser->state == s_start_res){
+		tmp=4;
+	}
+	else if(parser->state == s_res_H){
+		tmp=5;
+	}
+	else if(parser->state == s_res_HT){
+		tmp=6;
+	}
+	else if(parser->state == s_res_HTT){
+		tmp=7;
+	}
+	else if(parser->state == s_res_HTTP){
+		tmp=8;
+	}
+	else if(parser->state == s_res_first_http_major){
+		tmp=9;
+	}
+	else if(parser->state == s_res_http_major){
+		tmp=10;
+	}
+	else if(parser->state == s_res_first_http_minor){
+		tmp=11;
+	}
+	else if(parser->state == s_res_http_minor){
+		tmp=12;
+	}
+	else if(parser->state == s_res_first_status_code){
+		tmp=13;
+	}
+	else if(parser->state == s_res_status_code){
+		tmp=14;
+	}
+	else if(parser->state == s_res_status_start){
+		tmp=15;
+	}
+	else if(parser->state == s_res_status){
+		tmp=16;
+	}
+	else if(parser->state == s_res_line_almost_done){
+		tmp=17;
+	}
+	else if(parser->state == s_start_req){
+		tmp=18;
+	}
+	else if(parser->state == s_req_method){
+		tmp=19;
+	}
+	else if(parser->state == s_req_spaces_before_url){
+		tmp=20;
+	}
+	else if(parser->state == s_req_schema){
+		tmp=21;
+	}
+	else if(parser->state == s_req_schema_slash){
+		tmp=22;
+	}
+	else if(parser->state == s_req_schema_slash_slash){
+		tmp=23;
+	}
+	else if(parser->state == s_req_server_start){
+		tmp=24;
+	}
+	else if(parser->state == s_req_server){
+		tmp=25;
+	}
+	else if(parser->state == s_req_server_with_at){
+		tmp=26;
+	}
+	else if(parser->state == s_req_path){
+		tmp=27;
+	}
+	else if(parser->state == s_req_query_string_start){
+		tmp=28;
+	}
+	else if(parser->state == s_req_query_string){
+		tmp=29;
+	}
+	else if(parser->state == s_req_fragment_start){
+		tmp=30;
+	}
+	else if(parser->state == s_req_fragment){
+		tmp=31;
+	}
+	else if(parser->state == s_req_http_start){
+		tmp=32;
+	}
+	else if(parser->state == s_req_http_H){
+		tmp=33;
+	}
+	else if(parser->state == s_req_http_HT){
+		tmp=34;
+	}
+	else if(parser->state == s_req_http_HTT){
+		tmp=35;
+	}
+	else if(parser->state == s_req_http_HTTP){
+		tmp=36;
+	}
+	else if(parser->state == s_req_first_http_major){
+		tmp=37;
+	}
+	else if(parser->state == s_req_http_major){
+		tmp=38;
+	}
+	else if(parser->state == s_req_first_http_minor){
+		tmp=39;
+	}
+	else if(parser->state == s_req_http_minor){
+		tmp=40;
+	}
+	else if(parser->state == s_req_line_almost_done){
+		tmp=41;
+	}
+	else if(parser->state == s_header_field_start){
+		tmp=42;
+	}
+	else if(parser->state == s_header_field){
+		tmp=43;
+	}
+	else if(parser->state == s_header_value_discard_ws){
+		tmp=44;
+	}
+	else if(parser->state == s_header_value_discard_ws_almost_done){
+		tmp=44;
+	}
+	else if(parser->state == s_header_value_discard_lws){
+		tmp=45;
+	}
+	else if(parser->state == s_header_value_start){
+		tmp=46;
+	}
+	else if(parser->state == s_header_value){
+		tmp=47;
+	}
+	else if(parser->state == s_header_value_lws){
+		tmp=48;
+	}
+	else if(parser->state == s_header_almost_done){
+		tmp=49;
+	}
+	else if(parser->state == s_chunk_size_start){
+		tmp=50;
+	}
+	else if(parser->state == s_chunk_size){
+		tmp=51;
+	}
+	else if(parser->state == s_chunk_parameters){
+		tmp=52;
+	}
+	else if(parser->state == s_chunk_size_almost_done){
+		tmp=53;
+	}
+	else if(parser->state == s_headers_almost_done){
+		tmp=54;
+	}
+	else if(parser->state == s_headers_done){
+		tmp=55;
+	}
+	else if(parser->state == s_chunk_data){
+		tmp=56;
+	}
+	else if(parser->state == s_chunk_data_almost_done){
+		tmp=57;
+	}
+	else if(parser->state == s_chunk_data_done){
+		tmp=58;
+	}
+	else if(parser->state == s_body_identity){
+		tmp=59;
+	}
+	else if(parser->state == s_body_identity_eof){
+		tmp=60;
+	}
+	else if(parser->state == s_message_done){
+		tmp=61;
+	}else{
+		return -1;
+	}
+	klee_assume(tmp); 
+	return 0;
 }
 #endif
 
 
 int parser_chunked_states(){
+	int tmp;
 	enum state p_state = (enum state) parser->state;
-	return (p_state == s_chunk_size_start 
-		|| p_state == s_chunk_size
-		|| p_state == s_chunk_parameters
-		|| p_state == s_chunk_size_almost_done
-		|| p_state == s_chunk_data
-		|| p_state == s_chunk_data_almost_done
-		|| p_state == s_chunk_data_done);
+	if(p_state == s_chunk_size_start){
+		tmp = 0;
+	} else if (p_state == s_chunk_size){
+		tmp = 1;
+	} else if(p_state == s_chunk_parameters){
+		tmp = 2;
+	} else if(p_state == s_chunk_size_almost_done){
+		tmp = 3;
+	}else if(p_state == s_chunk_data){
+		tmp = 4;
+	}else if(p_state == s_chunk_data_almost_done){
+		tmp = 5;
+	}else if(p_state == s_chunk_data_done){
+		tmp = 6;
+	}
+	klee_assume(tmp);
 }
 
 int valid_parser_header_state() {
@@ -3834,13 +3972,20 @@ main (int argc, char **argv)
 {
 #if KLEE
   parser = NULL;
-  if(argc < 2){
-    printf("Not Enough Arguments");
-    return;
-  }
+  if(argc < 3)
+    return 0;
   
-  parser_init(HTTP_BOTH);
-  parser_possible_state();
+  // parser_init(HTTP_BOTH);
+  if(strlen(argv[2]) != sizeof(*parser))
+    return 0;
+  
+  
+  parser = malloc(sizeof(http_parser));
+  memcpy(parser, argv[2], sizeof(*parser));
+
+  int err = parser_possible_state();
+  if(err == -1)
+	return 0; 
 
   if(valid()){
 	if(!transition(argv[1], 1)){
