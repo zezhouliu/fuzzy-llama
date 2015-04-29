@@ -68,6 +68,11 @@ vector* vector_create(void) {
 vector* vector_create_with_size(size_t s) {
 
     vector* v = calloc(1, sizeof(vector));
+    if (!v)
+    {
+        return NULL;
+    }
+
     if(!vector_init_with_size(v, s)){
         free(v);
         return NULL;
@@ -232,7 +237,7 @@ void vector_push(vector *v, void *e){
     }
 
     if (v->size == 0) {
-        void ** ptr = (void **) malloc(INIT_VEC_SIZE * sizeof(void *));
+        void ** ptr = (void **) calloc(INIT_VEC_SIZE, sizeof(void *));
         if(ptr == NULL){
             return;
         }
@@ -362,9 +367,12 @@ void vector_delete(vector * v, size_t index){
     frees v;
 */
 void vector_free(vector * v){
-    if (v && v->data)
+    if (v)
     {
-        free(v->data);
+        if (v->data)
+        {
+            free(v->data);
+        }
         free(v);
     }
 }

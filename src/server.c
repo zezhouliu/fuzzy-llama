@@ -425,20 +425,12 @@ int main(void)
 
     int count = 0;
 
-    printf("Trying to accept\n");
-    client_sock = socket_accept(server_sock);
-
     while (1)
     {
         ++count;
         printf("Rep %d\n", count);
 
-<<<<<<< HEAD
         int result = poll_sockets(ps, 5000);
-=======
-        int result = poll_sockets(ps, 1000);
-
->>>>>>> 8a881cf14c2d6e8edd0ad64faa3583834ac8bc3a
         if (result < 0)
         {
             log_error("%s, %d: polling error!\n", __func__, __LINE__);
@@ -449,7 +441,7 @@ int main(void)
         }
         else
         {
-            printf("Got a response!\n");
+            printf("Got a response! %d\n", result);
 
             // Check for events on the different sockets
 
@@ -457,6 +449,12 @@ int main(void)
 
             for (unsigned int i = 0; i < ps->size; ++i)
             {
+                // Skip if the socket has no response
+                if (pfds[i].revents == 0)
+                {
+                    continue;
+                }   
+
                 printf("pfds[%d]: %d\n", i, pfds[i].revents);
 
                 // Listening server: accept new connections here
@@ -475,12 +473,20 @@ int main(void)
                 }
                 else if (pfds[i].revents & POLLIN)
                 {
+                    printf("Going into other...\n");
                     // Other sockets, we need to handle the incoming data
-
+                    char buf[2048];
+                    recv(pfds[i].fd, buf, sizeof(buf), 0);
+                    printf("%s\n", buf);
+                }
+                else if (pfds[i].revents & POLLERR)
+                {
+                    printf("Error with socket %d\n", pfds[i].fd);
                 }
             }
 
         }
+
        
         /* Single threaded for now... */
         // accept_request(client_sock);

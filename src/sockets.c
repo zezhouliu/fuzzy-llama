@@ -75,6 +75,21 @@ socket_t * socket_startup(unsigned short port)
     // {
     //     log_error("%s:L %d: could not set non-blocking\n", __func__, __LINE__);
     // }
+    // 
+    // Set as reusable and nonblocking
+    int on = 1;
+    int rc = setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
+    if (rc < 0)
+    {
+        log_error("%s:L %d: could not set as reusable");
+        goto failure;
+    }
+    int r_nonblocking = fcntl(s->fd, F_SETFL, O_NONBLOCK);
+    if (r_nonblocking < 0)
+    {
+        log_error("%s:L %d: could not set as nonblocking");
+        goto failure;
+    }
 
     // Try to bind the socket
     // if (bind(s->fd, (struct sockaddr *)&(s->name), sizeof(s->name)) < 0)

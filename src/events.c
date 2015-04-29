@@ -17,6 +17,10 @@
  */
 pollsocket_t* pollsocket_create(vector* sockets){
 
+    if (!sockets){
+        return NULL;
+    }
+
     size_t num_sockets = vector_count(sockets);
 
     // Validate all sockets before adding
@@ -35,16 +39,19 @@ pollsocket_t* pollsocket_create(vector* sockets){
     }
 
     // Create a pollsocket_t* with valid descriptors
-    pollsocket_t* ps = (pollsocket_t *) malloc(sizeof(pollsocket_t));
+    pollsocket_t* ps = calloc(1, sizeof(pollsocket_t));
     if (!ps){
         log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);
+        return NULL;
     }
 
-    // Track the count
+
+    // Track the count and sockets vector
     ps->size = valid_count;
+    ps->sockets = sockets;
 
     // Malloc valid_count number of pollfds
-    ps->pfds = malloc(sizeof(struct pollfd) * valid_count);
+    ps->pfds = calloc(valid_count, sizeof(struct pollfd));
 
     for (unsigned int i = 0; i < valid_count; ++i){
         unsigned int idx = valid_indices[i];
@@ -52,6 +59,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
         // Match corresponding socket
         socket_t* s = vector_get(sockets, idx);
         (ps->pfds[i]).fd = socket_get_fd(s);
+        (ps->pfds[i]).revents = 0;
     }
 
     return ps;
@@ -59,7 +67,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
 
 /*@
  requires \valid(ps);
- requires \valid(ps->sockets);
+ requires valid_vector(ps->sockets);
  requires \valid(ps->pfds);
 */
 pollsocket_t* pollsocket_validate(pollsocket_t* ps){
@@ -90,7 +98,8 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
     // to malloc to resize the number of pfds
     if (ps->size != valid_count){
         free(ps->pfds);
-        ps->pfds = malloc(sizeof(struct pollfd) * valid_count);
+        ps->pfds = calloc(valid_count, sizeof(struct pollfd));
+        ps->size = valid_count;
     }
 
     for (unsigned int i = 0; i < valid_count; ++i){
@@ -99,12 +108,13 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
         // Match corresponding socket
         socket_t* s = vector_get(sockets, idx);
         (ps->pfds[i]).fd = socket_get_fd(s);
+        (ps->pfds[i]).revents = 0;
 
         // First one is ALWAYS the listener (since its the accepter) ,
         // else everyone else is both listener and reader
         if (i == 0){
             (ps->pfds[i]).events = POLLIN;
-        } else{
+        } else {
             (ps->pfds[i]).events = POLLIN | POLLOUT;
         }
     }
@@ -125,14 +135,12 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
 int poll_sockets(pollsocket_t* ps, int timeout){
 
     // if valid pollsockets and count > 0
-    if (!ps)
-    {
+    if (!ps){
         log_error("%s, %d: Error invalid ufds\n", __func__, __LINE__);
         return -1;
     }
 
     pollsocket_validate(ps);
-
 
     int result = 0;
 
@@ -140,9 +148,15 @@ int poll_sockets(pollsocket_t* ps, int timeout){
 
     for (unsigned i = 0; i < ps->size; ++i)
     {
-        printf("%d\n", ps->pfds[i].fd);
+        printf("BEFORE %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents);
     }
+
     result = poll (ps->pfds, ps->size, timeout);
+
+    // for (unsigned i = 0; i < ps->size; ++i)
+    // {
+    //     printf("AFTER %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents);
+    // }
 
     return result;
 }
