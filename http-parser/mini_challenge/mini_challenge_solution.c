@@ -170,9 +170,6 @@ int valid() {
    if ((parser->s_prev == s_digit_nine) && !(parser->s_cur == s_digit_done || parser->s_cur == s_fail)) { 
      return 0; 
    }
-  if ((parser->s_prev == s_digit_nine) && (parser->s_cur == s_digit_done || parser->s_cur == s_fail)) { 
-     return 0; 
-   }
    return 1;  
 }
 
