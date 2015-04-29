@@ -137,6 +137,9 @@ parse_phone_char(enum state s, const char ch)
 
 
 int valid() { 
+   if ((parser->s_prev < 1 || parser->s_prev > 12) || (parser->s_cur < 1 || parser->s_cur > 12)) {
+    return 0;
+   }
    if ((parser->s_prev == s_start) && !(parser->s_cur == s_digit_one || parser->s_cur == s_fail)) { 
      return 0; 
    }
@@ -184,40 +187,40 @@ void phone_parser_init() {
   klee_make_symbolic(parser, sizeof(phone_parser), "parser");
 }
 
-void parser_possible_state() { 
+// void parser_possible_state() { 
 
-klee_assume(parser->s_prev == s_start);
-klee_assume(parser->s_prev == s_digit_one);
-klee_assume(parser->s_prev == s_digit_two);
-klee_assume(parser->s_prev == s_digit_three); 
-klee_assume(parser->s_prev == s_digit_four); 
-klee_assume(parser->s_prev == s_digit_five); 
-klee_assume(parser->s_prev == s_digit_six);
-klee_assume(parser->s_prev == s_digit_seven);
-klee_assume(parser->s_prev == s_digit_eight);
-klee_assume(parser->s_prev == s_digit_nine);
-klee_assume(parser->s_prev == s_digit_done);
-klee_assume(parser->s_prev == s_fail);
+// klee_assume(parser->s_prev == s_start);
+// klee_assume(parser->s_prev == s_digit_one);
+// klee_assume(parser->s_prev == s_digit_two);
+// klee_assume(parser->s_prev == s_digit_three); 
+// klee_assume(parser->s_prev == s_digit_four); 
+// klee_assume(parser->s_prev == s_digit_five); 
+// klee_assume(parser->s_prev == s_digit_six);
+// klee_assume(parser->s_prev == s_digit_seven);
+// klee_assume(parser->s_prev == s_digit_eight);
+// klee_assume(parser->s_prev == s_digit_nine);
+// klee_assume(parser->s_prev == s_digit_done);
+// klee_assume(parser->s_prev == s_fail);
 
-klee_assume(parser->s_cur == s_start);
-klee_assume(parser->s_cur == s_digit_one);
-klee_assume(parser->s_cur == s_digit_two);
-klee_assume(parser->s_cur == s_digit_three); 
-klee_assume(parser->s_cur == s_digit_four); 
-klee_assume(parser->s_cur == s_digit_five); 
-klee_assume(parser->s_cur == s_digit_six);
-klee_assume(parser->s_cur == s_digit_seven);
-klee_assume(parser->s_cur == s_digit_eight);
-klee_assume(parser->s_cur == s_digit_nine);
-klee_assume(parser->s_cur == s_digit_done);
-klee_assume(parser->s_cur == s_fail);
-}
+// klee_assume(parser->s_cur == s_start);
+// klee_assume(parser->s_cur == s_digit_one);
+// klee_assume(parser->s_cur == s_digit_two);
+// klee_assume(parser->s_cur == s_digit_three); 
+// klee_assume(parser->s_cur == s_digit_four); 
+// klee_assume(parser->s_cur == s_digit_five); 
+// klee_assume(parser->s_cur == s_digit_six);
+// klee_assume(parser->s_cur == s_digit_seven);
+// klee_assume(parser->s_cur == s_digit_eight);
+// klee_assume(parser->s_cur == s_digit_nine);
+// klee_assume(parser->s_cur == s_digit_done);
+// klee_assume(parser->s_cur == s_fail);
+// }
 
 /* Solution */
 int main(int argc, char **argv) { 
 
   phone_parser_init(); 
-  parser_possible_state();
+  // parser_possible_state();
 
   if(valid()){
   if(!transition(argv[1], 1)){
