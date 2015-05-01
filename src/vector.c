@@ -273,7 +273,7 @@ void vector_push(vector *v, void *e){
 /*@
     requires \valid(v);
     requires index < v->count <= v->size;
-    requires \valid_range(v->data,0,v->size);
+    requires \valid(v->data+(0..v->size));
     requires \separated(v, v->data + (0 .. v->size - 1));
     assigns v->data[index];
     ensures v->data[index] == e;
