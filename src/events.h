@@ -13,11 +13,10 @@
 #include "vector.h"
 #include "sockets.h"
 
-typedef struct pollsocket_
-{
-	vector* sockets;
-	struct pollfd* pfds;
-	unsigned int size;
+typedef struct pollsocket_{
+    vector* sockets;
+    struct pollfd* pfds;
+    unsigned int size;
 } pollsocket_t;
 
 pollsocket_t* pollsocket_create(vector* sockets);

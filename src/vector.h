@@ -17,3 +17,9 @@ void vector_set(vector*, size_t, void*);
 void *vector_get(vector*, size_t);
 void vector_delete(vector*, size_t);
 void vector_free(vector*);
+
+
+/*@
+ predicate valid_vector{L} (vector * v) =
+    \valid(v) && \valid_range(v,0, v->size) && v->count <= v->size;
+*/
