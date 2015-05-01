@@ -366,10 +366,10 @@ valid ()
   if(!valid_parser_states()){
     return 0;
   }
-  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
+  if((parser->state == s_chunk_size_start) && !(parser->nread == 1)) { 
     return 0; 
   }
-  if((parser->state == s_chunk_size_start) && !(parser->nread == 1)) { 
+  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
     return 0; 
   }
   if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)){
