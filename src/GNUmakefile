@@ -1,7 +1,7 @@
 # Default optimization level
 O ?= 3
 
-all: clean utils vector socket-base socket-systems sockets events client server
+all: clean utils vector socket-base socket-systems sockets events parser client server
 
 LIBS = -lm
 
@@ -32,12 +32,16 @@ client: client.o
 	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o socket-base.o socket-systems.o sockets.o $^ $(LDFLAGS) $(LIBS),LINK $@)
 
 server: server.o
-	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o vector.o socket-base.o socket-systems.o sockets.o events.o $^ $(LDFLAGS) $(LIBS),LINK $@)
+	$(call run,$(CC) $(CFLAGS) $(DEPCFLAGS) $(MATHFLAGS) -lm -o $@ utils.o vector.o socket-base.o socket-systems.o sockets.o events.o http-parser/http_parser.o $^ $(LDFLAGS) $(LIBS),LINK $@)
 
 clean: clean-main
 clean-main:
 	$(call run,rm -f client server *.o *~ *.bak core *.core,CLEAN)
 	$(call run,rm -rf $(DEPSDIR))
+	@$(MAKE) -s -C http-parser clean
+
+parser: $(BUILDSTAMP)
+	$(call run, $(MAKE) -C http-parser package, $<)
 
 distclean: clean
 
