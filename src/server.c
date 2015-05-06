@@ -44,7 +44,7 @@ void not_found(socket_t*);
 void serve_file(socket_t*, const char *);
 void serve_file1(int client, const char *filename);
 void unimplemented(socket_t*);
-void accept_request1(int fd);
+void parse_request(socket_t*);
 
 // Global to handle closing sockets
 socket_t* server_sock;
@@ -110,9 +110,8 @@ int url_cb (http_parser *p, const char *at, size_t len)
         strncpy(filepath, path, strlen(path));
         strncat(filepath, buf, strlen(buf));
 
-        // Get client fd
-        int* client_fd = (int *) p->data;
-        int client = *client_fd;
+        // Get client socket
+        socket_t* client_socket = (socket_t*) p->data;
 
         // Check permissions of files
         struct stat st;
@@ -138,14 +137,14 @@ int url_cb (http_parser *p, const char *at, size_t len)
                 else
                 {
                     // First send the headers
-                    send(client, r_head, strlen(r_head), 0);
+                    socket_send(client_socket, r_head, strlen(r_head), 0);
                     char filebuf[BUF_SIZE];
 
                     if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
                     {
                         while (!feof(resource))
                         {
-                            send(client, filebuf, strlen(filebuf), 0);
+                            socket_send(client_socket, filebuf, strlen(filebuf), 0);
                             if (fgets(filebuf, sizeof(filebuf), resource) == NULL)
                             {
                                 // Error
@@ -161,9 +160,16 @@ int url_cb (http_parser *p, const char *at, size_t len)
     return 0;
 }
 
-void accept_request1(int fd)
+void parse_request(socket_t* s)
 {
     printf("Parsing request...\n");
+
+    // Basic socket API features
+    if (s == NULL || socket_get_status(s) != SOCKET_OPEN)
+    {
+        return;
+    }
+
     http_parser_settings settings =
     {
         .on_message_begin = 0,
@@ -175,19 +181,15 @@ void accept_request1(int fd)
         .on_headers_complete = 0,
         .on_message_complete = 0,
     };
-    // settings.on_url = my_url_callback;
-    // settings.on_header_field = my_header_field_callback;
-    // settings.on_header_value = my_header_value_callback;
 
     http_parser *parser = malloc(sizeof(http_parser));
     http_parser_init(parser, HTTP_REQUEST);
-    parser->data = &fd;
+    parser->data = s;
 
     size_t len = 80 * 1024, nparsed;
     char buf[len];
     memset(buf, 0, len);
-    ssize_t recved;
-    recved = recv(fd, buf, len, 0);
+    ssize_t recved = socket_recv(s, buf, len, 0);
     printf("---------------\n");
     if (recved < 0)
     {
@@ -659,7 +661,7 @@ int main(void)
                 else
                 {
                     printf("Request: S(%d)\n", socket_get_fd(s));
-                    accept_request1(socket_get_fd(s));
+                    parse_request(s);
                     socket_close(s);
                 }
             }
