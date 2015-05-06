@@ -24,25 +24,23 @@
 #define ISspace(x) isspace((int)(x))
 
 #define SERVER_STRING "Server: httpd/0.1.0\r\n"
+#define STATIC_PATH "static"
 
 // Buffer size defines (handle more elegantly later...)
 #define BUF_SIZE 1024
 #define MAX_LENGTH 255
 #define MAX_PATH 512 
 
+#define HTTP_STATUS_OK 200
+#define HTTP_STATUS_FORBIDDEN 403
+#define HTTP_STATUS_NOT_FOUND 404
+
+
 // Prototypes
-void accept_request(socket_t*);
 void bad_request(socket_t*);
-void cat(socket_t*, FILE *);
-void cat1(int client, FILE *resource);
 void cannot_execute(socket_t*);
 void error_die(const char *);
 void execute_cgi(socket_t*, const char *, const char *, const char *);
-void headers(socket_t*, const char *);
-void headers1(int, const char *);
-void not_found(socket_t*);
-void serve_file(socket_t*, const char *);
-void serve_file1(int client, const char *filename);
 void unimplemented(socket_t*);
 void parse_request(socket_t*);
 
@@ -51,13 +49,33 @@ socket_t* server_sock;
 socket_t* client_sock;
 
 
-char* response_header (void)
+/**
+ * [response_header  description]
+ * @return  [description]
+ */
+char* response_header (int status)
 {
-    char* hd1 = "HTTP/1.0 200 OK\r\n";
+    char* hd1 = "";
+    if (status == HTTP_STATUS_OK)
+    {
+        // 200 okay status.
+        hd1 = "HTTP/1.0 200 OK\r\n";
+    }
+    else if (status == HTTP_STATUS_FORBIDDEN)
+    {
+        // 403 forbidden status.
+        hd1 = "HTTP/1.0 403 Forbidden";
+    }
+    else if (status == HTTP_STATUS_NOT_FOUND)
+    {
+        // 404 not found status.
+        hd1 = "HTTP/1.0 404 Not Found\r\n";
+    }
+
+
     char* hd2 = SERVER_STRING;
     char* hd3 = "Content-Type: text/html\r\n";
     char* hd4 = "\r\n";
-
     int total_len = strlen(hd1) + strlen(hd2) + strlen(hd3) + strlen(hd4) + 1;
 
     char* buf = malloc(total_len);
@@ -67,56 +85,62 @@ char* response_header (void)
     strncat(buf, hd2, strlen(hd2));
     strncat(buf, hd3, strlen(hd3));
     strncat(buf, hd4, strlen(hd4));
-    // send(client, buf, strlen(buf), 0);
-
     return buf;
 }
 
-int route_file(int client, const char* filename)
-{
-    (void) client;
-    (void) filename;
-    response_header();
-
-    return 0;
-}
-
+/**
+ * url_cb(p, at, len)
+ *
+ * @Brief: urb_cb is called when the URL has been parsed from request string.
+ *     Given the URL, url_cb creates the appropriate response header and tries 
+ *     to serve the file if it exists and permissions are granted.  
+ *     Else, returns 404 not found.
+ * @param  p   http_parser* associated with url parsing
+ * @param  at  const char* pointing to start of URL string
+ * @param  len size_t of length of the URL string
+ * @return     0 if success, else 1
+ */
 int url_cb (http_parser *p, const char *at, size_t len)
 {
-    char* buf = malloc(len + 1);
-    buf[len] = '\0';
-    for (size_t i = 0; i < len; ++i)
-    {
-        buf[i] = at[i];
-    }
+    // Parse our the url string
+    char* url_string = malloc(len + 1);
+    url_string[len] = '\0';
+    strncpy(url_string, at, len);
 
-    printf("URL: %s\n", buf);
+    printf("URL: %s\n", url_string);
     if (p->method == 1)
     {
         // If it is a GET-method, then we should try to serve it
-        char* r_head = response_header();
-        char* path = "static";
+        char* path = STATIC_PATH;
 
         // If it's looking for the home file, then redirect to index
-        if (strncmp(buf, "/", 1) == 0)
+        if (len == 1 && strncmp(url_string, "/", 1) == 0)
         {
-            buf = "/index.html";
+            free(url_string);
+            url_string = "/index.html";
         }
         
         // Serve the files requested if it exists.
-        int total_len = strlen(path) + strlen(buf) + 1;
+        int total_len = strlen(path) + strlen(url_string) + 1;
         char* filepath = malloc(total_len);
         filepath[total_len - 1] = '\0';
         strncpy(filepath, path, strlen(path));
-        strncat(filepath, buf, strlen(buf));
+        strncat(filepath, url_string, strlen(url_string));
 
         // Get client socket
         socket_t* client_socket = (socket_t*) p->data;
 
+        // Create header pointer
+        char* r_head = NULL;
+
         // Check permissions of files
         struct stat st;
-        if (stat(filepath, &st) == -1) {
-            // Cannot find permissions for file!
+        if (stat(filepath, &st) == -1) 
+        {
+            // Cannot find permissions for file! Return 404 Not Found
+            r_head = response_header(HTTP_STATUS_NOT_FOUND);
+            socket_send(client_socket, r_head, strlen(r_head), 0);
+            printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
         }
         else
         {
@@ -126,18 +150,34 @@ int url_cb (http_parser *p, const char *at, size_t len)
                 char* homefile = "/index.html";
                 strncat(filepath, homefile, strlen(homefile));
             }
-            if ((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH)) {
-                // Check for read permissions
-                // Send the headers then the file
+
+            // Check for read-permissions
+            if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
+            {
+                // If not permissions, then return forbidden
+                r_head = response_header(HTTP_STATUS_FORBIDDEN);
+                socket_send(client_socket, r_head, strlen(r_head), 0);
+                printf("%d: Permission denied.\n", HTTP_STATUS_FORBIDDEN);
+
+            }
+            else 
+            {
+                // If permissions, then serve the file if possible
                 FILE *resource = NULL;
                 resource = fopen(filepath, "r");
-                if (resource == NULL) {
-                    // Cannot open file!
+                if (resource == NULL) 
+                {
+                    // Cannot open file! Return 404 Not Found
+                    r_head = response_header(HTTP_STATUS_NOT_FOUND);
+                    socket_send(client_socket, r_head, strlen(r_head), 0);
+                    printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
                 }
                 else
                 {
-                    // First send the headers
+
+                    r_head = response_header(HTTP_STATUS_OK);
                     socket_send(client_socket, r_head, strlen(r_head), 0);
+                    // First send the headers
                     char filebuf[BUF_SIZE];
 
                     if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
@@ -151,15 +191,40 @@ int url_cb (http_parser *p, const char *at, size_t len)
                             }
                         }
                     }
+                    fclose(resource);
                 }
-                fclose(resource);
             }
         }
+
+        if (r_head)
+        {
+
+            free(r_head);
+            printf("%d\n", __LINE__);
+        }
+        if (filepath)
+        {
+            free(filepath);
+            printf("%d\n", __LINE__);
+        }
+    }
+
+    if (len != 1 && url_string)
+    {
+        free(url_string);
+        printf("%d\n", __LINE__);
     }
 
     return 0;
 }
 
+/**
+ * parse_request(s)
+ *
+ * @Brief: Parses the request from socket s using HTTP-Parser.
+ * @param[s]: s, socket_t* from which to receive the request.
+ * 
+ **/
 void parse_request(socket_t* s)
 {
     printf("Parsing request...\n");
@@ -203,95 +268,8 @@ void parse_request(socket_t* s)
     printf("---------------\n");
     printf("%s", buf);
     printf("---------------\n");
-    // serve_file1(fd, "static/index.html");
 }
 
-/**********************************************************************/
-/* A request has caused a call to accept() on the server port to
- * return.  Process the request appropriately.
- * Parameters: the socket connected to the client */
-/**********************************************************************/
-void accept_request(socket_t* client)
-{
-    char buf[BUF_SIZE];
-    int numchars;
-    char method[MAX_LENGTH];
-    char url[MAX_LENGTH];
-    char path[MAX_PATH];
-    size_t i, j;
-    struct stat st;
-
-    int cgi = 0;      /* becomes true if server decides this is a CGI
-                       * program */
-
-    char *query_string = NULL;
-
-    numchars = socket_read_line(client, buf, sizeof(buf));
-
-    i = 0; j = 0;
-    while (!ISspace(buf[j]) && (i < sizeof(method) - 1))
-    {
-        method[i] = buf[j];
-        i++; j++;
-    }
-    method[i] = '\0';
-
-    if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
-    {
-        unimplemented(client);
-        return;
-    }
-
-    if (strcasecmp(method, "POST") == 0)
-        cgi = 1;
-
-    i = 0;
-    while (ISspace(buf[j]) && (j < sizeof(buf)))
-        j++;
-    while (!ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < sizeof(buf)))
-    {
-        url[i] = buf[j];
-        i++; j++;
-    }
-    url[i] = '\0';
-
-    if (strcasecmp(method, "GET") == 0)
-    {
-        query_string = url;
-        while ((*query_string != '?') && (*query_string != '\0'))
-            query_string++;
-        if (*query_string == '?')
-        {
-            cgi = 1;
-            *query_string = '\0';
-            query_string++;
-        }
-    }
-
-    sprintf(path, "htdocs%s", url);
-    if (path[strlen(path) - 1] == '/')
-        strcat(path, "index.html");
-    if (stat(path, &st) == -1) {
-        while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
-            numchars = socket_read_line(client, buf, sizeof(buf));
-        not_found(client);
-    }
-    else
-    {
-        if ((st.st_mode & S_IFMT) == S_IFDIR)
-            strcat(path, "/index.html");
-        if ((st.st_mode & S_IXUSR) ||
-            (st.st_mode & S_IXGRP) ||
-            (st.st_mode & S_IXOTH))
-            cgi = 1;
-        if (!cgi)
-            serve_file(client, path);
-        else
-            execute_cgi(client, path, method, query_string);
-    }
-
-    socket_close(client);
-}
 
 /**********************************************************************/
 /* Inform the client that a request it has made has a problem.
@@ -311,49 +289,6 @@ void bad_request(socket_t* client)
     socket_send(client, buf, sizeof(buf), 0);
     sprintf(buf, "such as a POST without a Content-Length.\r\n");
     socket_send(client, buf, sizeof(buf), 0);
-}
-
-/**********************************************************************/
-/* Put the entire contents of a file out on a socket.  This function
- * is named after the UNIX "cat" command, because it might have been
- * easier just to do something like pipe, fork, and exec("cat").
- * Parameters: the client socket descriptor
- *             FILE pointer for the file to cat */
-/**********************************************************************/
-void cat(socket_t* client, FILE *resource)
-{
-    char buf[BUF_SIZE];
-
-    if (fgets(buf, sizeof(buf), resource) != NULL)
-    {
-        while (!feof(resource))
-        {
-            socket_send(client, buf, strlen(buf), 0);
-            if (fgets(buf, sizeof(buf), resource) == NULL)
-            {
-                // Error
-            }
-        }
-    }
-    
-}
-
-void cat1(int client, FILE *resource)
-{
-    char buf[BUF_SIZE];
-
-    if (fgets(buf, sizeof(buf), resource) != NULL)
-    {
-        while (!feof(resource))
-        {
-            send(client, buf, strlen(buf), 0);
-            if (fgets(buf, sizeof(buf), resource) == NULL)
-            {
-                // Error
-            }
-        }
-    }
-    
 }
 
 /**********************************************************************/
@@ -500,86 +435,6 @@ void headers(socket_t* client, const char *filename)
     socket_send(client, buf, strlen(buf), 0);
     strcpy(buf, "\r\n");
     socket_send(client, buf, strlen(buf), 0);
-}
-
-/**********************************************************************/
-/* Give a client a 404 not found status message. */
-/**********************************************************************/
-void not_found(socket_t* client)
-{
-    char buf[BUF_SIZE];
-
-    sprintf(buf, "HTTP/1.0 404 NOT FOUND\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, SERVER_STRING);
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "Content-Type: text/html\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "<HTML><TITLE>Not Found</TITLE>\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "<BODY><P>The server could not fulfill\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "your request because the resource specified\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "is unavailable or nonexistent.\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "</BODY></HTML>\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-}
-
-/**********************************************************************/
-/* Send a regular file to the client.  Use headers, and report
- * errors to client if they occur.
- * Parameters: a pointer to a file structure produced from the socket
- *              file descriptor
- *             the name of the file to serve */
-/**********************************************************************/
-void serve_file(socket_t* client, const char *filename)
-{
-    FILE *resource = NULL;
-    int numchars = 1;
-    char buf[BUF_SIZE];
-
-    buf[0] = 'A'; buf[1] = '\0';
-    while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
-        numchars = socket_read_line(client, buf, sizeof(buf));
-
-    resource = fopen(filename, "r");
-    if (resource == NULL)
-        not_found(client);
-    else
-    {
-        headers(client, filename);
-        cat(client, resource);
-    }
-    fclose(resource);
-}
-
-void serve_file1(int client, const char *filename)
-{
-    FILE *resource = NULL;
-    (void) client;
-    (void)filename;
-    // int numchars = 1;
-    // char buf[BUF_SIZE];
-
-    // buf[0] = 'A'; buf[1] = '\0';
-    // while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
-        // numchars = socket_read_line(client, buf, sizeof(buf));
-
-    resource = fopen(filename, "r");
-    if (resource == NULL)
-    {
-        // not_found(client);
-    }
-    else
-    {
-        // headers1(client, filename);
-        // cat1(client, resource);
-    }
-    fclose(resource);
 }
 
 /**********************************************************************/
