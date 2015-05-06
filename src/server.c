@@ -641,52 +641,30 @@ int main(void)
         else
         {
             printf("     Got a response!\n");
-            // vector* response_sockets = poll_response(ps);
-            // Check for events on the different sockets
-
-            struct pollfd* pfds = ps->pfds;
-
-            for (unsigned int i = 0; i < ps->size; ++i)
+            vector* response_sockets = poll_response(ps);
+            for (long unsigned int i = 0; i < vector_count(response_sockets); ++i)
             {
-                // Skip if the socket has no response
-                if (pfds[i].revents == 0)
+                socket_t* s = vector_get(response_sockets, i);
+                if (s == NULL)
                 {
-                    continue;
-                }   
-
-                printf("pfds[%d]: %d\n", i, pfds[i].revents);
-
-                // Listening server: accept new connections here
-                if (i == 0)
-                {
-                    struct pollfd pfd = pfds[0];
-                    if (pfd.revents & POLLIN)
-                    {
-                        client_sock = socket_accept(server_sock);
-                
-                        // Track our added sockets
-                        vector_push(sockets, client_sock);
-                    }
+                    log_error("Invalid socket\n");
                 }
-                else if (pfds[i].revents && pfds[i].revents & POLLIN)
+
+                // First socket MAY be the listening socket
+                if (s == server_sock)
                 {
-                    printf("Response from S(%d)\n", pfds[i].fd);
-                    // Other sockets, we need to handle the incoming data
-                    accept_request1(pfds[i].fd);
-                    close(pfds[i].fd);
-                    vector_delete(sockets, 1);
+                    client_sock = socket_accept(server_sock);
+                    vector_push(sockets, client_sock);
                 }
-                else if (pfds[i].revents & POLLERR)
+                else
                 {
-                    printf("Error with socket %d\n", pfds[i].fd);
+                    printf("Request: S(%d)\n", socket_get_fd(s));
+                    accept_request1(socket_get_fd(s));
+                    socket_close(s);
                 }
             }
 
         }
-
-       
-        /* Single threaded for now... */
-        // accept_request(client_sock);
     }
 
     socket_close(server_sock);

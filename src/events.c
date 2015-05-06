@@ -199,6 +199,12 @@ vector* poll_response(pollsocket_t* ps)
             continue;
         }
 
+        if (pfds[i].revents == POLLERR)
+        {
+            log_out("POLLING ERROR on S(%d)\n", pfds[i].fd);
+            continue;
+        }
+
         socket_t* s = vector_get(sockets, i);
 
         // Only handle the socket if it's valid
