@@ -89,7 +89,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
         sstatus_t socket_status = socket_get_status(s);
 
         if (socket_status != SOCKET_OPEN) {
-            invalid_indices[valid_count] = i;
+            invalid_indices[invalid_count] = i;
             ++invalid_count;
         }
     }
@@ -171,9 +171,9 @@ vector* poll_response(pollsocket_t* ps)
         log_error("%s, %d: Error invalid ps\n", __func__, __LINE__);
         return NULL;
     }
-
-    pollfd* pfds = ps->pfds;
-    if (pfds == NULL)
+    vector* sockets = ps->sockets;
+    struct pollfd* pfds = ps->pfds;
+    if (sockets == NULL || pfds == NULL)
     {
         return NULL;
     }
@@ -208,5 +208,5 @@ vector* poll_response(pollsocket_t* ps)
         }
     }
 
-    return response_sockets
+    return response_sockets;
 }
