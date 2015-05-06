@@ -17,7 +17,7 @@
  */
 pollsocket_t* pollsocket_create(vector* sockets){
 
-    if (!sockets){
+    if (sockets == NULL){
         return NULL;
     }
 
@@ -40,7 +40,7 @@ pollsocket_t* pollsocket_create(vector* sockets){
 
     // Create a pollsocket_t* with valid descriptors
     pollsocket_t* ps = calloc(1, sizeof(pollsocket_t));
-    if (!ps){
+    if (ps == NULL){
         log_error("%s, %d: Could not malloc for pollsocket_t\n", __func__, __LINE__);
         return NULL;
     }
@@ -115,7 +115,7 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
         if (i == 0){
             (ps->pfds[i]).events = POLLIN;
         } else {
-            (ps->pfds[i]).events = POLLIN | POLLOUT;
+            (ps->pfds[i]).events = POLLIN;
         }
     }
 
@@ -148,15 +148,9 @@ int poll_sockets(pollsocket_t* ps, int timeout){
 
     for (unsigned i = 0; i < ps->size; ++i)
     {
-        printf("BEFORE %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents);
+        printf("    S(%d)\n", ps->pfds[i].fd);
     }
 
     result = poll (ps->pfds, ps->size, timeout);
-
-    // for (unsigned i = 0; i < ps->size; ++i)
-    // {
-    //     printf("AFTER %d, %d, %d\n", ps->pfds[i].fd, ps->pfds[i].events, ps->pfds[i].revents);
-    // }
-
     return result;
 }

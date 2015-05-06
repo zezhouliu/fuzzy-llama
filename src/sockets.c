@@ -208,10 +208,6 @@ socket_t* socket_accept(socket_t* s)
     socklen_t addr_size = sizeof(their_addr);
     new_socket->fd = accept(socket_get_fd(s), (struct sockaddr *)&their_addr, &addr_size);
 
-    // unsigned client_name_len = sizeof(new_socket->name);
-    // new_socket->fd = accept(socket_get_fd(s),
-    //     (struct sockaddr *)&(new_socket->name), &(client_name_len));
-
     // Error?
     if (new_socket->fd < 0)
     {

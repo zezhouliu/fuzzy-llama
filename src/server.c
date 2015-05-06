@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "sockets.h"
 #include "events.h"
+#include "http-parser/http_parser.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -33,17 +34,175 @@
 void accept_request(socket_t*);
 void bad_request(socket_t*);
 void cat(socket_t*, FILE *);
+void cat1(int client, FILE *resource);
 void cannot_execute(socket_t*);
 void error_die(const char *);
 void execute_cgi(socket_t*, const char *, const char *, const char *);
 void headers(socket_t*, const char *);
+void headers1(int, const char *);
 void not_found(socket_t*);
 void serve_file(socket_t*, const char *);
+void serve_file1(int client, const char *filename);
 void unimplemented(socket_t*);
+void accept_request1(int fd);
 
 // Global to handle closing sockets
 socket_t* server_sock;
 socket_t* client_sock;
+
+
+char* response_header (void)
+{
+    char* hd1 = "HTTP/1.0 200 OK\r\n";
+    char* hd2 = SERVER_STRING;
+    char* hd3 = "Content-Type: text/html\r\n";
+    char* hd4 = "\r\n";
+
+    int total_len = strlen(hd1) + strlen(hd2) + strlen(hd3) + strlen(hd4) + 1;
+
+    char* buf = malloc(total_len);
+    buf[total_len - 1] = '\0';
+
+    strncpy(buf, hd1, strlen(hd1));
+    strncat(buf, hd2, strlen(hd2));
+    strncat(buf, hd3, strlen(hd3));
+    strncat(buf, hd4, strlen(hd4));
+    // send(client, buf, strlen(buf), 0);
+
+    return buf;
+}
+
+int route_file(int client, const char* filename)
+{
+    (void) client;
+    (void) filename;
+    response_header();
+
+    return 0;
+}
+
+int url_cb (http_parser *p, const char *at, size_t len)
+{
+    char* buf = malloc(len + 1);
+    buf[len] = '\0';
+    for (size_t i = 0; i < len; ++i)
+    {
+        buf[i] = at[i];
+    }
+
+    printf("URL: %s\n", buf);
+    if (p->method == 1)
+    {
+        // If it is a GET-method, then we should try to serve it
+        char* r_head = response_header();
+        char* path = "static";
+
+        // If it's looking for the home file, then redirect to index
+        if (strncmp(buf, "/", 1) == 0)
+        {
+            buf = "/index.html";
+        }
+        
+        // Serve the files requested if it exists.
+        int total_len = strlen(path) + strlen(buf) + 1;
+        char* filepath = malloc(total_len);
+        filepath[total_len - 1] = '\0';
+        strncpy(filepath, path, strlen(path));
+        strncat(filepath, buf, strlen(buf));
+
+        // Get client fd
+        int* client_fd = (int *) p->data;
+        int client = *client_fd;
+
+        // Check permissions of files
+        struct stat st;
+        if (stat(filepath, &st) == -1) {
+            // Cannot find permissions for file!
+        }
+        else
+        {
+            printf("Trying to send... %s\n", filepath);
+            // If it is a base directory, then we should serve base index.html
+            if ((st.st_mode & S_IFMT) == S_IFDIR) {
+                char* homefile = "/index.html";
+                strncat(filepath, homefile, strlen(homefile));
+            }
+            if ((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH)) {
+                // Check for read permissions
+                // Send the headers then the file
+                FILE *resource = NULL;
+                resource = fopen(filepath, "r");
+                if (resource == NULL) {
+                    // Cannot open file!
+                }
+                else
+                {
+                    // First send the headers
+                    send(client, r_head, strlen(r_head), 0);
+                    char filebuf[BUF_SIZE];
+
+                    if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
+                    {
+                        while (!feof(resource))
+                        {
+                            send(client, filebuf, strlen(filebuf), 0);
+                            if (fgets(filebuf, sizeof(filebuf), resource) == NULL)
+                            {
+                                // Error
+                            }
+                        }
+                    }
+                }
+                fclose(resource);
+            }
+        }
+    }
+
+    return 0;
+}
+
+void accept_request1(int fd)
+{
+    printf("Parsing request...\n");
+    http_parser_settings settings =
+    {
+        .on_message_begin = 0,
+        .on_header_field = 0,
+        .on_header_value = 0,
+        .on_url = url_cb,
+        .on_status = 0,
+        .on_body = 0,
+        .on_headers_complete = 0,
+        .on_message_complete = 0,
+    };
+    // settings.on_url = my_url_callback;
+    // settings.on_header_field = my_header_field_callback;
+    // settings.on_header_value = my_header_value_callback;
+
+    http_parser *parser = malloc(sizeof(http_parser));
+    http_parser_init(parser, HTTP_REQUEST);
+    parser->data = &fd;
+
+    size_t len = 800 * 1024, nparsed;
+    char buf[len];
+    memset(buf, 0, len);
+    ssize_t recved;
+    recved = recv(fd, buf, len, 0);
+    printf("---------------\n");
+    if (recved < 0)
+    {
+        // Error
+    }
+
+    nparsed = http_parser_execute(parser, &settings, buf, recved);
+    (void) nparsed;
+    printf("---------------\n");
+    printf("Original Request:\n");
+    printf("---------------\n");
+    printf("%s", buf);
+    printf("---------------\n");
+    // serve_file1(fd, "static/index.html");
+}
 
 /**********************************************************************/
 /* A request has caused a call to accept() on the server port to
@@ -168,6 +327,24 @@ void cat(socket_t* client, FILE *resource)
         while (!feof(resource))
         {
             socket_send(client, buf, strlen(buf), 0);
+            if (fgets(buf, sizeof(buf), resource) == NULL)
+            {
+                // Error
+            }
+        }
+    }
+    
+}
+
+void cat1(int client, FILE *resource)
+{
+    char buf[BUF_SIZE];
+
+    if (fgets(buf, sizeof(buf), resource) != NULL)
+    {
+        while (!feof(resource))
+        {
+            send(client, buf, strlen(buf), 0);
             if (fgets(buf, sizeof(buf), resource) == NULL)
             {
                 // Error
@@ -378,6 +555,31 @@ void serve_file(socket_t* client, const char *filename)
     fclose(resource);
 }
 
+void serve_file1(int client, const char *filename)
+{
+    FILE *resource = NULL;
+    (void) client;
+    (void)filename;
+    // int numchars = 1;
+    // char buf[BUF_SIZE];
+
+    // buf[0] = 'A'; buf[1] = '\0';
+    // while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
+        // numchars = socket_read_line(client, buf, sizeof(buf));
+
+    resource = fopen(filename, "r");
+    if (resource == NULL)
+    {
+        // not_found(client);
+    }
+    else
+    {
+        // headers1(client, filename);
+        // cat1(client, resource);
+    }
+    fclose(resource);
+}
+
 /**********************************************************************/
 /* Inform the client that the requested web method has not been
  * implemented.
@@ -415,10 +617,7 @@ int main(void)
 
     // 1 Acceptor, 4 Clients
     vector* sockets = vector_create_with_size(5);
-
     vector_push(sockets, server_sock);
-
-    printf("SERVER SOCKET: %d\n", socket_get_fd(server_sock));
 
     pollsocket_t* ps = pollsocket_create(sockets);
     (void) ps;
@@ -441,7 +640,7 @@ int main(void)
         }
         else
         {
-            printf("Got a response! %d\n", result);
+            printf("     Got a response!\n");
 
             // Check for events on the different sockets
 
@@ -467,17 +666,15 @@ int main(void)
                 
                         // Track our added sockets
                         vector_push(sockets, client_sock);
-
-                        printf("Accepted client at: %d\n", socket_get_fd(client_sock));
                     }
                 }
-                else if (pfds[i].revents & POLLIN)
+                else if (pfds[i].revents && pfds[i].revents & POLLIN)
                 {
-                    printf("Going into other...\n");
+                    printf("Response from S(%d)\n", pfds[i].fd);
                     // Other sockets, we need to handle the incoming data
-                    char buf[2048];
-                    recv(pfds[i].fd, buf, sizeof(buf), 0);
-                    printf("%s\n", buf);
+                    accept_request1(pfds[i].fd);
+                    close(pfds[i].fd);
+                    vector_delete(sockets, 1);
                 }
                 else if (pfds[i].revents & POLLERR)
                 {

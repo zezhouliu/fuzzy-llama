@@ -9,7 +9,7 @@ GCC ?= $(shell if gcc-4.9 --version | grep gcc >/dev/null; then echo gcc-4.9; \
 ifeq ($(PREFER_GCC),1)
 CC = $(shell if $(GCC) --version | grep gcc >/dev/null; then echo $(GCC); \
 	else echo clang; fi 2>/dev/null)
-override CFLAGS += $(shell if $(GCC) --version | grep gcc >/dev/null; then echo -std=gnu99 -g -ggdb -Wall -Wextra -Werror -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
+override CFLAGS += $(shell if $(GCC) --version | grep gcc >/dev/null; then echo -std=gnu99 -g -ggdb -Wall -Wextra -Wno-cast-align -Wno-padded -pedantic -I$(INCLUDE); \
 	else echo -std=c99 -g -ggdb -Weverything -Werror -Wno-cast-align -Wno-documentation -Wno-padded -pedantic -I$(INCLUDE); fi 2>/dev/null)
 
 else
