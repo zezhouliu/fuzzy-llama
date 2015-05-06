@@ -183,7 +183,7 @@ void accept_request1(int fd)
     http_parser_init(parser, HTTP_REQUEST);
     parser->data = &fd;
 
-    size_t len = 800 * 1024, nparsed;
+    size_t len = 80 * 1024, nparsed;
     char buf[len];
     memset(buf, 0, len);
     ssize_t recved;
