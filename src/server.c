@@ -641,7 +641,7 @@ int main(void)
         else
         {
             printf("     Got a response!\n");
-
+            // vector* response_sockets = poll_response(ps);
             // Check for events on the different sockets
 
             struct pollfd* pfds = ps->pfds;

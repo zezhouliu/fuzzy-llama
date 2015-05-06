@@ -81,29 +81,38 @@ pollsocket_t* pollsocket_validate(pollsocket_t* ps){
     long num_sockets = vector_count(sockets);
 
     // Validate all sockets before adding
-    unsigned int valid_count = 0;
-    long valid_indices[num_sockets];
+    unsigned int invalid_count = 0;
+    long invalid_indices[num_sockets];
 
     for (long i = 0; i < num_sockets; ++i){
         socket_t* s = vector_get(sockets, i);
         sstatus_t socket_status = socket_get_status(s);
 
-        if (socket_status == SOCKET_OPEN){
-            valid_indices[valid_count] = i;
-            ++valid_count;
+        if (socket_status != SOCKET_OPEN) {
+            invalid_indices[valid_count] = i;
+            ++invalid_count;
         }
     }
 
+    // Remove all the invalid indices, going from high->low
+    for (unsigned int i = 0; i < invalid_count; ++i)
+    {
+        unsigned int idx = invalid_indices[invalid_count - i - 1];
+        printf("[D]: %d\n", socket_get_fd(vector_get(sockets, idx)));
+        vector_delete(sockets, idx);
+    }
+
+    unsigned int valid_count = num_sockets - invalid_count;
     // If the size is different from the previous size, we want
     // to malloc to resize the number of pfds
-    if (ps->size != valid_count){
+    if (ps->size != valid_count) {
         free(ps->pfds);
         ps->pfds = calloc(valid_count, sizeof(struct pollfd));
         ps->size = valid_count;
     }
 
     for (unsigned int i = 0; i < valid_count; ++i){
-        unsigned int idx = valid_indices[i];
+        unsigned int idx = i;
 
         // Match corresponding socket
         socket_t* s = vector_get(sockets, idx);
@@ -153,4 +162,51 @@ int poll_sockets(pollsocket_t* ps, int timeout){
 
     result = poll (ps->pfds, ps->size, timeout);
     return result;
+}
+
+vector* poll_response(pollsocket_t* ps)
+{
+    if (ps == NULL)
+    {
+        log_error("%s, %d: Error invalid ps\n", __func__, __LINE__);
+        return NULL;
+    }
+
+    pollfd* pfds = ps->pfds;
+    if (pfds == NULL)
+    {
+        return NULL;
+    }
+
+    // Track all the sockets that need to be handled
+    long int num_responses = 0;
+    for (unsigned i = 0; i < ps->size; ++i)
+    {
+        if (pfds[i].revents != 0)
+        {
+            ++num_responses;
+        }
+    }
+
+    vector* response_sockets = vector_create_with_size(num_responses);
+
+    // Iterate through all of the sockets and check which ones are valid
+    for (unsigned i = 0; i < ps->size; ++i)
+    {
+        // Only handle sockets that have a return event
+        if (pfds[i].revents == 0)
+        {
+            continue;
+        }
+
+        socket_t* s = vector_get(sockets, i);
+
+        // Only handle the socket if it's valid
+        if (s != NULL && socket_get_status(s) == SOCKET_OPEN)
+        {
+            vector_push(response_sockets, s);
+        }
+    }
+
+    return response_sockets
 }
