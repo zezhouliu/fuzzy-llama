@@ -46,8 +46,6 @@ void parse_request(socket_t*);
 
 // Global to handle closing sockets
 socket_t* server_sock;
-socket_t* client_sock;
-
 
 /**
  * [response_header  description]
@@ -418,26 +416,6 @@ void execute_cgi(socket_t* client, const char *path,
 }
 
 /**********************************************************************/
-/* Return the informational HTTP headers about a file. */
-/* Parameters: the socket to print the headers on
- *             the name of the file */
-/**********************************************************************/
-void headers(socket_t* client, const char *filename)
-{
-    char buf[BUF_SIZE];
-    (void)filename;  /* could use filename to determine file type */
-
-    strcpy(buf, "HTTP/1.0 200 OK\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    strcpy(buf, SERVER_STRING);
-    socket_send(client, buf, strlen(buf), 0);
-    sprintf(buf, "Content-Type: text/html\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-    strcpy(buf, "\r\n");
-    socket_send(client, buf, strlen(buf), 0);
-}
-
-/**********************************************************************/
 /* Inform the client that the requested web method has not been
  * implemented.
  * Parameter: the client socket */
@@ -510,7 +488,7 @@ int main(void)
                 // First socket MAY be the listening socket
                 if (s == server_sock)
                 {
-                    client_sock = socket_accept(server_sock);
+                    socket_t* client_sock = socket_accept(server_sock);
                     vector_push(sockets, client_sock);
                 }
                 else
