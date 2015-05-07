@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE html>
 <HTML>
    <HEAD>
       <TITLE>
