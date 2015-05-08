@@ -79,7 +79,7 @@ char* response_header (int status, int content_length)
     {
 
         // Create the content-length string if it's needed
-        char* length_prefix = "Content-Length: ";
+        char* length_prefix = "Content-Length: \r\n";
         int length_str_size = strlen(length_prefix) + content_length;
         char clen_str[length_str_size + 1];
         clen_str[length_str_size] = '\0';
@@ -208,18 +208,28 @@ int url_cb (http_parser *p, const char *at, size_t len)
 
                     r_head = response_header(HTTP_STATUS_OK, sz);
                     socket_send(client_socket, r_head, strlen(r_head), 0);
-
+                    int total = 0;
                     if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
                     {
+
                         while (!feof(resource))
                         {
+
+                            total += strlen(filebuf);
                             socket_send(client_socket, filebuf, strlen(filebuf), 0);
+
                             if (fgets(filebuf, sizeof(filebuf), resource) == NULL)
                             {
                                 // Error
+                                printf("ERROR WITH STRING: %s\n", filebuf);
                             }
                         }
+                        total += strlen(filebuf);
+                        socket_send(client_socket, filebuf, strlen(filebuf), 0);
                     }
+
+                    // printf("HEADER length: %d\n" str;len(r_head))
+                    printf("SENT OVER: %d\n", total);
                     fclose(resource);
                 }
             }
