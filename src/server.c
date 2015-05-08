@@ -42,7 +42,7 @@ void cannot_execute(socket_t*);
 void error_die(const char *);
 void execute_cgi(socket_t*, const char *, const char *, const char *);
 void unimplemented(socket_t*);
-void parse_request(socket_t*);
+int parse_request(socket_t*);
 
 // Global to handle closing sockets
 socket_t* server_sock;
@@ -195,7 +195,7 @@ int url_cb (http_parser *p, const char *at, size_t len)
                     // Cannot open file! Return 404 Not Found
                     r_head = response_header(HTTP_STATUS_NOT_FOUND, 0);
                     socket_send(client_socket, r_head, strlen(r_head), 0);
-                    printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
+                    printf("%d: File not found1.\n", HTTP_STATUS_NOT_FOUND);
                 }
                 else
                 {
@@ -258,14 +258,14 @@ int url_cb (http_parser *p, const char *at, size_t len)
  * @param[s]: s, socket_t* from which to receive the request.
  * 
  **/
-void parse_request(socket_t* s)
+int parse_request(socket_t* s)
 {
     printf("Parsing request...\n");
 
     // Basic socket API features
     if (s == NULL || socket_get_status(s) != SOCKET_OPEN)
     {
-        return;
+        return -1;
     }
 
     http_parser_settings settings =
@@ -289,9 +289,11 @@ void parse_request(socket_t* s)
     memset(buf, 0, len);
     ssize_t recved = socket_recv(s, buf, len, 0);
     printf("---------------\n");
-    if (recved < 0)
+    if (recved <= 0)
     {
         // Error
+        printf("Error, didn't receive anything\n");
+        return -1;
     }
 
     nparsed = http_parser_execute(parser, &settings, buf, recved);
@@ -301,6 +303,8 @@ void parse_request(socket_t* s)
     printf("---------------\n");
     printf("%s", buf);
     printf("---------------\n");
+
+    return 0;
 }
 
 
@@ -529,8 +533,12 @@ int main(void)
                 else
                 {
                     printf("Request: S(%d)\n", socket_get_fd(s));
-                    parse_request(s);
-                    // socket_close(s);
+                    int result = parse_request(s);
+                    if (result < 0)
+                    {
+                        // Close the socket
+                        socket_close(s);
+                    }
                 }
             }
 
