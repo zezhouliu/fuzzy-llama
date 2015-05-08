@@ -168,18 +168,24 @@ static http_parser_settings settings_verify =
 
 /* Modified to be compatible with klee code */
 void
-parser_init (enum http_parser_type type)
+parser_init_base (enum http_parser_type type)
+{
+  assert(parser == NULL);
+  parser = malloc(sizeof(http_parser));
+  http_parser_init(parser, type);
+}
+
+
+#if KLEE
+void
+parser_init_inductive (enum http_parser_type type)
 {
   
   assert(parser == NULL);
   parser = malloc(sizeof(http_parser));
-#if KLEE
   http_parser_init_symbolic(parser, type);
-#else
-  http_parser_init(parser, type);
-#endif
-
 }
+#endif
 
 void
 parser_free ()
@@ -434,10 +440,14 @@ main (int argc, char **argv)
 
   if(strlen(argv[2]) != sizeof(*parser))
     return 0;
+
+  parser_init_base(HTTP_BOTH); 
+  klee_assert(valid());
+  parser_free();
   
   //parser = malloc(sizeof(http_parser));
   //memcpy(parser, argv[2], sizeof(*parser));
-  parser_init(HTTP_BOTH);
+  parser_init_inductive(HTTP_BOTH);
   //parser = (http_parser *)argv[2];
 
   if(valid()){
@@ -449,10 +459,12 @@ main (int argc, char **argv)
   printf("Buffer : %s\n", argv[1]);
   printf("Parser\n");
   print_http_parser((http_parser *) argv[2]);
-  int n = http_parser_execute((http_parser *) argv[2], &settings_verify,argv[0],1);
+  parser_init(HTTP_BOTH);
+  int n = http_parser_execute(parser, &settings_verify,argv[0],1);
   printf("Characters Parsed: %d\n", n);
   printf("\n");
 #endif
 
+  parser_free();
   return 0;
 }
