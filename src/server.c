@@ -51,30 +51,56 @@ socket_t* server_sock;
  * [response_header  description]
  * @return  [description]
  */
-char* response_header (int status)
+char* response_header (int status, int content_length)
 {
     char* hd1 = "";
     if (status == HTTP_STATUS_OK)
     {
         // 200 okay status.
-        hd1 = "HTTP/1.0 200 OK\r\n";
+        hd1 = "HTTP/1.1 200 OK\r\n";
     }
     else if (status == HTTP_STATUS_FORBIDDEN)
     {
         // 403 forbidden status.
-        hd1 = "HTTP/1.0 403 Forbidden";
+        hd1 = "HTTP/1.1 403 Forbidden";
     }
     else if (status == HTTP_STATUS_NOT_FOUND)
     {
         // 404 not found status.
-        hd1 = "HTTP/1.0 404 Not Found\r\n";
+        hd1 = "HTTP/1.1 404 Not Found\r\n";
     }
-
 
     char* hd2 = SERVER_STRING;
     char* hd3 = "Content-Type: text/html\r\n";
-    char* hd4 = "\r\n";
-    int total_len = strlen(hd1) + strlen(hd2) + strlen(hd3) + strlen(hd4) + 1;
+    char* hd4 = "Connection: Keep-Alive\r\n";
+    char* hd5 = "\r\n";
+
+    if (content_length > 0)
+    {
+
+        // Create the content-length string if it's needed
+        char* length_prefix = "Content-Length: ";
+        int length_str_size = strlen(length_prefix) + content_length;
+        char clen_str[length_str_size + 1];
+        clen_str[length_str_size] = '\0';
+        snprintf(clen_str, length_str_size, "Content-Length: %d\r\n", content_length);
+
+        int total_len = strlen(hd1) + strlen(hd2) + strlen(hd3) + strlen(hd4) + strlen(hd5) + length_str_size + 1;
+
+        char* buf = malloc(total_len);
+        buf[total_len - 1] = '\0';
+
+        strncpy(buf, hd1, strlen(hd1));
+        strncat(buf, hd2, strlen(hd2));
+        strncat(buf, hd3, strlen(hd3));
+        strncat(buf, clen_str, length_str_size);
+        strncat(buf, hd4, strlen(hd4));
+        strncat(buf, hd5, strlen(hd5));
+
+        return buf;
+    }
+
+    int total_len = strlen(hd1) + strlen(hd2) + strlen(hd3) + strlen(hd4) + strlen(hd5) + 1;
 
     char* buf = malloc(total_len);
     buf[total_len - 1] = '\0';
@@ -83,6 +109,7 @@ char* response_header (int status)
     strncat(buf, hd2, strlen(hd2));
     strncat(buf, hd3, strlen(hd3));
     strncat(buf, hd4, strlen(hd4));
+    strncat(buf, hd5, strlen(hd5));
     return buf;
 }
 
@@ -136,7 +163,7 @@ int url_cb (http_parser *p, const char *at, size_t len)
         if (stat(filepath, &st) == -1) 
         {
             // Cannot find permissions for file! Return 404 Not Found
-            r_head = response_header(HTTP_STATUS_NOT_FOUND);
+            r_head = response_header(HTTP_STATUS_NOT_FOUND, 0);
             socket_send(client_socket, r_head, strlen(r_head), 0);
             printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
         }
@@ -153,7 +180,7 @@ int url_cb (http_parser *p, const char *at, size_t len)
             if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
             {
                 // If not permissions, then return forbidden
-                r_head = response_header(HTTP_STATUS_FORBIDDEN);
+                r_head = response_header(HTTP_STATUS_FORBIDDEN, 0);
                 socket_send(client_socket, r_head, strlen(r_head), 0);
                 printf("%d: Permission denied.\n", HTTP_STATUS_FORBIDDEN);
 
@@ -166,17 +193,21 @@ int url_cb (http_parser *p, const char *at, size_t len)
                 if (resource == NULL) 
                 {
                     // Cannot open file! Return 404 Not Found
-                    r_head = response_header(HTTP_STATUS_NOT_FOUND);
+                    r_head = response_header(HTTP_STATUS_NOT_FOUND, 0);
                     socket_send(client_socket, r_head, strlen(r_head), 0);
                     printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
                 }
                 else
                 {
 
-                    r_head = response_header(HTTP_STATUS_OK);
-                    socket_send(client_socket, r_head, strlen(r_head), 0);
+                    fseek(resource, 0L, SEEK_END);
+                    long sz = ftell(resource);
+                    fseek(resource, 0L, SEEK_SET);
                     // First send the headers
                     char filebuf[BUF_SIZE];
+
+                    r_head = response_header(HTTP_STATUS_OK, sz);
+                    socket_send(client_socket, r_head, strlen(r_head), 0);
 
                     if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
                     {
@@ -495,7 +526,7 @@ int main(void)
                 {
                     printf("Request: S(%d)\n", socket_get_fd(s));
                     parse_request(s);
-                    socket_close(s);
+                    // socket_close(s);
                 }
             }
 
