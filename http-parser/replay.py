@@ -47,14 +47,17 @@ def main():
 			d["data"] = datas[i]
 			symbolicObjects[i] = d
 
+
 		parser = getItemByName("parser", symbolicObjects)
-		parser["data"] = parser["data"].replace("\\x", "")
-
 		arg0 = getItemByName("arg0", symbolicObjects)
-		arg0["data"] = arg0["data"][0]+arg0["data"][1]
-
 		pp.pprint(parser)
 		pp.pprint(arg0)
+		print 
+		sys.stdout.flush()
+
+		parser["data"] = parser["data"].replace("\\x", "")
+		arg0["data"] = arg0["data"][0]+arg0["data"][1]
+
 
 		subprocess.call([replayTarget, arg0["data"], parser["data"]])
 	

@@ -425,6 +425,7 @@ print_http_parser(http_parser *p){
   printf("\tp->http_errno : %u\n", p->http_errno);
   printf("\tp->upgrade : %u\n", p->upgrade);
   printf("\tp->data : %u\n", p->data); 
+  printf("\n=======================\n");
 }
 
 int
@@ -478,8 +479,12 @@ main (int argc, char **argv)
 
   int n = http_parser_execute((http_parser *)val, &settings_verify, argv[1],1);
   printf("Characters Parsed: %d\n", n);
-  printf("\n");
+  printf("\n\n");
+  // Should be unnessisary but why not flush
+  fflush(stdout);
   free(val);
 #endif
+fprintf(stderr, "\n");
+
   return 0;
 }
