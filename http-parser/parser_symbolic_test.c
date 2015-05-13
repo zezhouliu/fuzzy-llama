@@ -390,25 +390,55 @@ valid ()
   if((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
     return 0; 
   }
-  if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)) {
-    return 0; 
-  }
   if((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
     return 0; 
   }
-  if(!(parser->method >= 0 && parser->method <=26 &&  parser->index >= 0  && parser->index < strlen(method_strings[parser->method]))){
+  if(!(parser->method <= 26  
+    && parser->index < (unsigned char) strlen(method_strings[parser->method]))){
     return 0;
   }
   return 1;
 }
+void
+valid_tans ()
+{
+  if(!valid_parser_states()){
+    return klee_assert(0 && "Invalid State.");
+  }
+  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
+    return klee_assert(0 && "Invalid Chunked Flags"); 
+  }
+  if((parser->state == s_chunk_size_start) && !(parser->nread == 0)) { 
+    return klee_assert(0 && "Invalid Chunk Size."); 
+  }
+  if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)){
+    return klee_assert(0 && "Invalid Chunk Length Finishing."); 
+  }
+  if((parser->state == s_header_field) && !(valid_parser_header_state())){
+   return klee_assert(0 && "Invalid Header Field.");
+  }
+  if((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding)) {
+    return klee_assert(0 && "Invalid Connection or Encoding."); 
+  }
+  if((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
+    return klee_assert(0 && "Invalid Chunk Lenght Starting."); 
+  }
+  if((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
+    return klee_assert(0 && "Invalid Body Length."); 
+  }
+  if(!(parser->method <=26 
+    && parser->index < (unsigned char) strlen(method_strings[parser->method]))){
+    return klee_assert(0 && "Invalid Method or Invalid Method Index.");
+  }
+}
 #endif
 
 #if KLEE
-int
+void
 transition(char *buf, int len){
 	int n;
 	n = http_parser_execute(parser, &settings_verify, buf, len);
-	return valid();
+	valid_tans();
 }
 #endif
 
@@ -454,10 +484,8 @@ main (int argc, char **argv)
   parser_init_inductive(HTTP_BOTH);
   //parser = (http_parser *)argv[2];
 
-  if(valid()){
-	if(!transition(argv[1], 1)){
-		klee_assert(0);	
-	} 
+  if(valid()) {
+    transition(argv[1], 1);
   }
   parser_free();
 #else 
