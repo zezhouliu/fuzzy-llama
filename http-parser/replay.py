@@ -7,9 +7,6 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 
-badTests = ["klee-last/test000088.assert.err", "klee-last/test000119.ptr.err", "klee-last/test000668.assert.err", "klee-last/test001014.assert.err", "klee-last/test001561.assert.err", "klee-last/test000102.ptr.err", "klee-last/test000125.assert.err", "klee-last/test000739.assert.err", "klee-last/test001306.assert.err", "klee-last/test001635.assert.err", "klee-last/test000110.assert.err", "klee-last/test000456.assert.err", "klee-last/test000969.assert.err", "klee-last/test001344.assert.err", "klee-last/test001658.assert.err", "klee-last/test000116.ptr.err", "klee-last/test000596.assert.err", "klee-last/test001013.assert.err", "klee-last/test001526.assert.err"]
-
-
 # Returns a symbolic argument that
 def getItemByName(name, lst):
 	return filter(lambda x: x["name"] == name, lst)[0]
@@ -20,12 +17,25 @@ def removeSingleQuotes(el):
 
 
 def main():
+	if len(sys.argv) < 2:
+		print "Please Specify Replay Target"
+
 	replayTarget = sys.argv[1]
+	badTests = []
+
+	if len(sys.argv) < 3:
+		badTests = [f for f in os.listdir("./klee-last") if re.match(r'(.*?)\.err', f)]
+	else:
+		for i in range(2,len(sys.argv)):
+			badTests.append(sys.argv[i])
+
 	for f in badTests:
-		replayCandidate = f.split(".")[0] + ".ktest"
+		replayCandidate = "./klee-last/" + f.split(".")[0] + ".ktest"
+		print replayCandidate
 		p = subprocess.Popen(['ktest-tool', replayCandidate], stdout=subprocess.PIPE)
 		s, err = p.communicate()
 
+		pp.pprint(s)
 
 		# Find all of the symbolic objects
 		s = s.split('object')
