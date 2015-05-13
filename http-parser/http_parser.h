@@ -127,6 +127,13 @@ enum http_method
 #undef XX
   };
 
+static const char *method_strings[] =
+  {
+#define XX(num, name, string) #string,
+  HTTP_METHOD_MAP(XX)
+#undef XX
+  };
+
 
 enum http_parser_type { HTTP_REQUEST, HTTP_RESPONSE, HTTP_BOTH };
 

@@ -173,13 +173,6 @@ do {                                                                 \
 #define CLOSE "close"
 
 
-static const char *method_strings[] =
-  {
-#define XX(num, name, string) #string,
-  HTTP_METHOD_MAP(XX)
-#undef XX
-  };
-
 
 /* Tokens as defined by rfc 2616. Also lowercases them.
  *        token       = 1*<any CHAR except CTLs or separators>

@@ -375,7 +375,7 @@ valid ()
   if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
     return 0; 
   }
-  if((parser->state == s_chunk_size_start) && !(parser->nread == 1)) { 
+  if((parser->state == s_chunk_size_start) && !(parser->nread == 0)) { 
     return 0; 
   }
   if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)){
@@ -395,6 +395,9 @@ valid ()
   }
   if((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
     return 0; 
+  }
+  if(!(parser->method >= 0 && parser->method <=26 &&  parser->index >= 0  && parser->index < strlen(method_strings[parser->method]))){
+    return 0;
   }
   return 1;
 }
