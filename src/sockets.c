@@ -299,7 +299,10 @@ int socket_read_line(socket_t* s, char* buf, int size)
 ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
 {
     assert(s);
-    assert(s->status == SOCKET_OPEN);
+    if (socket_get_status(s) != SOCKET_OPEN)
+    {
+        return 0;
+    }
 
     return io_send(s, buf, size, flags);
 }
