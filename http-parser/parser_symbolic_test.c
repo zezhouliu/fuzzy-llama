@@ -234,26 +234,26 @@ size_t parse_incrementally (const char *buf, size_t len)
 }
 
 // VeriServe
-void
-test_symbolic_parser (const char *buf, enum http_errno err_expected)
-{
+// void
+// test_symbolic_parser (const char *buf, enum http_errno err_expected)
+// {
 
-  parser_init(HTTP_BOTH);
+//   parser_init(HTTP_BOTH);
 
-  enum http_errno err;
+//   enum http_errno err;
 
-  parse_incrementally(buf, strlen(buf));
+//   parse_incrementally(buf, strlen(buf));
 
-  err = HTTP_PARSER_ERRNO(parser);
-  parse(NULL, 0);
+//   err = HTTP_PARSER_ERRNO(parser);
+//   parse(NULL, 0);
 
-  parser_free();
+//   parser_free();
 
-  if(err == HPE_UNKNOWN){
-	klee_assert(0);
-  }
+//   if(err == HPE_UNKNOWN){
+// 	klee_assert(0);
+//   }
 
-}
+//}
 
 #if KLEE
 int valid_parser_states(){
@@ -455,16 +455,31 @@ main (int argc, char **argv)
 		klee_assert(0);	
 	} 
   }
+  parser_free();
 #else 
-  printf("Buffer : %s\n", argv[1]);
-  printf("Parser\n");
-  print_http_parser((http_parser *) argv[2]);
-  parser_init(HTTP_BOTH);
-  int n = http_parser_execute(parser, &settings_verify,argv[0],1);
+  //printf("Buffer : %s\n", argv[1]);
+  //printf("Parser\n");
+  //print_http_parser((http_parser *) argv[2]);
+  //parser_init(HTTP_BOTH);
+
+  char *hexstring = argv[2];
+  const char*pos = hexstring;
+  unsigned char *val = malloc(sizeof(hexstring));
+  size_t count = 0;
+
+
+  for(count = 0; count < sizeof(val)/sizeof(val[0]); count++) {
+      sscanf(pos, "%2hhx", &val[count]);
+      pos += 2 * sizeof(char);
+  }
+ 
+  print_http_parser((http_parser *) val);
+
+
+  int n = http_parser_execute((http_parser *)val, &settings_verify, argv[1],1);
   printf("Characters Parsed: %d\n", n);
   printf("\n");
+  free(val);
 #endif
-
-  parser_free();
   return 0;
 }

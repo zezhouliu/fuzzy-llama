@@ -2051,13 +2051,15 @@ http_parser_init_state_sym (http_parser *parser, enum http_parser_type t)
 {
   void *data = parser->data; /* preserve application data */
   memset(parser, 0, sizeof(*parser));
-  parser->data = data;
   parser->type = t;
 #if KLEE
   klee_make_symbolic_range(&parser->state, 0, sizeof(unsigned int), "state");
 #else
   parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
 #endif
+  
+  // We shouldn't even care about the data this is user specific
+  parser->data = data;
   parser->http_errno = HPE_OK;
 }
 
