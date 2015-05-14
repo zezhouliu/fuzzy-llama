@@ -28,13 +28,13 @@ def main():
 	badTests = []
 
 	if len(sys.argv) < 3:
-		badTests = [f for f in os.listdir("./klee-out-41") if re.match(r'(.*?)\.err', f)]
+		badTests = [f for f in os.listdir("./klee-last") if re.match(r'(.*?)\.err', f)]
 	else:
 		for i in range(2,len(sys.argv)):
 			badTests.append(sys.argv[i])
 
 	for f in badTests:
-		replayCandidate = "./klee-out-41/" + f.split(".")[0] + ".ktest"
+		replayCandidate = "./klee-last/" + f.split(".")[0] + ".ktest"
 		print replayCandidate
 		p = subprocess.Popen(['ktest-tool', replayCandidate], stdout=subprocess.PIPE)
 		s, err = p.communicate()
@@ -62,7 +62,7 @@ def main():
 			symbolicObjects[i] = d
 
 
-		parser = getItemByName("parser", symbolicObjects)
+		parser = getItemByName("arg1", symbolicObjects)
 		arg0 = getItemByName("arg0", symbolicObjects)
 		pp.pprint(parser)
 		pp.pprint(arg0)
