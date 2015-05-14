@@ -1,0 +1,486 @@
+{   'data': '\\x04\\xff\\xff\\xff3\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xff\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '>>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 65
+	p->state : 127
+	p->header_state : 255
+	p->index : 255
+	p->nread : 48
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x00\\x00\\x00\\x00\\x13\\x00\\x00\\x00\\xff`\\xff\\xff\\xfd\\x7f\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\x19\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '>>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 0
+	p->state : 0
+	p->header_state : 0
+	p->index : 0
+	p->nread : 19
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff7\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 112
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff1\\x00\\x00\\x00\\x14\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777232
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\x00\\xff\\xff.\\x00\\x00\\x00\\xe8\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 234881024
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x00\\x00\\x00\\x00\\x13\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xfb?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff[\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '>>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 0
+	p->state : 0
+	p->header_state : 0
+	p->index : 0
+	p->nread : 19
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\xff\\xff\\xff6\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xfb?\\x01\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\x00\\x00\\x00\\x00\\xff\\xff\\xff\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 65
+	p->state : 127
+	p->header_state : 255
+	p->index : 255
+	p->nread : 96
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff.\\x00\\x00\\x00\\x14\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777216
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\x00\\xff\\xff1\\x00\\x00\\x00\\x15\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777232
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\x00\\xff\\xff.\\x00\\x00\\x00\\x16\\xff\\xff\\xff\\xfb?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777216
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\xff\\xff\\xff;\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xff\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 65
+	p->state : 127
+	p->header_state : 255
+	p->index : 255
+	p->nread : 0
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff8\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xfd\\x7f\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x80\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 128
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff.\\x00\\x00\\x00\\x15\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777216
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x00\\x00\\xff\\xff1\\x00\\x00\\x00\\x13\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 0
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777232
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\x00\\xff\\xff1\\x00\\x00\\x00\\x16\\xff\\xff\\xff\\xfb?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777232
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x00\\x00\\x00\\x00\\x13\\x00\\x00\\x00\\xff\\x0c\\xff\\xff\\xff}\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\x1a\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': ' >\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 0
+	p->state : 0
+	p->header_state : 0
+	p->index : 0
+	p->nread : 19
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x04\\x00\\xff\\xff*\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+out: http_parser.c:1930: http_parser_execute: Assertion `0 && "unhandled state"' failed.
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 0
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+{   'data': '\\x00\\x00\\xff\\xff.\\x00\\x00\\x00\\x13\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 0
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 16777216
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
+{   'data': '\\x04\\x00\\xff\\xff1\\x00\\x00\\x00\\xe8\\xff\\xff\\xff\\xff?\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xff\\xff\\xfa\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00',
+    'name': 'parser',
+    'size': 40}
+{   'data': '\\n>\\x00                                     \\x00',
+    'name': 'arg0',
+    'size': 41}
+
+	p->type : 0
+	p->flags : 1
+	p->state : 0
+	p->header_state : 255
+	p->index : 255
+	p->nread : 234881040
+	p->content_length : 0
+	p->http_major : 0
+	p->http_minor : 0
+	p->status_code : 0
+	p->method : 0
+	p->http_errno : 0
+	p->upgrade : 0
+	p->data : 135137
+
+=======================
+Characters Parsed: 0
+
+
+
