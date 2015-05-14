@@ -42,15 +42,17 @@ sstatus_t socket_get_status(socket_t* s)
 	behavior valid_open:
 		assumes s->status == SOCKET_OPEN;
 		assigns \nothing;
+        ensures \result == s->fd;
 
 	complete behaviors valid_closed, valid_open;
 	disjoint behaviors valid_closed, valid_open;
 */
 int socket_get_fd(socket_t* s){
-    if(s && s->status == SOCKET_OPEN)
-    {
+    if(s && s->status == SOCKET_OPEN){
         return s->fd;
+    } else {
+        return -1;
     }
-    printf("%d\n", s->status);
-    return -1;
+   // printf("%d\n", s->status);
+   // return -1;
 }

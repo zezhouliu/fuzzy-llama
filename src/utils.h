@@ -31,3 +31,16 @@ void logg(FILE* out, const char *format, ...);
 void log_out(const char *format, ...);
 void log_error(const char *format, ...);
 
+
+
+/*@
+    predicate IsEqualVoid{A, B}(void ** data, integer n, void ** ndata) =
+        \forall integer i; 0 <= i < n ==> \at(data[i], A) == \at(ndata[i], B);
+
+    lemma EqualityReflexive{T} :
+        \forall void ** d; \forall integer n; IsEqualVoid{T,T}(d, n, d);
+
+    lemma EqualityCommutative{S, T} :
+        \forall void ** d, ** n; \forall integer num;
+            IsEqualVoid{S, T}(d, num, n) ==> IsEqualVoid{T, S}(n, num, d);
+ */

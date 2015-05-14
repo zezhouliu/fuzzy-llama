@@ -2,6 +2,7 @@
 
 #include "utils.h"
 
+const size_t MAX_VEC_SIZE = SIZE_MAX / 16;
 typedef struct vector_ {
     void** data;
     size_t size;
@@ -20,6 +21,11 @@ void vector_free(vector*);
 
 
 /*@
- predicate valid_vector{L} (vector * v) =
-    \valid(v) && \valid_range(v,0, v->size) && v->count <= v->size;
+    predicate valid_vector{L} (vector * v) =
+        \valid(v) && \valid(v->data+(0..v->size)) && v->count <= v->size && v->size < MAX_VEC_SIZE;
+*/
+
+/*@
+    predicate vector_contains{L}(vector * v, void * e) =
+        \exists size_t i; valid_vector(v) &&  0 <= i < 0 && v->count && v->data[i] == e;
 */
