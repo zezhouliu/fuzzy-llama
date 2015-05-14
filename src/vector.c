@@ -3,7 +3,6 @@
 // Private
 
 const size_t INIT_VEC_SIZE = 16;
-const size_t MAX_VEC_SIZE = SIZE_MAX / 16;
 void vector_init(vector*);
 bool vector_init_with_size(vector*, size_t);
 size_t vector_size(vector*);
@@ -271,12 +270,10 @@ void vector_push(vector *v, void *e){
 **/
 
 /*@
-    requires \valid(v);
-    requires index < v->count <= v->size;
-    requires \valid(v->data+(0..v->size));
-    requires \separated(v, v->data + (0 .. v->size - 1));
+    requires valid_vector(v);
+    requires index < v->count;
     assigns v->data[index];
-    ensures v->data[index] == e;
+    ensures v != \null ==> (size_t)v->data[index] ==  (size_t)e;
 
 */
 void vector_set(vector * v, size_t index, void * e){
@@ -284,8 +281,7 @@ void vector_set(vector * v, size_t index, void * e){
     if (v == NULL || index >= v->count) {
         return;
     }
-
-    v->data[index] = (int *)e;
+    v->data[index] = e;
 }
 
 /**
@@ -324,11 +320,9 @@ void * vector_get(vector *v, size_t index){
 **/
 
 /*@
-    requires \valid(v);
-    requires v->size <= MAX_VEC_SIZE;
-    requires v->size >= v->count;
-    requires index < v->count;
-    requires \valid(v->data + (0 .. v->size - 1));
+    requires valid_vector(v);
+    requires index < v->count - 1;
+    requires index < MAX_VEC_SIZE;
     assigns v->data[index  .. v->count - 1];
     assigns v->count;
     ensures \forall size_t i; index <= i < v->count ==> v->data[i] == \old(v->data[i + 1]);
@@ -344,10 +338,13 @@ void vector_delete(vector * v, size_t index){
 
     // else, we want to just delete the element and shift the
     // rest of the elements down
+    /*@
+     loop invariant index <= i < (v->count - 1);
+     loop assigns i,v->data[index .. i];
+     */
     for (size_t i = index; i < v->count - 1; ++i) {
         v->data[i] = v->data[i + 1];
     }
-
     // set last element as NULL and decrement count
     v->data[v->count - 1] = NULL;
     v->count--;
@@ -363,14 +360,14 @@ void vector_delete(vector * v, size_t index){
 /*@
     requires \valid(v);
     requires \valid(v->data);
+    requires \freeable(v);
+    requires \freeable(v->data);
     frees v->data;
     frees v;
 */
 void vector_free(vector * v){
-    if (v)
-    {
-        if (v->data)
-        {
+    if (v){
+        if (v->data){
             free(v->data);
         }
         free(v);

@@ -28,15 +28,13 @@
     complete behaviors;
     disjoint behaviors;
 */
-socket_t * socket_startup(unsigned short port)
-{
+socket_t * socket_startup(unsigned short port){
 
     errno = 0;
 
     // Basic initialization routine
     socket_t * s = calloc(1, sizeof(socket_t));
-    if(s == NULL)
-    {
+    if(s == NULL){
         // First failure, we cannot allocate our structure due to lack of memory
         // we should set errno to set failure
         errno = ENOMEM;
@@ -63,8 +61,7 @@ socket_t * socket_startup(unsigned short port)
     // Assign a file descriptor and validate
     // s->fd = socket(PF_INET, SOCK_STREAM, 0);
     s->fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (s->fd < 0)
-    {
+    if (s->fd < 0){
         log_error("%s:L %d: could not create socket", __func__, __LINE__);
         goto failure;
     }
@@ -75,7 +72,7 @@ socket_t * socket_startup(unsigned short port)
     // {
     //     log_error("%s:L %d: could not set non-blocking\n", __func__, __LINE__);
     // }
-    // 
+    //
     // Set as reusable and nonblocking
     int on = 1;
     int rc = setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
@@ -117,8 +114,7 @@ socket_t * socket_startup(unsigned short port)
     // Here we handle all error cases
     failure:
         log_out("Failure in socket_startup\n");
-        if (s->fd >= 0)
-        {
+        if (s->fd >= 0){
             close(s->fd);
         }
         free(s);
@@ -154,23 +150,21 @@ socket_t * socket_startup(unsigned short port)
 */
 void socket_close(socket_t* s){
 
-    if(!s)
-    {
+    if(!s){
         errno = 1;
         return;
     }
 
     // If open, then close
-    if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0)
-    {
+    if (socket_get_status(s) == SOCKET_OPEN && socket_get_fd(s) >= 0){
         close(s->fd);
         s->status = SOCKET_CLOSED;
     }
 
     // Should possibly free socket?
     // free(s);
-    errno = 0;
     free(s);
+    errno = 0;
     return;
 }
 
@@ -187,30 +181,44 @@ void socket_close(socket_t* s){
 * @post: new_socket.fd != s.fd
 * @return: void
 **/
-socket_t* socket_accept(socket_t* s)
-{
-    printf("socket_accept()\n");
+/*@
+    requires \valid(s);
+    requires s->status == SOCKET_OPEN;
+    behavior alloc_fail:
+        assumes !is_allocable((unsigned long)sizeof(socket_t));
+        assigns \nothing;
+        ensures \result == \null;
+    behavior alloc_succ:
+        assumes is_allocable((unsigned long)sizeof(socket_t));
+        ensures \result != \null ==>
+            (\result->fd >= 0 &&
+             \result->status == SOCKET_OPEN &&
+             \result->port == 0
+            );
+    complete behaviors;
+    disjoint behaviors;
+*/
+
+socket_t* socket_accept(socket_t* s){
 
     // Check preconditions
     assert(s->status == SOCKET_OPEN);
 
     // Create new socket wrapper for the connecting socket
     socket_t * new_socket = calloc(1, sizeof(socket_t));
-    if(!new_socket)
-    {
+    if(!new_socket){
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
 
-    printf("server socket is... %d\n", socket_get_fd(s));
+    //printf("server socket is... %d\n", socket_get_fd(s));
 
     struct sockaddr_storage their_addr;
     socklen_t addr_size = sizeof(their_addr);
     new_socket->fd = accept(socket_get_fd(s), (struct sockaddr *)&their_addr, &addr_size);
-
+    new_socket->port = 0;
     // Error?
-    if (new_socket->fd < 0)
-    {
+    if (new_socket->fd < 0){
         log_error("%s, %d: Could not create socket\n", __func__, __LINE__);
         free(new_socket);
         return NULL;
@@ -219,7 +227,7 @@ socket_t* socket_accept(socket_t* s)
     // If everything is fine, mark socket as valid and open
     new_socket->status = SOCKET_OPEN;
 
-    printf("Accepted @%d\n", new_socket->fd);
+    //printf("Accepted @%d\n", new_socket->fd);
 
     return new_socket;
 }
@@ -244,14 +252,18 @@ socket_t* socket_accept(socket_t* s)
     requires \valid(s) && \valid(buf) && size > 0;
     requires \valid(buf + (0..size - 1));
         requires s->status == SOCKET_OPEN && s->fd >= 0;
+    assigns buf[0..size - 1];
     ensures \result > 0 && \result <= size;
 */
-int socket_read_line(socket_t* s, char* buf, int size)
-{
+int socket_read_line(socket_t* s, char* buf, int size){
     // Track the counter
     char c = '\0';
     int i;
     // Read until it's the end of the buffer or endline
+    /*@
+     loop invariant 0 <= i < size - 1;
+     loop variant size - i - 1;
+     */
     for (i = 0; i < size - 1 && c != '\n'; ++i){
         int n = io_recv(s, &c, 1, 0);
         if (n > 0){
@@ -324,7 +336,7 @@ ssize_t socket_send(socket_t* s, char* buf, int size, int flags)
     requires \valid(s) && \valid(buf) && size > 0;
     requires \valid(buf + (0..size - 1));
     assigns buf[0..size-1];
-    ensures \result > 0 && \result == size;
+    ensures \result == -1 || \result >= 0;
 */
 ssize_t socket_recv(socket_t* s, char* buf, int size, int flags){
     assert(s);
@@ -346,20 +358,27 @@ ssize_t socket_recv(socket_t* s, char* buf, int size, int flags){
 
  /*@
     behavior null_addr:
-        requires !\valid(addr);
+        assumes !\valid(addr);
     behavior addr:
-        requires \valid(addr);
+        assumes \valid(addr) && is_allocable((size_t)sizeof(socket_t));
+        ensures \result->status == SOCKET_OPEN && \result->fd >= 0;
+    behavior alloc_fail:
+        assumes \valid(addr) && !is_allocable((size_t)sizeof(socket_t));
+        assigns \nothing;
+        ensures \result == \null;
 
     complete behaviors null_addr, addr;
     disjoint behaviors null_addr, addr;
 */
 socket_t* socket_connect(unsigned short port, char* addr){
     (void) port;
+    if(addr == NULL){
+        return NULL;
+    }
 
     // Basic initialization routine
     socket_t * s = calloc(1, sizeof(socket_t));
-    if(s == NULL)
-    {
+    if(s == NULL){
         //  First failure, we cannot allocate our structure due to lack of memory
         return NULL;
     }
