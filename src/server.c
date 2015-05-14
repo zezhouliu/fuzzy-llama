@@ -224,7 +224,8 @@ int url_cb (http_parser *p, const char *at, size_t len)
             }
 
             // Check for read-permissions
-            if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
+            // if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
+            if (!(st.st_mode & S_IRUSR) && (st.st_mode & S_IROTH)) 
             {
                 // If not permissions, then return forbidden
                 r_head = response_header(HTTP_STATUS_FORBIDDEN, 0, 0);
