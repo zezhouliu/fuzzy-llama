@@ -34,15 +34,14 @@ sstatus_t socket_get_status(socket_t* s)
 
 /*@
 	requires \valid(s);
+    assigns \nothing;
 
 	behavior valid_closed:
 		assumes s->status != SOCKET_OPEN;
-		assigns \nothing;
 		ensures \result == -1;
 	behavior valid_open:
 		assumes s->status == SOCKET_OPEN;
-		assigns \nothing;
-        ensures \result == s->fd;
+        ensures \result == s->fd && (s->fd < 0 || s->fd >= 0);
 
 	complete behaviors valid_closed, valid_open;
 	disjoint behaviors valid_closed, valid_open;

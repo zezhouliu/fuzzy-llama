@@ -33,7 +33,7 @@ void log_error(const char *format, ...);
 
 
 
-/*@
+/***
     predicate IsEqualVoid{A, B}(void ** data, integer n, void ** ndata) =
         \forall integer i; 0 <= i < n ==> \at(data[i], A) == \at(ndata[i], B);
 
@@ -43,4 +43,4 @@ void log_error(const char *format, ...);
     lemma EqualityCommutative{S, T} :
         \forall void ** d, ** n; \forall integer num;
             IsEqualVoid{S, T}(d, num, n) ==> IsEqualVoid{T, S}(n, num, d);
- */
+ ****/
