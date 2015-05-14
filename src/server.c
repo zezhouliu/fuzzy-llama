@@ -27,7 +27,7 @@
 #define STATIC_PATH "static"
 
 // Buffer size defines (handle more elegantly later...)
-#define BUF_SIZE 1024
+#define BUF_SIZE 204800
 #define MAX_LENGTH 255
 #define MAX_PATH 512 
 
@@ -48,10 +48,15 @@ int parse_request(socket_t*);
 socket_t* server_sock;
 
 /**
- * [response_header  description]
- * @return  [description]
+ * response_header(status, content_length)
+ *
+ * @Brief: response_header generates the HTTP header for the response.
+ *     It should require an input HTTP status, and possibly an [opt] content length.
+ * @param[in]: status, int for HTTP status code
+ * @param[in]: content_length, int for length of body 
+ * @return  char* for HTTP response header
  */
-char* response_header (int status, int content_length)
+char* response_header (int status, int content_type, int content_length)
 {
     char* hd1 = "";
     if (status == HTTP_STATUS_OK)
@@ -72,6 +77,15 @@ char* response_header (int status, int content_length)
 
     char* hd2 = SERVER_STRING;
     char* hd3 = "Content-Type: text/html\r\n";
+    if (content_type == 1)
+    {
+        hd3 = "Content-Type: image/png\r\n";
+    }
+    else if (content_type == 2)
+    {
+        hd3 = "Content-Type: image/jpg\r\n";
+    }
+
     char* hd4 = "Connection: Keep-Alive\r\n";
     char* hd5 = "\r\n";
 
@@ -113,6 +127,30 @@ char* response_header (int status, int content_length)
     return buf;
 }
 
+int directory_change(char* url)
+{
+    int len = strlen(url);
+    int prev = 0;
+    for (int i = 0; i < len; ++i)
+    {
+        if (prev && url[i] == '.')
+        {
+            return 1;
+        }
+        if (url[i] == '.')
+        {
+            prev = 1;
+        }
+        else
+        {
+            prev = 0;
+        }
+
+    }
+
+    return 0;
+}
+
 /**
  * url_cb(p, at, len)
  *
@@ -133,7 +171,22 @@ int url_cb (http_parser *p, const char *at, size_t len)
     strncpy(url_string, at, len);
 
     printf("URL: %s\n", url_string);
-    if (p->method == 1)
+
+
+    // Get client socket
+    socket_t* client_socket = (socket_t*) p->data;
+
+    // Create header pointer
+    char* r_head = NULL;
+
+    // Check if valid directory:
+    if (directory_change(url_string) != 0)
+    {
+        r_head = response_header(HTTP_STATUS_FORBIDDEN, 0, 0);
+        socket_send(client_socket, r_head, strlen(r_head), 0);
+        printf("%d: Permission denied.\n", HTTP_STATUS_FORBIDDEN);
+    }
+    else if (p->method == 1)
     {
         // If it is a GET-method, then we should try to serve it
         char* path = STATIC_PATH;
@@ -152,18 +205,12 @@ int url_cb (http_parser *p, const char *at, size_t len)
         strncpy(filepath, path, strlen(path));
         strncat(filepath, url_string, strlen(url_string));
 
-        // Get client socket
-        socket_t* client_socket = (socket_t*) p->data;
-
-        // Create header pointer
-        char* r_head = NULL;
-
         // Check permissions of files
         struct stat st;
         if (stat(filepath, &st) == -1) 
         {
             // Cannot find permissions for file! Return 404 Not Found
-            r_head = response_header(HTTP_STATUS_NOT_FOUND, 0);
+            r_head = response_header(HTTP_STATUS_NOT_FOUND, 0, 0);
             socket_send(client_socket, r_head, strlen(r_head), 0);
             printf("%d: File not found.\n", HTTP_STATUS_NOT_FOUND);
         }
@@ -177,10 +224,11 @@ int url_cb (http_parser *p, const char *at, size_t len)
             }
 
             // Check for read-permissions
-            if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
+            // if (!((st.st_mode & S_IRUSR) || (st.st_mode & S_IRGRP) || (st.st_mode & S_IROTH))) 
+            if (!(st.st_mode & S_IRUSR) && (st.st_mode & S_IROTH)) 
             {
                 // If not permissions, then return forbidden
-                r_head = response_header(HTTP_STATUS_FORBIDDEN, 0);
+                r_head = response_header(HTTP_STATUS_FORBIDDEN, 0, 0);
                 socket_send(client_socket, r_head, strlen(r_head), 0);
                 printf("%d: Permission denied.\n", HTTP_STATUS_FORBIDDEN);
 
@@ -193,7 +241,7 @@ int url_cb (http_parser *p, const char *at, size_t len)
                 if (resource == NULL) 
                 {
                     // Cannot open file! Return 404 Not Found
-                    r_head = response_header(HTTP_STATUS_NOT_FOUND, 0);
+                    r_head = response_header(HTTP_STATUS_NOT_FOUND, 0, 0);
                     socket_send(client_socket, r_head, strlen(r_head), 0);
                     printf("%d: File not found1.\n", HTTP_STATUS_NOT_FOUND);
                 }
@@ -204,40 +252,74 @@ int url_cb (http_parser *p, const char *at, size_t len)
                     long sz = ftell(resource);
                     fseek(resource, 0L, SEEK_SET);
                     // First send the headers
-                    char filebuf[BUF_SIZE];
+                    char filebuf[sz];
 
-                    r_head = response_header(HTTP_STATUS_OK, sz);
-                    socket_send(client_socket, r_head, strlen(r_head), 0);
-                    if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
+                    if (strncmp(url_string, "/logo.png", strlen(url_string)) == 0)
+                    {
+                        r_head = response_header(HTTP_STATUS_OK, 1, sz);
+                        socket_send(client_socket, r_head, strlen(r_head), 0);
+
+                        int res = fread(filebuf, sz, 1, resource);
+                        if (res < 0)
+                        {
+
+                        }
+                        socket_send(client_socket, filebuf, sz, 0);
+                    }
+                    else if (strncmp(url_string, "/logo.jpg", strlen(url_string)) == 0)
+                    {
+                        r_head = response_header(HTTP_STATUS_OK, 2, sz);
+                        socket_send(client_socket, r_head, strlen(r_head), 0);
+
+                        int res = fread(filebuf, sz, 1, resource);
+                        if (res < 0)
+                        {
+
+                        }
+                        socket_send(client_socket, filebuf, sz, 0);
+                    }
+                    else 
                     {
 
-                        while (!feof(resource))
-                        {
-                            socket_send(client_socket, filebuf, strlen(filebuf), 0);
+                        r_head = response_header(HTTP_STATUS_OK, 0, sz);
+                        socket_send(client_socket, r_head, strlen(r_head), 0);
 
-                            if (fgets(filebuf, sizeof(filebuf), resource) == NULL)
+                        if (fgets(filebuf, sizeof(filebuf), resource) != NULL)
+                        {
+                            int total = 0;
+
+                            while (!feof(resource))
                             {
-                                // Error
-                                printf("ERROR WITH STRING: %s\n", filebuf);
+                                total += socket_send(client_socket, filebuf, strlen(filebuf), 0);
+
+                                if (fgets(filebuf, sizeof(filebuf), resource) == NULL)
+                                {
+                                    // Error
+                                    printf("ERROR WITH STRING: %s\n", filebuf);
+                                }
                             }
+                            total += socket_send(client_socket, filebuf, strlen(filebuf), 0);
                         }
-                        socket_send(client_socket, filebuf, strlen(filebuf), 0);
                     }
+                    
 
                     fclose(resource);
                 }
             }
         }
 
-        if (r_head)
+        if (r_head != NULL)
         {
 
-            free(r_head);
+            printf("%d\n", __LINE__);
+            // free(r_head);
             printf("%d\n", __LINE__);
         }
-        if (filepath)
+        if (filepath != NULL)
         {
-            free(filepath);
+
+            printf("%d\n", __LINE__);
+            // free(filepath);
             printf("%d\n", __LINE__);
         }
     }

@@ -2,7 +2,8 @@
 
 #include "utils.h"
 
-const size_t MAX_VEC_SIZE = SIZE_MAX / 16;
+#define MAX_VEC_SIZE = SIZE_MAX / 16;
+
 typedef struct vector_ {
     void** data;
     size_t size;

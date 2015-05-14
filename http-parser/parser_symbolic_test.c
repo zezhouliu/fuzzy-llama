@@ -274,7 +274,6 @@ size_t parse_incrementally (const char *buf, size_t len)
 
 //}
 
-#if KLEE
 int valid_parser_states(){
   switch(parser->state){
     case s_dead:
@@ -344,9 +343,7 @@ int valid_parser_states(){
     return 0;
   }
 }
-#endif
 
-#if KLEE
 int parser_chunked_states(){
   int tmp;
   switch(parser->state) {
@@ -362,7 +359,6 @@ int parser_chunked_states(){
     return 0;
   }
 }
-#endif
 
 int valid_parser_header_state() {
   switch (parser->header_state) {
@@ -384,7 +380,6 @@ int valid_parser_header_state() {
               return 0;
   }
 }
-#if KLEE
 int
 valid ()
 {
@@ -418,6 +413,42 @@ valid ()
   }
   return 1;
 }
+
+#if !KLEE
+valid_tans ()
+{
+  if(!valid_parser_states()){
+      assert(0 && "Invalid State.");
+  }
+  if(parser_chunked_states() && !(parser->flags & F_CHUNKED)) { 
+      assert(0 && "Invalid Chunked Flags"); 
+  }
+  if((parser->state == s_chunk_size_start) && !(parser->nread == 0)) { 
+      assert(0 && "Invalid Chunk Size."); 
+  }
+  if((parser->state == s_chunk_data_almost_done) && !(parser->content_length == 0)){
+      assert(0 && "Invalid Chunk Length Finishing."); 
+  }
+  if((parser->state == s_header_field) && !(valid_parser_header_state())){
+    assert(0 && "Invalid Header Field.");
+  }
+  if((parser->state == s_header_value) && (parser->header_state == h_connection || parser->header_state == h_transfer_encoding)) {
+      assert(0 && "Invalid Connection or Encoding."); 
+  }
+  if((parser->state == s_chunk_data) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
+      assert(0 && "Invalid Chunk Lenght Starting."); 
+  }
+  if((parser->state == s_body_identity) && ((parser->content_length == 0) || (parser->content_length == ULLONG_MAX))) {
+      assert(0 && "Invalid Body Length."); 
+  }
+  if(!(parser->method <=26 
+    && parser->index < (unsigned char) strlen(method_strings[parser->method]))){
+      assert(0 && "Invalid Method or Invalid Method Index.");
+  }
+}
+#endif
+
+#if KLEE
 void
 valid_tans ()
 {
@@ -510,6 +541,14 @@ print_http_parser(http_parser *p){
   printf("\n=======================\n");
 }
 
+static void pr_hexbytes(const unsigned char *bytes, int nbytes)
+/* Print bytes in hex format + newline */
+{
+  int i;
+  for (i = 0; i < nbytes; i++)
+    printf("%02X", bytes[i]);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -528,48 +567,41 @@ main (int argc, char **argv)
   klee_assert(valid());
   parser_free();
   
-  //parser = malloc(sizeof(http_parser));
-  //memcpy(parser, argv[2], sizeof(*parser));
-  parser_init_inductive(HTTP_BOTH);
+  parser = malloc(sizeof(http_parser));
+  memcpy(parser, argv[2], sizeof(*parser));
+  //parser_init_inductive(HTTP_BOTH);
   //parser = (http_parser *)argv[2];
 
   // Mini parser code
-  mini_parser_init(mini_parser); 
+ // mini_parser_init(mini_parser); 
 
-  if(mini_valid()) { 
-    mini_transition(); 
-  }
+ // if(mini_valid()) { 
+ //   mini_transition(); 
+ // }
 
   if(valid()) {
     transition(argv[1], 1);
   }
   parser_free();
 #else 
-  //printf("Buffer : %s\n", argv[1]);
-  //printf("Parser\n");
-  //print_http_parser((http_parser *) argv[2]);
-  //parser_init(HTTP_BOTH);
 
-  char *hexstring = argv[2];
-  const char*pos = hexstring;
-  unsigned char *val = malloc(sizeof(hexstring));
-  size_t count = 0;
-
-
-  for(count = 0; count < sizeof(val)/sizeof(val[0]); count++) {
-      sscanf(pos, "%2hhx", &val[count]);
-      pos += 2 * sizeof(char);
-  }
- 
-  print_http_parser((http_parser *) val);
-
-
-  int n = http_parser_execute((http_parser *)val, &settings_verify, argv[1],1);
+ // char *helper = malloc(40);
+ //  int i = 4;
+ //  unsigned len = atoi(argv[3])+4;
+ //  for(i; i < len; i++){
+ //    helper[i-4] = (char) atoi(argv[i]);
+ //  }
+  parser = malloc(sizeof(http_parser));
+  memcpy(parser, argv[2], 32);
+  print_http_parser(parser);
+  assert(valid() && "Invalid");
+  int n = http_parser_execute(parser, &settings_verify, argv[1],1);
+  valid_tans();
   printf("Characters Parsed: %d\n", n);
   printf("\n\n");
   // Should be unnessisary but why not flush
   fflush(stdout);
-  free(val);
+  parser_free(parser);
 #endif
 fprintf(stderr, "\n");
 

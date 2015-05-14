@@ -5,7 +5,8 @@ import re
 from operator import itemgetter
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
-
+from itertools import islice
+import binascii
 
 # Returns a symbolic argument that
 def getItemByName(name, lst):
@@ -14,6 +15,9 @@ def getItemByName(name, lst):
 
 def removeSingleQuotes(el):
 	return el.replace("'", "")
+
+def removeBlanks(lst):
+	return filter(lambda x: x != '', lst)
 
 
 def main():
@@ -58,18 +62,42 @@ def main():
 			symbolicObjects[i] = d
 
 
-		parser = getItemByName("parser", symbolicObjects)
+		parser = getItemByName("arg1", symbolicObjects)
 		arg0 = getItemByName("arg0", symbolicObjects)
 		pp.pprint(parser)
 		pp.pprint(arg0)
 		print 
 		sys.stdout.flush()
 
-		parser["data"] = parser["data"].replace("\\x", "")
-		arg0["data"] = arg0["data"][0]+arg0["data"][1]
+		tmp = parser["data"].split("\\x")
+		real = []
+		for el in tmp:
+			if len(el) == 2:
+				try:
+					real.append(int(el, 16))
+				except:
+					real.append(el)
+			else:
+				builder = ''
+				for i in range(len(el)):
+					builder += el[i]
+					if((i+1)%2 == 0):
+						try:
+							real.append(int(builder, 16))
+						except:
+							real.append(builder)
+						builder = ''
+				if(len(builder) > 0):
+					real.append(ord(builder))
 
-
-		subprocess.call([replayTarget, arg0["data"], parser["data"]])
+		real = removeBlanks(real)
+		real = map(str, real)
+		real[:0] = [str(len(real))]
+		real[:0] = arg0["data"][:1]
+		real[:0] = str(1)
+		real[:0] = [replayTarget]
+		pp.pprint(real)
+		subprocess.call(real)
 	
 
 if __name__ == "__main__":
