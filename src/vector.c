@@ -148,7 +148,7 @@ bool vector_init_with_size(vector *v, size_t i){
 /*@
     requires \valid(v);
     assigns \nothing;
-    ensures \result == v->count;
+    ensures v != \null ==> \result == v->count;
 */
 size_t vector_count(vector *v){
     if (v == NULL) {
@@ -273,7 +273,7 @@ void vector_push(vector *v, void *e){
     requires valid_vector(v);
     requires index < v->count;
     assigns v->data[index];
-    ensures v != \null ==> (size_t)v->data[index] ==  (size_t)e;
+    ensures v != \null ==> v->data[index] ==  e;
 
 */
 void vector_set(vector * v, size_t index, void * e){

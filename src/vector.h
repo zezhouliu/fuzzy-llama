@@ -22,7 +22,7 @@ void vector_free(vector*);
 
 /*@
     predicate valid_vector{L} (vector * v) =
-        \valid(v) && \valid(v->data+(0..v->size)) && v->count <= v->size && v->size < MAX_VEC_SIZE;
+        \valid(v) && \valid(v->data+(0..v->size - 1)) && v->count <= v->size && v->size < MAX_VEC_SIZE;
 */
 
 /*@
