@@ -5,7 +5,8 @@ import re
 from operator import itemgetter
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
-
+from itertools import islice
+import binascii
 
 # Returns a symbolic argument that
 def getItemByName(name, lst):
@@ -14,6 +15,9 @@ def getItemByName(name, lst):
 
 def removeSingleQuotes(el):
 	return el.replace("'", "")
+
+def removeBlanks(lst):
+	return filter(lambda x: x != '', lst)
 
 
 def main():
@@ -24,13 +28,13 @@ def main():
 	badTests = []
 
 	if len(sys.argv) < 3:
-		badTests = [f for f in os.listdir("./klee-last") if re.match(r'(.*?)\.err', f)]
+		badTests = [f for f in os.listdir("./klee-out-41") if re.match(r'(.*?)\.err', f)]
 	else:
 		for i in range(2,len(sys.argv)):
 			badTests.append(sys.argv[i])
 
 	for f in badTests:
-		replayCandidate = "./klee-last/" + f.split(".")[0] + ".ktest"
+		replayCandidate = "./klee-out-41/" + f.split(".")[0] + ".ktest"
 		print replayCandidate
 		p = subprocess.Popen(['ktest-tool', replayCandidate], stdout=subprocess.PIPE)
 		s, err = p.communicate()
@@ -65,11 +69,35 @@ def main():
 		print 
 		sys.stdout.flush()
 
-		parser["data"] = parser["data"].replace("\\x", "")
-		arg0["data"] = arg0["data"][0]+arg0["data"][1]
+		tmp = parser["data"].split("\\x")
+		real = []
+		for el in tmp:
+			if len(el) == 2:
+				try:
+					real.append(int(el, 16))
+				except:
+					real.append(el)
+			else:
+				builder = ''
+				for i in range(len(el)):
+					builder += el[i]
+					if((i+1)%2 == 0):
+						try:
+							real.append(int(builder, 16))
+						except:
+							real.append(builder)
+						builder = ''
+				if(len(builder) > 0):
+					real.append(ord(builder))
 
-
-		subprocess.call([replayTarget, arg0["data"], parser["data"]])
+		real = removeBlanks(real)
+		real = map(str, real)
+		real[:0] = [str(len(real))]
+		real[:0] = arg0["data"][:1]
+		real[:0] = str(1)
+		real[:0] = [replayTarget]
+		pp.pprint(real)
+		subprocess.call(real)
 	
 
 if __name__ == "__main__":

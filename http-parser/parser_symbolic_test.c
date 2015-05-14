@@ -255,7 +255,6 @@ size_t parse_incrementally (const char *buf, size_t len)
 
 //}
 
-#if KLEE
 int valid_parser_states(){
 	switch(parser->state){
 	  case s_dead:
@@ -325,9 +324,7 @@ int valid_parser_states(){
 		return 0;
 	}
 }
-#endif
 
-#if KLEE
 int parser_chunked_states(){
 	int tmp;
 	switch(parser->state) {
@@ -343,7 +340,6 @@ int parser_chunked_states(){
 		return 0;
 	}
 }
-#endif
 
 int valid_parser_header_state() {
   switch (parser->header_state) {
@@ -365,7 +361,6 @@ int valid_parser_header_state() {
               return 0;
   }
 }
-#if KLEE
 int
 valid ()
 {
@@ -399,6 +394,7 @@ valid ()
   }
   return 1;
 }
+#if KLEE
 void
 valid_tans ()
 {
@@ -461,6 +457,14 @@ print_http_parser(http_parser *p){
   printf("\n=======================\n");
 }
 
+static void pr_hexbytes(const unsigned char *bytes, int nbytes)
+/* Print bytes in hex format + newline */
+{
+  int i;
+  for (i = 0; i < nbytes; i++)
+    printf("%02X", bytes[i]);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -493,27 +497,24 @@ main (int argc, char **argv)
   //printf("Parser\n");
   //print_http_parser((http_parser *) argv[2]);
   //parser_init(HTTP_BOTH);
-
-  char *hexstring = argv[2];
-  const char*pos = hexstring;
-  unsigned char *val = malloc(sizeof(hexstring));
-  size_t count = 0;
-
-
-  for(count = 0; count < sizeof(val)/sizeof(val[0]); count++) {
-      sscanf(pos, "%2hhx", &val[count]);
-      pos += 2 * sizeof(char);
+  char *helper = malloc(40);
+  int i = 4;
+  unsigned len = atoi(argv[3])+4;
+  for(i; i < len; i++){
+    helper[i-4] = (char) atoi(argv[i]);
   }
- 
-  print_http_parser((http_parser *) val);
+  parser = malloc(sizeof(http_parser));
+  memcpy(parser, helper, 32);
+  assert(valid() && "Invalid");
+  print_http_parser(parser);
 
-
-  int n = http_parser_execute((http_parser *)val, &settings_verify, argv[1],1);
+  int n = http_parser_execute(parser, &settings_verify, argv[2],1);
   printf("Characters Parsed: %d\n", n);
   printf("\n\n");
   // Should be unnessisary but why not flush
   fflush(stdout);
-  free(val);
+  parser_free(parser);
+  free(helper);
 #endif
 fprintf(stderr, "\n");
 
