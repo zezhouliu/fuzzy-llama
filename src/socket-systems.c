@@ -23,11 +23,11 @@ recv(int socket, void *buffer, size_t length, int flags);
     assigns \nothing;
 
     behavior invalid:
-        assumes sockfd < 0 || !\valid((char*)buffer + (0..length-1));
+        assumes sockfd < 0;
         ensures \result == -1;
 
     behavior valid_error:
-		assumes sockfd >= 0 && \valid((char*)buffer + (0..length-1));
+		assumes sockfd >= 0;
 	    ensures (0 <= \result <= length) || (\result == -1);
 
     complete behaviors invalid, valid_error;
@@ -39,6 +39,8 @@ ssize_t send(int sockfd, const void * buffer, size_t length, int flags);
 
 /*@
     requires \valid(socket);
+    requires \valid(&(socket->status));
+    requires \valid(&(socket->fd));
     requires \valid((char *) buffer);
     requires length >= 0;
 
@@ -53,7 +55,7 @@ ssize_t send(int sockfd, const void * buffer, size_t length, int flags);
 
     behavior valid_error:
         assumes socket->status == SOCKET_OPEN && (socket->fd >= 0); 
-	    ensures \result <= length;
+        ensures \result <= length || (\result == -1);
 
     disjoint behaviors invalid, valid_error_no_socket, valid_error;
 */
@@ -75,7 +77,8 @@ ssize_t io_recv(socket_t* socket, void* buffer, size_t length, int flags)
 
 /*@
     requires \valid(socket);
-    requires \valid((char*)buffer + (0..length-1));
+    requires \valid(&(socket->status));
+    requires \valid(&(socket->fd));
     requires length >= 0;
     assigns \nothing;
 
